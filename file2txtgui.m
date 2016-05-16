@@ -1,0 +1,220 @@
+function filetxt = file2txtgui( varargin )
+%dosegui lets you compare ex files from same unit with different dose
+
+
+fdir0 = 'D:\data\mango\0243';
+
+inp = 1;
+while inp<=length(varargin)
+    switch varargin{inp}
+        case 'fdir0'
+            fdir0 = varargin{inp+1};
+    end
+    inp = inp+1;
+end
+
+
+
+global h_fdir;
+global h_files;
+
+filetxt = {};
+
+
+h = figure('Position', [200 200 800 400], 'DeleteFcn', @savetxt);
+% --------------------- data directory
+
+h_fdir = uicontrol(h, 'Style', 'edit', ...
+    'String', fdir0,...
+    'Position', [20 350 400 20], ...
+    'Enable', 'Inactive', ...
+    'ButtonDownFcn', @updateFolder);
+
+% --------------------- all files in the directory
+h_files = uicontrol(h, ....
+    'Style', 'listbox', ...
+    'String', '', ...    
+    'Position', [20 140 400 200]);
+
+% --------------------- all files in the textfile
+txt_files = uicontrol(h, ....
+    'Style', 'listbox', ...
+    'String', filetxt, ...    
+    'Position', [450 140 300 200]);
+
+    
+% --------------------- check TC
+uicontrol('Style', 'pushbutton', ...
+        'String', 'Tuning Curve',...
+        'Position', [200 100 100 20], ...
+        'Callback', @callTC);
+
+
+% --------------------- check mean firing rate across files
+uicontrol('Style', 'pushbutton', ...
+        'String', 'Plot Time Course',...
+        'Position', [300 100 100 20], ...
+        'Callback', @callDosePlot);
+
+
+% --------------------- add to text file
+uicontrol('Style', 'pushbutton', ...
+        'String', 'Add to txt',...
+        'Position', [100 100 100 20], ...
+        'Callback', @add2txt);
+
+    
+% --------------------- remove from text file
+uicontrol('Style', 'pushbutton', ...
+        'String', 'Remove from txt',...
+        'Position', [600 100 100 20], ...
+        'Callback', @rmfile);
+
+%% update folderfiles
+    function updateFolder(~,~)
+        
+        fdir = uigetdir(get(h_fdir, 'String'));
+        if fdir~=0
+            fname = dir(fdir);
+            fname = fname(...
+                cellfun(@(x) ~isempty(strfind(x, 'c1')) || ...
+                             ~isempty(strfind(x, 'c2')), ...
+                        {fname.name}));
+            
+            set(h_files, 'Value', 1);
+            set(h_files, 'String', {fname.name});
+            set(h_files, 'Max', length(fname));
+            set(h_fdir, 'String', fdir);
+        end
+    end
+
+    function callDosePlot(~,~)
+        
+        sz = 50;
+        fdir = get(h_fdir, 'String');
+        
+        figure('Name', fdir);
+        fnames = get(h_files, 'String');
+        val = get(h_files, 'Value');
+        
+        
+        for i = 1:length(val)
+                        
+            fname = fnames{val(i)}
+            [temp, dose(i), id(i)] = PlotTC(fdir, fname, ...
+                'plot', false); 
+            
+            [~, max_i] = max(temp, [], 1);
+            
+            mnspk(i) = mean(temp( max_i(1), :));
+            
+        end
+        
+        [~, idx] = sort(id);
+        
+        for j = 1:length(val)
+            i = idx(j);
+            
+            if ~isempty(strfind(fnames{val(i)}, '5HTSB'))
+                scatter(j, mnspk(i), sz*dose(i), 'o', 'm', 'filled', ...
+                    'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
+            elseif ~isempty(strfind(fnames{val(i)}, '5HTKet'))
+                scatter(j, mnspk(i), sz*dose(i), 'o', 'filled', ...
+                    'MarkerFaceColor',[1 .5 0],  ...
+                    'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
+            elseif ~isempty(strfind(fnames{val(i)}, 'Ket'))
+                scatter(j, mnspk(i), sz*dose(i), 'd', 'filled', ...
+                    'MarkerFaceColor',[1 .5 0], ...
+                    'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
+            elseif ~isempty(strfind(fnames{val(i)}, 'SB'))
+                scatter(j, mnspk(i), sz*dose(i), 'd', 'm', 'filled', ...
+                    'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
+            elseif ~isempty(strfind(fnames{val(i)}, '5HT'))
+                scatter(j, mnspk(i), sz*dose(i), 'o', 'r', ...
+                    'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
+            elseif ~isempty(strfind(fnames{val(i)}, 'NaCl'))
+                scatter(j, mnspk(i), sz*dose(i), 'd', 'k', 'filled', ...
+                    'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
+            else 
+                scatter(j, mnspk(i), sz, 'o', 'r', 'filled', ...
+                    'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
+            end
+               hold on;
+        end
+        
+%         plot(get(gca, 'xlim'), [0 0], 'Color', [0.6 0.6 0.6]);
+        title( sprintf(['baseline: filles o, 5HT: white o, ' ...
+            'NaCl: black diamont \n SB: magenta, Ket:orange']));
+    end
+
+
+    function callTC(~,~)
+
+        fdir = get(h_fdir, 'String');
+        fnames = get(h_files, 'String');
+        val = get(h_files, 'Value');
+
+        for i = 1:length(val)
+            PlotTC(fdir, fnames{val(i)}); 
+        end
+    end
+
+    function add2txt(~, ~)
+        
+        fdir = [get(h_fdir, 'String') '\']; 
+        fnames = get(h_files, 'String');
+        val = get(h_files, 'Value');
+        
+        filetxt = [filetxt; strcat(fdir, fnames(val))];
+        filetxt = unique(filetxt);
+
+        
+        txt_files.String = filetxt;
+        txt_files.Value = 1;
+        
+        
+        
+        fileID = fopen('temp.txt',  'wt');
+        fprintf(fileID, '%s\n', filetxt{:});
+        fclose(fileID);
+    end
+
+
+
+    function savetxt(~, ~)
+        fileID = fopen('filenames.txt',  'wt');
+        fprintf(fileID, '%s\n', filetxt{:});
+        fclose(fileID);
+    end
+
+
+    function rmfile(~, ~)
+
+        fnames = get(txt_files, 'String');
+        
+        if length(fnames) <= 1
+            set(txt_files, 'String', '')
+        else
+            ind = ones(length(fnames),1);
+            ind(get(txt_files, 'Value')) = 0;
+            ind = logical(ind);
+           
+            set(txt_files, 'Value', sum(ind));
+            fnames = fnames(ind);
+            set(txt_files, 'String', fnames)
+        end
+        filetxt = fnames;
+        
+        
+        fileID = fopen('temp.txt',  'wt');
+        fprintf(fileID, '%s\n', filetxt{:});
+        fclose(fileID);
+        
+    end
+
+end
+
+
+function PlotTC_helper(~,~,fdir, fname)
+    PlotTC(fdir, fname);
+end
