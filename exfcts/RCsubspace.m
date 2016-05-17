@@ -95,7 +95,7 @@ end
 if ~isempty(res.netSpikesPerFrameBlank)
     mn_rate(i2+1).mn = mean(nspk_blank);
     mn_rate(i2+1).sd = std(nspk_blank);
-    mn_rate(i2+1).var =  var(nspk_blank);
+    mn_rate(i2+1).var = var(nspk_blank);
     mn_rate(i2+1).or = 100000;
 end
 

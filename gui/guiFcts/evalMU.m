@@ -296,15 +296,15 @@ switch fctname
         lab = 'latency diff (drug-base)';
         
     case 'latency base corrected'
-%         val = [expInfo.lat] - [expInfo.reg_slope].*assignFct('latnoise', expInfo);
-        val = [expInfo.lat];
+        val = [expInfo.lat] - [expInfo.reg_slope].*assignFct('latnoise', expInfo);
+%         val = [expInfo.lat];
         lab = fctname;
         
     case 'latency drug corrected'
-%         val = [expInfo.lat_drug] - [expInfo.reg_slope].*assignFct('latnoise drug', expInfo);
-        val = [expInfo.lat_drug] - ...
-            ([expInfo.reg_slope].*assignFct('latnoise drug', expInfo) -...
-            [expInfo.reg_slope].*assignFct('latnoise', expInfo) );
+        val = [expInfo.lat_drug] - [expInfo.reg_slope].*assignFct('latnoise drug', expInfo);
+%         val = [expInfo.lat_drug] - ...
+%             ([expInfo.reg_slope].*assignFct('latnoise drug', expInfo) -...
+%             [expInfo.reg_slope].*assignFct('latnoise', expInfo) );
         lab = fctname;
         
     case 'latency diff corrected'

@@ -23,13 +23,14 @@ markerface(find(dat_new.is5HT), 1) =  1;
 temp = [];
 for lll = 1:length(dat_new.x)
     
-    dat_new.expinf{lll}(1).fname
+%     dat_new.expinf{lll}(1).fname
     temp(lll,1) = dat_new.expinf{lll}(1).id;
     temp(lll,2) = dat_new.x(lll);
     temp(lll,3) = dat_new.y(lll);
     
 end
 
+disp('id x y');
 temp
 %%%----------------------------------------------------
 if hist_flag
@@ -76,7 +77,6 @@ for i = 1:length(dat_new.x)
             'ButtonDownFcn', { @DataPressed, dat_new.expinf{i}, ...
             dat_new.xlab, dat_new.ylab, fig2plot} );
         hold on;
-        disp([dat_new.expinf{i}.id]);
     end
 end
 

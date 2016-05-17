@@ -35,7 +35,6 @@ for is5HT = 0:1
             
             dat.is5HT(kk) = is5HT;
             
-            id(idx)
             dat.indX{kk} = find ([expInfo.id] == id(idx) & condS & condc1 & ix);
             dat.indY{kk} = find ([expInfo.id] == id(idx) & condS & condc1 & iy);
             

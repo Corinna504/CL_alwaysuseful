@@ -44,9 +44,15 @@ while j<=length(fig2plot)
         case 'Spike Density'
             temp = openfig(datinfo(1).fig_sdfs, 'invisible');
             ax = findobj(temp, 'Type', 'Axes');
+            set(findobj(ax(1), 'LineStyle', '-'), ...
+                'Color', 'b', 'LineWidth', 1.5);
             set(findobj(ax(1), 'LineStyle', '--'), ...
-                'Color', [0 0.3 0], 'LineStyle', '-', 'LineWidth', 1.5);
+                'LineStyle', '-', 'LineWidth', 1.5);
             ax(1).XLim = [0 160];
+            ax(2).XTick = [];   ax(3).XTick = [];
+            ax(1).XLabel.String = ax(2).XLabel.String ;
+            ax(2).XLabel.String = '';
+            
     end
     
     
@@ -65,7 +71,7 @@ while j<=length(fig2plot)
     j = j+1;
 end
 
-h.Position = [287   558   300*length(fig2plot)  420];
+h.Position = [287   500   350*length(fig2plot)  450];
 h.Name = datinfo(1).figname;
 h.UserData = datinfo;
 
