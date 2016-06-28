@@ -4,7 +4,7 @@ function [beta1, beta0, xvarX, xvarY, xvarXY]  = type2reg(exinfo, p_flag)
 
 
 
-% only take those conditions that are present in both experiments
+% % only take those conditions that are present in both experiments
 s1 = exinfo.ratepar;  %or/sf/co/... values used in the experiment
 s2 = exinfo.ratepar_drug;
 
@@ -13,7 +13,7 @@ drug = exinfo.ratemn_drug( ismember( s2, s1 ) );
 
 
 % calculate perpendicular distance minimizing fit
-[beta0, beta1, xvarX, xvarY, xvarXY] = perpendicularfit(cont, drug);
+[beta0, beta1, xvarX, xvarY, xvarXY] = perpendicularfit(cont, drug, var(drug)/var(cont));
 
 
 % triangular fit
@@ -26,6 +26,7 @@ if p_flag
     scatter(cont, drug, 100, getCol(exinfo), 'filled',...
         'MarkerFaceAlpha', 0.5); hold on;
     
+
     if any(s1)>1000 && any(s2)>1000
         scatter(cont(end), drug(end), 100, 'g', 'filled',...
             'MarkerFaceAlpha', 0.5); hold on;
@@ -38,9 +39,14 @@ if p_flag
     xlabel('baseline');
     ylabel(exinfo.drugname);
     
-    title(sprintf( 'gain = %1.2f, add = %1.2f, \n r2_{drug}=%1.2f r2_{both}=%1.2f', ...
-        beta1, beta0, xvarY, xvarXY));
+    title(sprintf( 'gain = %1.2f, add = %1.2f, \n r2_{x}=%1.2f  r2_{y}=%1.2f r2_{xy}=%1.2f', ...
+        beta1, beta0, xvarX, xvarY, xvarXY));
     unity; axis square; box off;
+    
+    ylim_ = get(gca, 'YLim');
+    hold on
+    plot([mean(cont) mean(cont)], ylim_, 'Color', [0.5 0.5 0.5 0.5])
+    plot(xlim_, [mean(drug) mean(drug)], 'Color', [0.5 0.5 0.5 0.5])
     
     savefig(h, exinfo.fig_regl);
     close(h);
@@ -55,38 +61,6 @@ end
 end
 
 
-
-
-
-function [beta0, beta1, xvarX, xvarY, xvarXY] = perpendicularfit(x, y)
-
-SSTy = sum( (y-mean(y)).^2 );
-SSTx = sum( (x-mean(x)).^2 );
-
-% fit that considers both x and y as subject to error
-[beta0, beta1] = fit_bothsubj2error(x, y);
-
-% predicted values by fit
-xfit = (y - beta0) / beta1;
-yfit = x * beta1 + beta0;
-
-% residual sum of squares
-SSRx = sum( (x - xfit).^2 );
-SSRy = sum( (y - yfit).^2 );
-
-% explained variance
-xvarX = 1 - (SSRx / SSTx);
-xvarY = 1 - (SSRy / SSTy);
-
-xvarXY = 1 - ( sum( (x-xfit).^2 ) * sum( (y-yfit).^2 )) ...
-    / (sum( (x-mean(x)).^2) * sum( (y-mean(y)).^2 ));
-
-
-if xvarY < 0; xvarY = 0; end
-if xvarX < 0; xvarX = 0; end
-if xvarXY < 0; xvarXY = 0; end
-
-end
 
 
 

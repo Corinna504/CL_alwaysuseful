@@ -65,7 +65,7 @@ function [result, Expt] = HN_PlotRevCorAny_tue(Expt, varargin)
 % history
 % 2/14/16   hn: changed code to correct for timing bug with RCperiod in
 %           VisStim versions preceding 1.0.20
-raster = [];
+
 times = -200:10:1600;
 np = 1;
 sdfw = 20;
@@ -106,8 +106,8 @@ duration =[]; %0.1ms
 all_fr=[];
 all_spk=[];
 fl_fr = [];
-figh1 = figure;
-figh2 = figure;
+% figh1 = figure;
+% figh2 = figure;
 type = 'or_seq';
 if profile
     tic;
@@ -248,6 +248,13 @@ while j < nargin
     end
     j = j+1;
 end
+
+% added CL 23.06.2016 to avoid figure popping
+if showplot
+    figh1 = figure;
+    figh2 = figure;
+end
+
 % select only completed trials
 itr = find(abs([Expt.Trials.Reward])>0);
 Expt.Trials = Expt.Trials(itr);
@@ -261,12 +268,10 @@ end
 %btype = 'phase_seq';
 
 result.calctime(1) = now;
-if showplot
-    colors =  mycolors;
-    excolors = mycolors;
-    excolors{4} = [0.6 0.4 0]; %% dotted yellow invisible
-    colors = {colors{:} colors{:}}; % just in case second order makes many lines
-end
+colors =  mycolors;
+excolors = mycolors;
+excolors{4} = [0.6 0.4 0]; %% dotted yellow invisible
+colors = {colors{:} colors{:}}; % just in case second order makes many lines
 if ~isfield(Expt.Header,'RCparams')
     if isfield(Expt.Header,'StoreErr')
         for j = 1:length(Expt.Trials)
@@ -808,9 +813,7 @@ for loop = aloop: nloops;
                     alltriggers{tidx(k)} = [ alltriggers{tidx(k)}; Expt.Trials(tidx(k)).Trigger'];
             end
             if ~isempty(tidx) & (n > nmin);
-                [sdf, n,nspk] = HN_trigsdfa_hn(Expt.Trials(tidx),sdfw,times,smtype);
-%                 [raster, sdf, n,nspk] = CL_trigsdf(Expt.Trials(tidx),sdfw,times,smtype);
-
+                [sdf, n,nspk] = trigsdfa_hn(Expt.Trials(tidx),sdfw,times,smtype);
                 sdfs.x(nx, ny, loopctr) = x;
                 sdfs.y(nx, ny, loopctr) = y;
                 sdfs.n(nx, ny, loopctr) = n;
@@ -905,9 +908,7 @@ for j = 1:nextra * npsych
         if choiceval == 1
             goodextras = goodextras+1;
         end
-        [sdf, n,nspk] = HN_trigsdfa_hn(Expt.Trials(tidx),sdfw,times,smtype);
-%         [raster, sdf, n,nspk] = CL_trigsdf(Expt.Trials(tidx),sdfw,times,smtype);
-
+        [sdf, n,nspk] = trigsdfa_hn(Expt.Trials(tidx),sdfw,times,smtype);
         if showplot
             h(np+nex-1) = plot(times(pid)/10,sdf(pid),':','color',excolors{nex - (choiceval-1)*goodextras},'linestyle',linestyles{3+choiceval-1},'linew',2);
             labels{np+nex-1} = [extralabel{lid} sprintf(' n = %d',n)];

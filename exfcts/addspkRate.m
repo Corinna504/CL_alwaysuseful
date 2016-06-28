@@ -34,8 +34,10 @@ for n = 1:length(ex.Trials)
      
         if length(ex.Trials(n).Start) == 46
             ex.Trials(n).spkRate    =  ex.Trials(n).nSpks / (t_end - t_strt(1));
+            ex.Trials(n).spkCount   =  ex.Trials(n).nSpks ;
         else
             ex.Trials(n).spkRate    =  ex.Trials(n).nSpks / (t_end - t_strt(1) + frame_dur);
+            ex.Trials(n).spkCount   =  ex.Trials(n).nSpks ;
         end
     else
         ex.Trials(n).spkRate = [];

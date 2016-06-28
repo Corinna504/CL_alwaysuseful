@@ -34,7 +34,7 @@ function PosterProps(ax, xlim_, ylim_, varargin)
 % 
 % Other setttings that can not be altered: 
 % - LineWidth is set to 2.
-% - Figure position is set. If you need to change it, change it outside of,
+% - Figure position is set. If you need to change it, change it outside,
 % after you call PosterProps
 % 
 % 
@@ -45,7 +45,7 @@ function PosterProps(ax, xlim_, ylim_, varargin)
 % nicer with new versionse, otherwise try to make a copy and adapt it to
 % older versions.
 % 
-% NOTE2: Put the unity function in the same folder to guarantee for smooth
+% NOTE2: Put the unity function in the same folder to guarantee smooth
 % collaborations.
 
 
@@ -54,6 +54,9 @@ function PosterProps(ax, xlim_, ylim_, varargin)
 set(gcf, 'Position', [492   269   650   600]);
 axis square 
 box off
+
+delete(findobj(gca, 'Type', 'Line'));
+
 
 fsz = 25;
 sz = 200;
@@ -112,7 +115,8 @@ if unity_flag
     h = findobj(ax,'LineStyle', '--', 'Color', 'k');
     set(h, 'Color', ones(1,3)*greyf, 'LineStyle', '-', 'LineWidth', 4)
     h = ax.Children(1:length( ax.Children.findobj('Type', 'Line') ));
-elseif cross_flag 
+end
+if cross_flag
     crossl
     h = findobj(ax, 'LineStyle', '--');
     set(h, 'Color', ones(1,3)*greyf, 'LineStyle', '-', 'LineWidth', 4)

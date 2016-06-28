@@ -1,4 +1,4 @@
-function [mnspk, dose, timeofrec] = PlotTC( fdir, fname, varargin )
+function [mnspk, dose, timeofrec, stim] = PlotTC( fdir, fname, varargin )
 % gives a first climps on the tuning curve of the file
 
 
@@ -74,6 +74,20 @@ else
 end
 
 
+if isempty(strfind(fname, 'RC'))
+    mnspk = getspkDG(ex, p_flag, drugname, dose, lstyle, stim, fname);
+else
+    [ ~, mn_rate, ~ ] = RCsubspace(ex, 'plot' ,p_flag);    
+    mnspk = [mn_rate.mn];
+end
+
+
+end
+
+
+
+function mnspk = getspkDG(ex, p_flag, drugname, dose, lstyle, stim, fname)
+
 % preallocate variables
 me = unique([ex.Trials.me]);
 me = sort(me);
@@ -113,6 +127,7 @@ for i_me = 1:length(me)
         ntrial(i_me, i_vals) = n;
     end
 end
+
 
 
 % plot tuning curve
@@ -169,6 +184,4 @@ if p_flag
     xlabel(stim); ylabel('spike rate');
 end
 
-
 end
-

@@ -1,10 +1,9 @@
 function [ex, argout] = evalSingleDG( exinfo, fname )
-% batch file that calls all functions to evaluated drifiting gratings
-% trials
+% batch file that calls all functions to evaluated drifiting grating trials
 
 
-% load raw data
-ex = loadCluster( fname );
+rate_flag = true;
+ex = loadCluster( fname ); % load raw data
 ex.Trials = ex.Trials([ex.Trials.me] == exinfo.ocul);
 
 
@@ -17,33 +16,37 @@ else
     powstim_mn = 0;    powstim_sd = 0;    powbase_mn = 0;     powbase_sd = 0;
 end
 
-
-
-%% Cluster Correlation
+%% Spiking
+%%% z normed spike rates entered in ex.Trials
+[ex, spkstats, phaseResp, f1] = znormex(ex, exinfo, rate_flag);
 
 %%% Fano Factors
-%     [ ff.classic, ff.fit, ff.mitchel, ff.church ] = ...
-%         FanoFactors( ex, [spkstats.mn], [spkstats.var], info.param1);
-ff = [];
+    [ ff.classic, ff.fit, ff.mitchel, ff.church ] = ...
+        FanoFactors( ex, [spkstats.mn], [spkstats.var], exinfo.param1);
+% ff = [];
 
 fnamec0 = strrep(fname, exinfo.cluster, 'c0'); % load cluster 0
 exc0 = loadCluster( fnamec0 );
 exc0.Trials = exc0.Trials([exc0.Trials.me] == exinfo.ocul);
 
-%%% z normed spike rates entered in ex.Trials
-[ex, spkstats] = znormex(ex, exinfo, true);
-
 %%% Noise Correlation
-[exc0, spkstatsc0] = znormex(exc0, exinfo, true); % z norm
+[exc0, spkstatsc0] = znormex(exc0, exinfo, rate_flag); % z norm
 [rsc, prsc] = corr([ex.Trials.zspkrate]', [exc0.Trials.zspkrate]', 'rows', 'complete');
 
 %%% Signale Correlation
 [rsig, prsig] = corr([spkstats.mn]', [spkstatsc0.mn]', 'rows', 'complete');
-    
+  
 
-%% Mean and Variance
-if strcmp(exinfo.param1, 'or') 
+
+%% Fitting
+if strcmp(exinfo.param1, 'or')
     fitparam = fitgaussOR(spkstats);
+elseif strcmp(exinfo.param1, 'co')
+    if strfind( fname , exinfo.drugname )
+        fitparam = fitCO_drug([spkstats.mn], [spkstats.(exinfo.param1)], exinfo.fitparam);
+    else
+        fitparam = fitCO([spkstats.mn], [spkstats.(exinfo.param1)]);
+    end
 else
     fitparam = [];
 end
@@ -63,6 +66,17 @@ eX = -10^3;
 eY = -10^3;
 
 
+%% Latency
+% [lat, psth] = getLatencyPerWindow(exinfo, ex);
+
+
+%% Phase dependence
+spkwoblank = [spkstats( [spkstats.(exinfo.param1)] < 1000).mn];
+phasesel(1) = nanmean(f1(:,1)./spkwoblank');
+
+% [~, max_i] = max(spkwoblank);
+phasesel(2) = nanmean(f1(:,2));
+
 
 %% assign output arguments
 argout =  {'fitparam', fitparam, ...
@@ -73,7 +87,7 @@ argout =  {'fitparam', fitparam, ...
     'ff', ff, 'tcdiff', tcdiff, ...
     'powst_mn', powstim_mn, 'powst_sd', powstim_sd, ...
     'powbs_mn', powbase_mn, 'powbs_sd', powbase_sd, ...
-    'ed', ed, 'eX', eX, 'eY', eY};
+    'ed', ed, 'eX', eX, 'eY', eY, 'phasesel', phasesel, 'phaseRespM', phaseResp};
 end
 
 
@@ -98,22 +112,27 @@ fitparam.val = val;
 end
 
 
-function [ex, spkstats] = znormex(ex, exinfo, norm_flag)
+function [ex, spkstats, phaseResp, f1] = znormex(ex, exinfo, norm_flag)
 %znormex
 % converts spike rates to z-normed data for each condition pair
 % norm_flag determines if to use spike rate (norm_falg = 1) or spike count
 % (norm_flag = 0)
 
+
 param1 = exinfo.param1;
 parvls = unique( [ ex.Trials.(param1) ] );
 
+phaseResp = zeros(sum(parvls<1000), 4);
+phaseN = phaseResp;
+f1 = zeros(sum(parvls<1000), 2);
 j = 1;
 
 if exinfo.isadapt
     time = 0:0.001:5;
 else 
-    time = 0:0.001:0.5;
+    time = 0.001:0.001:0.45;
 end
+
 
 for par = parvls
     
@@ -140,7 +159,6 @@ for par = parvls
     z = num2cell(z);
     [ex.Trials(ind).zspkrate] = deal(z{:});
     
-    
     % raster - contains 0 for times without spike and 1 for times of spikes
     % is reduced for times between -0.5s and 0.5s around stimulus onset
     idxct = find(ind);
@@ -157,7 +175,6 @@ for par = parvls
         if exinfo.isadapt
             t_strt = t_strt(t_strt<=5);
         end
-        
                 
         idx = round((ct(k).Spikes(...
             ct(k).Spikes>=t_strt(1) & ct(k).Spikes<=t_strt(end))-t_strt(1)) ...
@@ -165,15 +182,64 @@ for par = parvls
         
         idx(idx==0) = 1; % avoid bad indexing
         
-        
         ex.raster{j}(k, idx) = 1;
         ex.rastercum{j}(k, idx) = k;
+        
+        
+        % skip phase analysis if it is a blank
+        if par>1000 
+            continue
+        end
+        
+        
+        % assign spikes to phase and stimulus condition in a matrix later
+        % used to plot a heat map of spike acitivity showing the phase
+        % sensitivity
+        phase_inc = 1/ (4*ex.stim.vals.tf);
+        phase_t = t_strt(1);
+        phase_i = ct(k).phase;
+        
+        while phase_t+phase_inc < t_strt(end)-t_strt(1)
+            
+            
+            phaseResp(j, phase_i) = phaseResp(j, phase_i) + ...
+                sum( ct(k).Spikes >= phase_t & ...
+                ct(k).Spikes <= phase_t + phase_inc);
+            
+            phaseN(j, phase_i) = phaseN(j, phase_i)+ 1;
+            phase_i = phase_i + 1;
+            if phase_i > 4
+                phase_i = 1;
+            end
+            phase_t = phase_t + phase_inc;
+            
+        end
+        
+        % binned 10ms trial data
+        for bin = 0:44
+            temp(bin+1) = sum(ex.raster{j}(k,bin*10+1 :bin*10+10, 1)) /0.01;
+        end
+        [trial_f1(k), trial_freq, trial_pow(:,k)]  = ...
+            trialSpec(temp, ex.stim.vals.tf);
+    end
+    
+    
+    if par<1000 
+        f1(j, 1) = nanmean(trial_f1);
+        try
+            f1(j, 2) = nanmean(trial_f1./[ex.Trials(ind).spkRate]);
+        catch
+            disp('');
+        end
     end
     
     j = j+1;
-    
+    clearvars trial_f1 trial_freq trial_pow;
 end
 
+
+phaseResp = phaseResp./phaseN;
+phaseResp = phaseResp./phase_inc;
 ex.raster_pval = parvls;
 
 end
@@ -181,4 +247,38 @@ end
 
 
 
+function [f1, f_new, P1_new] = trialSpec(temp, tf)
+% GET THE CORRECT POWER AT THE TEMPORAL FREQUENCY OF THE
+% STIMULUS
 
+%     fouriercoeff = fft(conv(sum(ex.raster{j}, 1), ones(1, 10)/10, 'same'));
+%     L = length(ex.raster{j}(1,:));
+%     Fs = L / time(end);
+
+fouriercoeff = fft(temp);
+L = 45;
+Fs = L / 0.45;
+
+try
+    P2 = abs(fouriercoeff/L);
+    if mod(L,2)==1
+        L=L-1;
+    end
+    P1 = P2(1:L/2+1);
+    P1(2:end-1) = 2*P1(2:end-1);
+    
+catch
+    disp();
+end
+f = Fs*(0:(L/2))/L;
+
+% interpolate in smaller increments and get the nearest frequency
+% to the stimulus tf
+f_new = f(1):0.5:f(end);
+P1_new = interp1(f, P1, f_new, 'spline');
+
+tf_i = find(f_new>=tf, 1, 'first');
+f1 = P1_new(tf_i);
+
+
+end

@@ -3,6 +3,8 @@ function exinfo = getDominantEyeField( exinfo )
 %--------------- select dominant eye
 isdominant = zeros(1, length(exinfo));
 
+% select the dominant eye, ie the trials that are not binocularly
+% stimulated
 for neuron = unique([exinfo.id])
     
     neuron_idx = [exinfo.id] == neuron; %& [info.rsqr4drug] >= expVarThres & ~[info.isadapt] & ~[info.isRC];
@@ -52,14 +54,14 @@ for neuron = unique([exinfo.id])
             isdominant(dom_i) = true;
         end
     end
-    
-    
 end
 
 
 isdominant  = num2cell(isdominant==1);
 [exinfo.isdominant] = deal(isdominant{:});
 
+
+% compare these dominant trials and get the one with the highest firing rate
 cmpExp = num2cell(zeros(length(exinfo), 1));
 [exinfo.cmpExp] = deal(cmpExp{:});
 

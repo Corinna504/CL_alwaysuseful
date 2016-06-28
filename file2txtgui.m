@@ -19,9 +19,10 @@ global h_fdir;
 global h_files;
 
 filetxt = {};
+filename = 'file.txt';
 
 
-h = figure('Position', [200 200 800 400], 'DeleteFcn', @savetxt);
+h = figure('Position', [500 500 800 400]);
 % --------------------- data directory
 
 h_fdir = uicontrol(h, 'Style', 'edit', ...
@@ -67,18 +68,34 @@ uicontrol('Style', 'pushbutton', ...
 % --------------------- remove from text file
 uicontrol('Style', 'pushbutton', ...
         'String', 'Remove from txt',...
-        'Position', [600 100 100 20], ...
+        'Position', [650 100 100 20], ...
         'Callback', @rmfile);
+    
+% --------------------- save text file
+uicontrol('Style', 'pushbutton', ...
+        'String', 'Save',...
+        'Position', [670 50 80 20], ...
+        'Callback', @savetxt);
+    
+ uicontrol('Style', 'edit', ...
+        'String', 'Name',...
+        'Position', [500 50 150 20], ...
+        'Callback', @editfilename);      
+    
+    
 
 %% update folderfiles
     function updateFolder(~,~)
         
         fdir = uigetdir(get(h_fdir, 'String'));
+        
         if fdir~=0
             fname = dir(fdir);
             fname = fname(...
-                cellfun(@(x) ~isempty(strfind(x, 'c1')) || ...
-                             ~isempty(strfind(x, 'c2')), ...
+                cellfun(@(x) (~isempty(strfind(x, 'c1')) || ...
+                             ~isempty(strfind(x, 'c2'))) && ...
+                             isempty(strfind(x, 'Pos')) && ...
+                             isempty(strfind(x, 'sortKK')), ...
                         {fname.name}));
             
             set(h_files, 'Value', 1);
@@ -97,54 +114,57 @@ uicontrol('Style', 'pushbutton', ...
         fnames = get(h_files, 'String');
         val = get(h_files, 'Value');
         
-        
         for i = 1:length(val)
-                        
             fname = fnames{val(i)}
-            [temp, dose(i), id(i)] = PlotTC(fdir, fname, ...
+            [temp, dose(i), id(i), stim{i}] = PlotTC(fdir, fname, ...
                 'plot', false); 
             
-            [~, max_i] = max(temp, [], 1);
-            
-            mnspk(i) = mean(temp( max_i(1), :));
-            
+            [~, max_i] = max(mean(temp, 2));            
+            meanspk(i) = nanmean(temp(max_i, :));
         end
         
-        [~, idx] = sort(id);
         
-        for j = 1:length(val)
-            i = idx(j);
-            
+        [~, idx] = sort(id);
+        dose = dose./2;
+        
+        for j2 = 1:length(val)
+            i = idx(j2);
+            j = id(i)-min(id);
             if ~isempty(strfind(fnames{val(i)}, '5HTSB'))
-                scatter(j, mnspk(i), sz*dose(i), 'o', 'm', 'filled', ...
+                scatter(j, meanspk(i), sz*dose(i), 'o', 'm', 'filled', ...
                     'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
             elseif ~isempty(strfind(fnames{val(i)}, '5HTKet'))
-                scatter(j, mnspk(i), sz*dose(i), 'o', 'filled', ...
+                scatter(j, meanspk(i), sz*dose(i), 'o', 'filled', ...
                     'MarkerFaceColor',[1 .5 0],  ...
                     'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
             elseif ~isempty(strfind(fnames{val(i)}, 'Ket'))
-                scatter(j, mnspk(i), sz*dose(i), 'd', 'filled', ...
+                scatter(j, meanspk(i), sz*dose(i), 'd', 'filled', ...
                     'MarkerFaceColor',[1 .5 0], ...
                     'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
             elseif ~isempty(strfind(fnames{val(i)}, 'SB'))
-                scatter(j, mnspk(i), sz*dose(i), 'd', 'm', 'filled', ...
+                scatter(j, meanspk(i), sz*dose(i), 'd', 'm', 'filled', ...
                     'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
             elseif ~isempty(strfind(fnames{val(i)}, '5HT'))
-                scatter(j, mnspk(i), sz*dose(i), 'o', 'r', ...
+                scatter(j, meanspk(i), sz*dose(i), 'o', 'r', ...
                     'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
             elseif ~isempty(strfind(fnames{val(i)}, 'NaCl'))
-                scatter(j, mnspk(i), sz*dose(i), 'd', 'k', 'filled', ...
+                scatter(j, meanspk(i), sz*dose(i), 'd', 'filled', ...
+                    'MarkerFaceColor', [.8 .8 .8], ...
                     'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
             else 
-                scatter(j, mnspk(i), sz, 'o', 'r', 'filled', ...
+                scatter(j, meanspk(i), sz, 'o', 'r', 'filled', ...
                     'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
             end
                hold on;
+            text(j, meanspk(i)+1, stim{i}); 
         end
+        
+        
         
 %         plot(get(gca, 'xlim'), [0 0], 'Color', [0.6 0.6 0.6]);
         title( sprintf(['baseline: filles o, 5HT: white o, ' ...
-            'NaCl: black diamont \n SB: magenta, Ket:orange']));
+            'NaCl: grey diamond \n SB: magenta, Ket:orange']));
+        ylabel('mean spk resp');
     end
 
 
@@ -154,18 +174,41 @@ uicontrol('Style', 'pushbutton', ...
         fnames = get(h_files, 'String');
         val = get(h_files, 'Value');
 
+        c = lines(length(val));
+        figure;
+        p = subplot(3,1,[1 2]);
         for i = 1:length(val)
-            PlotTC(fdir, fnames{val(i)}); 
+            
+            [~, dose(i), timeofrec(i), ~] = PlotTC(fdir, fnames{val(i)}); h =gcf;
+            ax = findobj(gcf, 'Type', 'Axes');            
+            set(findobj(ax.Children, 'Type', 'ErrorBar'), 'Color', c(i, :));
+            
+            copyobj(ax.Children, p);
+            exname{i} = get(h, 'Name');
+            param = ax.XLabel.String;
+            delete(h);
         end
+        
+        xlabel(param);
+        
+        subplot(3,1,3);
+        ylim([0 length(val)]);
+        for i = 1:length(val)
+            str = sprintf([exname{i} ' dose: ' ...
+                num2str(dose(i))]);
+            text(0, length(val)-i, str, 'Color', c(i,:), 'FontSize', 12);
+        end
+        axis off
+        
     end
 
     function add2txt(~, ~)
         
         fdir = [get(h_fdir, 'String') '\']; 
-        fnames = get(h_files, 'String');
+        exnames = get(h_files, 'String');
         val = get(h_files, 'Value');
         
-        filetxt = [filetxt; strcat(fdir, fnames(val))];
+        filetxt = [filetxt; strcat(fdir, exnames(val))];
         filetxt = unique(filetxt);
 
         
@@ -179,10 +222,8 @@ uicontrol('Style', 'pushbutton', ...
         fclose(fileID);
     end
 
-
-
     function savetxt(~, ~)
-        fileID = fopen('filenames.txt',  'wt');
+        fileID = fopen(filename,  'wt');
         fprintf(fileID, '%s\n', filetxt{:});
         fclose(fileID);
     end
@@ -212,6 +253,9 @@ uicontrol('Style', 'pushbutton', ...
         
     end
 
+    function editfilename(src, ~)
+        filename = [src.String '.txt'];
+    end
 end
 
 

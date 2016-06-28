@@ -26,12 +26,64 @@ err = [];
 
 switch fctname
     
+    
+    case  'r2 ag'
+        for i = 1:length(expInfo)
+            val(i) = expInfo(i).fitparam_drug.r2_ag;
+        end
+        
+    case 'r2 cg'
+        for i = 1:length(expInfo)
+            val(i) = expInfo(i).fitparam_drug.r2_cg;
+        end
+        
+    case 'r2 rg' 
+        for i = 1:length(expInfo)
+            val(i) = expInfo(i).fitparam_drug.r2_rg;
+        end
+        
+    case 'a ag' 
+        for i = 1:length(expInfo)
+            val(i) = expInfo(i).fitparam_drug.a_ag;
+        end
+        
+    case 'a cg'
+        for i = 1:length(expInfo)
+            val(i) = expInfo(i).fitparam_drug.a_cg;
+        end
+        
+    case 'a rg'
+        for i = 1:length(expInfo)
+            val(i) = expInfo(i).fitparam_drug.a_rg;
+        end
+        
+    case 'phase selectivity'
+        for i = 1:length(expInfo)
+            val(i) = expInfo(i).phasesel(1);
+        end
+        
+    case 'c50 base'
+        for i = 1:length(expInfo)
+            val(i) = expInfo(i).fitparam.c50;
+        end
+        
+    case 'c50 drug'
+        for i = 1:length(expInfo)
+            val(i) = expInfo(i).fitparam_drug.c50;
+        end
+        
+    case 'c50 diff'
+        val = assignFct('c50 base', expInfo) - ...
+            assignFct('c50 drug', expInfo);
+        
+        lab = [lab ' (base-drug)'];
+        
     case 'blank diff'
         val = assignFct('blank base', expInfo) - ...
-                assignFct('blank drug', expInfo);
+            assignFct('blank drug', expInfo);
         
-            lab = [lab ' (base-drug)']
-            
+        lab = [lab ' (base-drug)'];
+        
     case 'blank base'
         for i = 1:length(expInfo)
             if any(expInfo(i).ratepar > 1000) && any(expInfo(i).ratepar_drug > 1000)
@@ -533,15 +585,22 @@ switch fctname
                 val_{kk,1}  = [expInfo(i).ff.mitchel.mn];
                 val_{kk,2}  = [expInfo(i).ff_drug.mitchel.mn];
                 
-                err_{kk,1} = [expInfo(i).ff.mitchel.sem];
-                err_{kk,2} = [expInfo(i).ff_drug.mitchel.sem];
+%                 err_{kk,1} = [expInfo(i).ff.mitchel.sem];
+%                 err_{kk,2} = [expInfo(i).ff_drug.mitchel.sem];
+                
                 kk = kk+1;
             end
         end
         
         
         val = [ nanmean(horzcat(val_{:,1}), 2), nanmean(horzcat(val_{:,2}), 2)];
-        err = [ nanmean(horzcat(err_{:,1}), 2), nanmean(horzcat(err_{:,2}), 2)];
+        
+%         err = [ nanmean(horzcat(err_{:,1}), 2), nanmean(horzcat(err_{:,2}), 2)];
+        err(:, 1) = nanstd( horzcat(val_{:, 1}), 0, 2 ) ./ ...
+            sqrt(sum( isnan(horzcat(val_{:, 1})), 2 ));
+        err(:, 2) = nanstd( horzcat(val_{:, 2}), 0, 2 ) ./ ...
+            sqrt(sum( isnan(horzcat(val_{:, 2})), 2 ));
+        
         
         kk = 1;
         for i = 1:length(expInfo)

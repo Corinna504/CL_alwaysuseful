@@ -4,13 +4,13 @@ function expInfo = addStruct( expInfo )
 
 for i = 1:length(expInfo)
     
-    if ~isempty( expInfo(i).fitparam )
+    if ~isempty(expInfo(i).fitparam)
         expInfo(i).gaussr2 = expInfo(i).fitparam.r2;
     else
         expInfo(i).gaussr2 = 0;
     end
     
-    if ~isempty( expInfo(i).fitparam_drug )
+    if ~isempty(expInfo(i).fitparam_drug)
         expInfo(i).gaussr2_drug = expInfo(i).fitparam_drug.r2;
     else
         expInfo(i).gaussr2_drug = 0;

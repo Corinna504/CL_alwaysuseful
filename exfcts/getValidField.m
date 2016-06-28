@@ -18,52 +18,35 @@ for neuron = unique([info.id])
     if any(or_idx)
         [~, i] = max([info(or_idx).rsqr_both]);
         valid(or_idx(i)) = 1;
-        
-        [~, i] = max(cellfun(@max, {info(or_idx).ratemn}));
-        intracmp(or_idx(i)) = 1;
     end
     
     %%%
     if any(rc_idx)
         [~, i] = max([info(rc_idx).rsqr_both]);
         valid(rc_idx(i)) = 1;
-        
-        [~, i] = max(cellfun(@max, {info(rc_idx).ratemn}));
-        intracmp(rc_idx(i)) = 1;
     end
     
     %%%
     if any(sf_idx)
         [~, i] = max([info(sf_idx).rsqr_both]);
         valid(sf_idx(i)) = 1;
-        
-        [~, i] = max(cellfun(@max, {info(sf_idx).ratemn}));
-        intracmp(sf_idx(i)) = 1;
     end
     
     %%%
     if any(co_idx)
         [~, i] = max([info(co_idx).rsqr_both]);
         valid(co_idx(i)) = 1;
-        
-        [~, i] = max(cellfun(@max, {info(co_idx).ratemn}));
-        intracmp(co_idx(i)) = 1;
     end
     
     %%%
     if any(sz_idx)
         [~, i] = max([info(sz_idx).rsqr_both]);
         valid(sz_idx(i)) = 1;
-        
-        [~, i] = max(cellfun(@max, {info(sz_idx).ratemn}));
-        intracmp(sz_idx(i)) = 1;
     end
     
     
 end
 
-intracmp        = num2cell(intracmp);
-[info.cmpExp] = deal(intracmp{:});
 
 valid        = num2cell(valid==1);
 [info.valid] = deal(valid{:});

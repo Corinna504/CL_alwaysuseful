@@ -1,8 +1,19 @@
-function [ res, mn_rate, fitparam ] = RCsubspace( ex )
+function [ res, mn_rate, fitparam ] = RCsubspace( ex, varargin )
 %RCsupspace 
 % This is a batch function calling 
 % HN_computeLatencyAndNetSpk and
 % fitgauss
+
+
+j=1; p_flag = false;
+while j<= length(varargin)
+   switch varargin{j}
+       case 'plot'
+           p_flag = varargin{j+1};
+   end
+   j=j+2;
+end
+
 
 ex.Trials = ex.Trials([ex.Trials.Reward]>0);
 
@@ -45,18 +56,35 @@ fitparam.r2 = gaussr2;
 fitparam.HN = fitHN;
 
 
+% plot results if necessary
+if p_flag
+    figure;
+    x = 1:length(mn_rate);
+    
+    errorbar(x, [mn_rate.mn], [mn_rate.sd]); hold on;
+    
+    n = res.sdfs.n;
+    if ~isempty(res.sdfs.extras);   
+        errorbar(x(end), mn_rate(end).mn, mn_rate(end).sd, 'g');
+        n = [n; res.sdfs.extras{1}.n];    
+    end
+    text(x, [mn_rate.mn], num2str(n));    
+end
+    
+
+
 end
 
 
 
 
 function [res, mn_rate] = resampleRC(ex, nsmpl)
-% randomly choose perctrials% of trials and compute netspikes
+% randomly choose n trials and compute netspikes
 % do this nsmpl times
 
 
 ex_boot = ex;
-res = HN_computeLatencyAndNetSpk([], ex); close all;
+res = HN_computeLatencyAndNetSpk([], ex); 
 
 res_boot = cell(nsmpl,1); % results from bootstrapping samples
 
@@ -76,7 +104,7 @@ for i = 1:nsmpl
     if ~isempty(res.netSpikesPerFrameBlank)
         nspk_blank(i) = res_boot{i}.netSpikesPerFrameBlank(1);
     end
-    close all;
+
 end
 
 

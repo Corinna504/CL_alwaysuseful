@@ -9,7 +9,7 @@ function res = HN_computeLatencyAndNetSpk(res,ex)
 
 if isempty(res) 
 %     res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot');
-    res = PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot');
+    res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot');
 end
    
 if isfield(res, 'vars')

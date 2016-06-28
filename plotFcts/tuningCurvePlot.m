@@ -4,8 +4,10 @@ function h = tuningCurvePlot(exinfo, fit_flag)
 
 h = figure('Name', exinfo.figname);
 
-if fit_flag
-    fittedTC(exinfo)
+if strcmp(exinfo.param1, 'or')
+    fittedTC_or(exinfo)
+elseif strcmp(exinfo.param1, 'co')
+    fittedTC_co(exinfo)
 else
     rawTC(exinfo);
 end
@@ -50,19 +52,18 @@ end
 
 
 
-%%
-function fittedTC(exinfo)
+%% orientation data
+function fittedTC_or(exinfo)
 % plots fitted tuning curve for both conditions +/- sme
    
-
 
 c = getCol(exinfo);
 ft = exinfo.fitparam;
 ft_drug = exinfo.fitparam_drug;
 
 args = {'o', 'Color', c, 'MarkerSize', 5};
-fittedTC_Helper(ft,  [args, 'MarkerFaceColor', c], {c}); ho;
-fittedTC_Helper(ft_drug,  args, {c, 'LineStyle', '--'});
+fittedTC_or_Helper(ft,  [args, 'MarkerFaceColor', c], {c}); ho;
+fittedTC_or_Helper(ft_drug,  args, {c, 'LineStyle', '--'});
 
 
 xlabel('orientation'); 
@@ -96,8 +97,7 @@ title( sprintf( ['Baseline: pf=%1.2f, bw=%1.2f, amp=%1.2f, off=%1.2f \n' ...
 end
 
 
-function fittedTC_Helper(ft, errArgs, lineArgs)
-
+function fittedTC_or_Helper(ft, errArgs, lineArgs)
 
 or = ft.mu-100 : ft.mu+100;
 y = gaussian(ft.mu, ft.sig, ft.a, ft.b, or) ;
@@ -108,3 +108,56 @@ plot(or, y, lineArgs{:}); ho
 end
 
 
+%% contrast data
+function fittedTC_co(exinfo)
+% plots tuning curve for both conditions +/- sme
+
+c = getCol(exinfo);
+
+mn0 = exinfo.ratemn;            mn1 = exinfo.ratemn_drug;
+sme0 = exinfo.ratesme;          sme1 = exinfo.ratesme_drug;   
+par0 = exinfo.ratepar;          par1 = exinfo.ratepar_drug;
+par0(par0==0) = par0(2)/2;      par1(par1==0) = par1(2)/2;
+idx0 = par0<=1;                 idx1 = par1<=1;
+
+errArgs = {'o', 'Color', c, 'MarkerSize', 5};
+
+% plot errorbars
+fittedTC_co_Helper(exinfo.fitparam, {c})
+fittedTC_co_Helper(exinfo.fitparam_drug, {c, 'LineStyle', '--'})
+
+errorbar(par0(idx0), mn0(idx0), sme0(idx0), errArgs{:}, 'MarkerFaceColor', c); hold on;
+errorbar(par1(idx1), mn1(idx1), sme1(idx1), errArgs{:});
+if any(idx0); errorbar(2, mn0(~idx0), sme0(~idx0), errArgs{:}); end
+if any(idx1); errorbar(2, mn1(~idx1), sme1(~idx1), errArgs{:}, 'MarkerFaceColor', c); end
+
+legend('base', exinfo.drugname, 'Location', 'northwest');
+set(gca, 'XScale', 'log', 'XLim', [0.01 2]);
+
+title( sprintf(['r_{max} * (c^n / (c^n + c50^n) ) + m \n '...
+    'baseline: r_{max}=%1.0f, n=%1.1f, c50=%1.1f, m=%1.1f r2=%1.2f \n' ...
+    '   ' exinfo.drugname ': r_{max}=%1.0f, n=%1.1f, c50=%1.1f, m=%1.1f r2=%1.2f  \n' ....
+    'a_{cog} = %1.1f (%1.2f)  a_{actg} = %1.1f (%1.2f)  a_{resg} = %1.1f (%1.2f) '],...
+    exinfo.fitparam.rmax, ...
+    exinfo.fitparam.n, exinfo.fitparam.c50, ...
+    exinfo.fitparam.m, exinfo.fitparam.r2, ...
+    exinfo.fitparam_drug.rmax, ...
+    exinfo.fitparam_drug.n, exinfo.fitparam_drug.c50, ...
+    exinfo.fitparam_drug.m, exinfo.fitparam_drug.r2, ...
+    exinfo.fitparam_drug.a_cg, exinfo.fitparam_drug.r2_cg, ...
+    exinfo.fitparam_drug.a_ag, exinfo.fitparam_drug.r2_ag, ...
+    exinfo.fitparam_drug.a_rg, exinfo.fitparam_drug.r2_rg), ...
+    'FontSize', 7);
+xlabel('contrast (log)');
+ylabel('spike rate');
+
+end
+
+function fittedTC_co_Helper(ft, lineArgs)
+
+co = 0.001:0.001:1;
+y = hyperratiofct(co, ft.rmax, ft.c50, ft.n, ft.m) ;
+
+plot(co, y, lineArgs{:}); ho
+
+end

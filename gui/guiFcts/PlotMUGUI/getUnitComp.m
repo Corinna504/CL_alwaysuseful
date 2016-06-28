@@ -1,13 +1,6 @@
-function dat = getUnitComp(dat, spec, expInfo)
+function expInfo_out = getUnitComp(spec, expInfo)
 % when there are is a comparison inside a unit this functions looks
 % to assign the data correctly
-
-xdat = dat.x;
-ydat = dat.y;
-
-dat.x = [];
-dat.y = [];
-id = unique([expInfo.id]);
 
 if strcmp(spec.stimx, 'all stimuli cond') && ~(strcmp(spec.stimy, spec.stimx))
     ix = findCorrespStimIdx(spec.stimy, spec.eyex, expInfo, 0);
@@ -21,43 +14,7 @@ else
 end
 
 
-%%% assign to x and y data
-kk = 1;
-for is5HT = 0:1
-    
-    condS = [expInfo.is5HT] == is5HT;
-    
-    for c1 = 0:1
-        condc1 = [expInfo.isc2] == c1;
-        
-        for idx = 1:length(id)
-            
-            
-            dat.is5HT(kk) = is5HT;
-            
-            dat.indX{kk} = find ([expInfo.id] == id(idx) & condS & condc1 & ix);
-            dat.indY{kk} = find ([expInfo.id] == id(idx) & condS & condc1 & iy);
-            
-            if ~isempty(dat.indX{kk}) &&  ~isempty(dat.indY{kk})
-                [dat.x(kk), expInf_x] = ...
-                    findCorrespDat( xdat(dat.indX{kk}), expInfo(dat.indX{kk}) );
-                [dat.y(kk), expInf_y] = ...
-                    findCorrespDat( ydat(dat.indY{kk}), expInfo(dat.indY{kk}) );
-                dat.expinf{kk} = [expInf_x, expInf_y];
-            end
-            
-            kk = kk+1;
-            
-        end
-    end
-end
-
-% 
-% [dat, expInfo] = singleUnitsOnly(dat, expInfo);
-% 
-dat.is5HT = logical(dat.is5HT);
-
-    
+expInfo_out = singleUnitsOnly(expInfo(ix | iy));
 
 end
 
@@ -105,21 +62,17 @@ end
 end
 
 
-function [retval, retinfo] = findCorrespDat(dat, datinfo)
+function retinfo = findCorrespDat(datinfo)
 %%% if there are multiple data for one neuron, take the one with the best r2
 
 
 
-if isempty(dat)
-    retval = [];
+if isempty(datinfo)
     retinfo = datinfo;
-elseif length(dat) > 1
+elseif length(datinfo) > 1
     [~, i] = max([datinfo.rsqr_drug]);
-    i =1;
-    retval = dat(i);
     retinfo = datinfo(i);
 else
-    retval = dat;
     retinfo = datinfo;
 end
 
@@ -129,7 +82,7 @@ end
 
 
 
-function [dat, expInfo] = singleUnitsOnly(dat, expInfo)
+function expInfo_out = singleUnitsOnly(expInfo)
 % if there are conflicting data from the same session, the one with best
 % regression fit is used
 
@@ -148,10 +101,7 @@ function [dat, expInfo] = singleUnitsOnly(dat, expInfo)
         end
     end
 
-    expInfo = expInfo(idxsu);
-    dat.x = dat.x(idxsu);
-    dat.y = dat.y(idxsu);
-    dat.expinf = dat.expinf(idxsu);
-    dat.is5HT = dat.is5HT(idxsu);
+    expInfo_out = expInfo(idxsu);
+    
 
 end

@@ -14,8 +14,8 @@ try
     miny = min(horzcat(objs.YData));
     maxy = max(horzcat(objs.YData));
     
-    set(gca, 'xlim', [ min(minx, miny) max(maxx, maxy) ], ...
-        'ylim', [ min(minx, miny) max(maxx, maxy) ]);
+    set(gca, 'XLim', [ min(minx, miny) max(maxx, maxy) ], ...
+        'YLim', [ min(minx, miny) max(maxx, maxy) ]);
     
 catch
     

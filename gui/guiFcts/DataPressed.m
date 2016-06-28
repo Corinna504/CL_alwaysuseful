@@ -15,14 +15,38 @@ end
 
 
 
-h = figure;
+h = figure('Visible', 'off');
 
 j = 1;
+pos = 1;
+nfig = length(fig2plot);
+
+if any(strcmp(fig2plot, 'Raster'))
+    nfig = nfig+1;
+% % elseif any(strcmp(fig2plot, 'smooth PSTH'))
+% %     nfig = nfig-1;
+%     
+end
+
+
+
 temp =[];
 while j<=length(fig2plot)
     
     switch fig2plot{j}
        
+       case 'Variability'
+            temp = figure; 
+            scatter(datinfo.ratemn, datinfo.ratevars, 'r', 'filled'); hold on;
+            scatter(datinfo.ratemn_drug, datinfo.ratevars_drug, 'r');
+            legend('baseline', datinfo.drugname);
+            title(datinfo.figname); 
+            set(gca, 'XLim', [0 max( [ datinfo.ratevars datinfo.ratevars_drug] )],...
+                'YLim', [0 max( [ datinfo.ratevars datinfo.ratevars_drug] )]);
+            set(gca, 'XScale', 'log', 'YScale', 'log');
+                        eqax; unity; 
+            axis square
+            
        case 'Tuning Curve'
            temp = openfig(datinfo(1).fig_tc, 'invisible');
            
@@ -41,6 +65,37 @@ while j<=length(fig2plot)
         case 'Raster'
             temp = openfig(datinfo(1).fig_raster, 'invisible');
             
+            ax = findobj(temp, 'Type', 'axes');
+            newax = copyobj(ax, h);
+            close(temp);
+
+            newax(1).Position = [0.1+(0.9/nfig)*(pos-1)  ...
+                0.95 (0.9/nfig-0.05)*2 0.05];
+           
+            newax(3).Position = [0.1+(0.9/nfig)*(pos-1)  ...
+                0.1 0.9/nfig-0.05 0.8];
+            
+            pos = pos+1;
+            newax(2).Position = [0.1+(0.9/nfig)*(pos-1)  ...
+                0.1 0.9/nfig-0.05 0.8];
+            
+            j = j+1;
+            pos = pos+1;
+            continue 
+            
+        case 'Phase Select.'
+            temp = openfig(datinfo(1).fig_phase, 'invisible');
+            
+        case 'smooth PSTH'
+            temp = openfig(datinfo(1).fig_psth);
+            ax = findobj(temp, 'Type', 'Axes');
+            delete(ax([2,4]))
+
+            ylim_ = [0 max( horzcat(ax([3,5]).YLim) )];
+            set(ax([3,5]), 'YLim', ylim_); 
+%             j = j+1;
+%             continue            
+            
         case 'Spike Density'
             temp = openfig(datinfo(1).fig_sdfs, 'invisible');
             ax = findobj(temp, 'Type', 'Axes');
@@ -58,21 +113,26 @@ while j<=length(fig2plot)
     
 
     ax = findobj(temp, 'Type', 'axes');
-    newax = copyobj(ax, h);
+    newax = copyobj(ax, h);    newax.Title.FontSize = 8;
+
     close(temp);
     
     for i = 1:length(newax)
-        newax(i).Position = [0.1+(0.9/length(fig2plot))*(j-1)  ...
+        newax(i).Position = [0.1+(0.9/nfig)*(pos-1)  ...
             0.12+(0.8/length(newax))*(i-1) ...
-            0.9/length(fig2plot)-0.05 ...
+            0.85/nfig-0.05 ...
             0.8/length(newax)-0.1];
     end
     
+    pos = pos+1;
     j = j+1;
 end
 
-h.Position = [287   500   350*length(fig2plot)  450];
+h.Position = [287   500   350*nfig  450];
 h.Name = datinfo(1).figname;
 h.UserData = datinfo;
-
+h.Visible = 'on';
+if nfig==0
+    close(h);
+end
 end

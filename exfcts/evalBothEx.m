@@ -49,26 +49,17 @@ if isfield(ex0.Trials, 'Waves') && isfield(ex2.Trials, 'Waves')
 end
 
 
+%% pfreferred orientation fit evaluation
 
-%% plot results
-if ~exinfo.isRC
-    exinfo.isi_frct = getISI_All(exinfo, ex0, ex2, p_flag);
-    
-    if p_flag
-%         lfpPlot( exinfo );
-        rasterPlot( exinfo, ex0, ex2);
-        tuningCurvePlot(exinfo, strcmp(exinfo.param1, 'or'));        
-        
-%         spectogramPlot( exinfo );
+if strcmp(exinfo.param1, 'or');
+if abs(exinfo.fitparam.mu - exinfo.fitparam_drug.mu) > 150
+    if exinfo.fitparam.mu < exinfo.fitparam_drug.mu
+        exinfo.fitparam.mu = exinfo.fitparam.mu +180;
+    elseif exinfo.fitparam_drug.mu < exinfo.fitparam.mu
+        exinfo.fitparam_drug.mu = exinfo.fitparam_drug.mu +180;
     end
-    
-elseif exinfo.isRC && p_flag
-    rcPlot(exinfo);
-    tuningCurvePlot(exinfo, true);  
 end
-
-
-
+end
 end
 
 

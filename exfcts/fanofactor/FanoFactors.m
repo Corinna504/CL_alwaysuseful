@@ -8,7 +8,7 @@ function [ ff1, ff1_fit, mitchel, church ] = FanoFactors( ex, Mn, Vars, param1 )
 
 %------------------------------------------------------ Fano Factor
 ff1 = ( Mn ./ Vars );
-ff1 = nanmean(ff1);
+% ff1 = nanmean(ff1);
 
 [FitPa, ~,~,~,~] = FitPower( Mn , Vars);
 ff1_fit = FitPa.exponent;

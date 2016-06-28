@@ -103,7 +103,7 @@ if p_flag
     xlabel('time window of consecutive trials, each aligned to first stimuli presentation');
     ylabel('pupil size'); xlim([0 2]);
     title(fname, 'interpreter','none');
-    savefig(h, ['C:\Users\Corinna\Documents\SU_analysis\PupilSizeDev\' fname(20:end-4) '_rawppsz.fig']);
+    savefig(h, ['C:\Users\Corinna\Documents\CODE\Analysis\plots\PupilSizeDev\' fname(20:end-4) '_rawppsz.fig']);
     close(h);
 end
 

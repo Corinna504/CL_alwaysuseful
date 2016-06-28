@@ -1,8 +1,20 @@
-function ex = loadCluster(fname, onlyrewarded_flag)
+function ex = loadCluster(fname, varargin)
 % all preprocessing goes here
 
-if nargin == 1
-    onlyrewarded_flag = 1;
+
+p_flag = 0;
+onlyrewarded_flag = 1;
+
+j = 1;
+
+while j<=length(varargin)
+    switch varargin{j}
+        case 'reward'
+            onlyrewarded_flag = varargin{j+1};
+        case 'p_flag'
+            onlyrewarded_flag = varargin{j+1};
+    end
+    j=j+1;
 end
 
 
@@ -18,7 +30,7 @@ end
 
 % pupil sizes 
 if isempty(strfind(fname, 'c0')) && isempty(strfind(fname, 'lfp'))
-    [~, ex.Trials] = fctPupilSizeTrial(ex, fname, 0);
+    [~, ex.Trials] = fctPupilSizeTrial(ex, fname, p_flag);
 end
 
 

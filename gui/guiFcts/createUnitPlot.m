@@ -1,32 +1,40 @@
-function dat_new = createUnitPlot(expInfo, dat_in, spec, fig2plot, hist_flag)
+function dat = createUnitPlot(expInfo, fctX, fctY, spec, fig2plot, hist_flag)
 
-guiprop = PlotProps();
-markerfacecol = guiprop.markerfacecol;
 
 
 % get Data per Unit
-dat_new = getUnitComp(dat_in, spec, expInfo);
+dat.expInfo = getUnitComp(spec, expInfo);
+
+val = evalMU(fctX, fctY, dat.expInfo);
+
+dat.x = val.x; 
+dat.y = val.y;
+dat.xlab = [val.xlab ' '  spec.stimx ' ' spec.eyex];
+dat.ylab = [val.ylab ' ' spec.stimy ' ' spec.eyey];
+clearvars val
+
+
 
 % remove nan values
-isntnan = find(~cellfun(@isempty, dat_new.expinf) & ~isnan(dat_new.x) & ~isnan(dat_new.x));
-dat_new.x       = dat_new.x(isntnan);            dat_new.y      = dat_new.y(isntnan);
-dat_new.indX    = dat_new.indX(isntnan);         dat_new.indY   = dat_new.indY(isntnan);
-dat_new.is5HT   = dat_new.is5HT(isntnan);        dat_new.is5HT  = logical(dat_new.is5HT);
-dat_new.expinf  = dat_new.expinf(isntnan);
+isntnan = find(~isnan(dat.x) & ~isnan(dat.y));
+dat.x       = dat.x(isntnan);            
+dat.y      = dat.y(isntnan);
+dat.is5HT   = [dat.expInfo(isntnan).is5HT];  
+dat.is5HT  = logical(dat.is5HT);
 
 % edit marker
-markerface = zeros(length(dat_new.x), 3);
-markerface(find(dat_new.is5HT), 1) =  1;
+markerface = zeros(length(dat.x), 3);
+markerface(find(dat.is5HT), 1) =  1;
 
 
 
 temp = [];
-for lll = 1:length(dat_new.x)
+for lll = 1:length(dat.x)
     
 %     dat_new.expinf{lll}(1).fname
-    temp(lll,1) = dat_new.expinf{lll}(1).id;
-    temp(lll,2) = dat_new.x(lll);
-    temp(lll,3) = dat_new.y(lll);
+    temp(lll,1) = dat.expInfo(lll).id;
+    temp(lll,2) = dat.x(lll);
+    temp(lll,3) = dat.y(lll);
     
 end
 
@@ -43,20 +51,20 @@ end
 
 %%% dinstinguish two distributions via logical indexing
 i_drug = logical(markerface(:,1));
-rx1 = min(dat_new.x) - abs(min(dat_new.x)/2);               rx2 = max(dat_new.x) + abs(max(dat_new.x)/2);
-ry1 = min(dat_new.y(1, :)) - abs(min(dat_new.y(1,:))/2);    ry2 = max(dat_new.y(1, :)) + abs(max(dat_new.y(1, :))/2);
+rx1 = min(dat.x) - abs(min(dat.x)/2);               rx2 = max(dat.x) + abs(max(dat.x)/2);
+ry1 = min(dat.y(1, :)) - abs(min(dat.y(1,:))/2);    ry2 = max(dat.y(1, :)) + abs(max(dat.y(1, :))/2);
 
 if hist_flag
     %%%-------------------------------- histogram x
     subplot(3,3, [1 2]);
-    plotHist(dat_new.x, i_drug);
+    plotHist(dat.x, i_drug);
     set(gca, 'Position', pos_hist(1,:));
     if (rx1 - rx2) ~= 0
         set(gca, 'Xlim', [rx1 rx2])%, 'xticklabel',[]);
     end
     %%%--------------------------------- histogram y
     subplot(3,3, [6 9])
-    plotHist(dat_new.y, i_drug);
+    plotHist(dat.y, i_drug);
     set(gca, 'Position', pos_hist(2, :));
     if (ry1 - ry2) ~= 0
         set(gca, 'Xlim', [ry1 ry2])  %, 'xticklabel',[]);
@@ -68,29 +76,26 @@ if hist_flag
     subplot(3,3, [4 5 7 8])
 end
 
-for i = 1:length(dat_new.x)
-    if ~isempty(dat_new.expinf{i})
-        scatter(dat_new.x(i), dat_new.y(i), ...
-            markerAssignment(dat_new.expinf{i}(1).param1),...
-            'MarkerFaceColor', markerface(i,:), ...
-            'MarkerEdgeColor',  markerface(i,:),...
-            'ButtonDownFcn', { @DataPressed, dat_new.expinf{i}, ...
-            dat_new.xlab, dat_new.ylab, fig2plot} );
-        hold on;
-    end
+for i = 1:length(dat.x)
+    scatter(dat.x(i), dat.y(i), ...
+        markerAssignment(dat.expInfo(i).param1),...
+        'MarkerFaceColor', markerface(i,:), ...
+        'MarkerEdgeColor',  markerface(i,:),...
+        'ButtonDownFcn', { @DataPressed, dat.expInfo(i), ...
+        dat.xlab, dat.ylab, fig2plot} );
+    hold on;
 end
 
 
-xlabel(dat_new.xlab); ylabel(dat_new.ylab);
+xlabel(dat.xlab); ylabel(dat.ylab);
 hold off;
-set(gca, 'Position', pos_hist(3,:), 'UserData', dat_new);
+set(gca, 'Position', pos_hist(3,:), 'UserData', dat);
 if (rx1 - rx2) ~= 0
     set(gca, 'xlim',  [rx1 rx2], 'ylim', [ry1 ry2]);
 end
 
-
 if ~hist_flag
-    addTitle(i_drug, dat_new);
+    addTitle(i_drug, dat);
 end
 
 end

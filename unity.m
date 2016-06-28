@@ -8,7 +8,16 @@ ylim_ = get(gca, 'YLim');
 
 
 if strcmp(get(gca, 'XScale'), 'log') && strcmp(get(gca, 'YScale'), 'log')
-    plot(xlim_, xlim_, '--k');
+    if xlim_(1) == 0
+        ch = get(gca, 'Children');
+        minx = min(horzcat(ch.XData));
+        if minx == 0
+            xlim_(1) = 1/100;
+        else 
+            xlim_(1) = minx;
+        end
+    end
+    plot(xlim_', xlim_', '--k');
 elseif strcmp(get(gca, 'XScale'), 'log')
     plot(xlim_, xlim_, '--c');
 elseif strcmp(get(gca, 'YScale'), 'log')
