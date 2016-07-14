@@ -20,6 +20,8 @@ markerfacecol = guiprop.markerfacecol;
 colorOpts = guiprop.faceColorOpts;
 edgeColorOpts = guiprop.edgeColorOpts;
 markerOpts = guiprop.markerOpts;
+datacrit = guiprop.datacrit;
+
 stimulicond = guiprop.stimulicond;
 eyeopts = guiprop.eyeopts;
 
@@ -111,13 +113,38 @@ editr2gauss_h = uicontrol(fig_h, 'Style','edit',...
     'Callback', @UpdateInclusion);
 
 
-%--------------------------- popup for Color
-%
-popM_h = uicontrol(fig_h, ....
+% %--------------------------- popup for Color
+% %
+% popM_h = uicontrol(fig_h, ....
+%     'Style',  'popupmenu',...
+%     'String', markerOpts,...
+%     'Position', [pos(3)*margins pos(4)*0.7 pos(3)*0.15 pos(4)*0.1],...
+%     'Callback', @editMarker);
+
+%--------------------------- popup for Data Criteria
+popC_h = uicontrol(fig_h, ....
     'Style',  'popupmenu',...
-    'String', markerOpts,...
+    'String', datacrit,...
     'Position', [pos(3)*margins pos(4)*0.7 pos(3)*0.15 pos(4)*0.1],...
-    'Callback', @editMarker);
+    'Callback', @UpdateInclusion);
+
+%--------------------------- radiobuttons for monkeys
+bg = uibuttongroup(...
+    'Position', [0.03 0.82 0.15 0.15]);
+              
+% Create three radio buttons in the button group.
+r1 = uicontrol(bg,'Style',...
+                  'radiobutton',...
+                  'String','both',...
+                  'Position',[1 5 100 15]);
+              
+r2 = uicontrol(bg,'Style','radiobutton',...
+                  'String','mango',...
+                  'Position',[1 35 100 15]);
+
+r3 = uicontrol(bg,'Style','radiobutton',...
+                  'String','kaki',...
+                  'Position',[1 65 100 15]);
 
 %---------------------------- plot button
 uicontrol(fig_h,...
@@ -462,8 +489,9 @@ fig2plot_check(10) = uicontrol(fig_h, ...
         else
             for j = 1:size(dat.y, 1)
                 for i = 1:length(dat.x)
-                    scatter(dat.x(i), dat.y(j, i), marker{i},...
-                        'MarkerFaceColor', markerface(i,:), ...
+                    scatter(dat.x(i), dat.y(j, i), ...
+                        markerAssignment(dat.expInfo(i).param1),...
+                        'MarkerFaceColor', markerFaceAssignment( dat.expInfo(i) ),...
                         'MarkerEdgeColor', markeredge(i,:), ...
                         'ButtonDownFcn', {@DataPressed, expInfo(incl_i(i)), ...
                         dat.xlab, dat.ylab, fig2plot} );
@@ -496,6 +524,7 @@ fig2plot_check(10) = uicontrol(fig_h, ...
         %%% simple (logical) inclusion criteria
 %         UpdateHNfiles(strcmp(stimulicond(get(pop_Xspec, 'Value')), 'RC'), 1);
 
+               
         %%% simple numerical inclusion criteria
         UpdateInclusionHelper(1, ...
             ['[expInfo.rsqr_both] ' get(editr2_h, 'String')]);
@@ -505,6 +534,14 @@ fig2plot_check(10) = uicontrol(fig_h, ...
         UpdateInclusionHelper(1,...
             ['[expInfo.gaussr2] ' get(editr2gauss_h, 'String') ...
             ' & [expInfo.gaussr2_drug] ' get(editr2gauss_h, 'String')]);
+        
+        % monkeys
+        UpdateInclusionHelper(r2.Value, '[expInfo.ismango]');
+        UpdateInclusionHelper(r3.Value, '~[expInfo.ismango]');
+        
+        %%% data critera via popup popC_h
+        idx = getCritIdx(expInfo(incl_i), popC_h.String{popC_h.Value});
+        incl_i = incl_i(idx);
     end
 
     function UpdateInclusionHelper(val, cond)
@@ -521,24 +558,24 @@ fig2plot_check(10) = uicontrol(fig_h, ...
     end
 
 %-------------------------------------------------------------------------
-    function UpdatePlotSpec()
-        editMarker(popM_h);
-    end
+%     function UpdatePlotSpec()
+%         editMarker(popM_h);
+%     end
 
-    function editMarker(popM_h, eventdata)
-        
-        len = length(expInfo(incl_i));
-        stimcond = {expInfo(incl_i).param1};
-        
-        marker = repmat({'^'}, len, 1);
-        
-        
-        if get(popM_h, 'Value') == 2
-            for kk = 1:len
-                marker{kk} = markerAssignment(stimcond{kk});
-            end
-        end
-    end
+%     function editMarker(popM_h, eventdata)
+%         
+%         len = length(expInfo(incl_i));
+%         stimcond = {expInfo(incl_i).param1};
+%         
+%         marker = repmat({'^'}, len, 1);
+%         
+%         
+%         if get(popM_h, 'Value') == 2
+%             for kk = 1:len
+%                 marker{kk} = markerAssignment(stimcond{kk});
+%             end
+%         end
+%     end
 
 %--------------------------------------------------------------------------
     function UpdateAxes(fctX, fctY)

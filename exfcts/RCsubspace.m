@@ -5,7 +5,7 @@ function [ res, mn_rate, fitparam ] = RCsubspace( ex, varargin )
 % fitgauss
 
 
-j=1; p_flag = false;
+j=1; p_flag = false;    
 while j<= length(varargin)
    switch varargin{j}
        case 'plot'
@@ -26,6 +26,7 @@ nsmpl = 10;       % number of resampling processes
 if ~isfield(res, 'latencyToHalfMax')
     res.dur = 0;
     res.lat = -1;
+    res.latFP = -1;
 else
     res.lat = res.latencyToHalfMax /10;
 end
@@ -71,8 +72,6 @@ if p_flag
     text(x, [mn_rate.mn], num2str(n));    
 end
     
-
-
 end
 
 
@@ -84,7 +83,7 @@ function [res, mn_rate] = resampleRC(ex, nsmpl)
 
 
 ex_boot = ex;
-res = HN_computeLatencyAndNetSpk([], ex); 
+res = HN_computeLatencyAndNetSpk([], ex, 'lat_flag', 0);
 
 res_boot = cell(nsmpl,1); % results from bootstrapping samples
 
@@ -97,7 +96,7 @@ for i = 1:nsmpl
     ex_boot.Trials = ex.Trials(bootidx);
     
     % use HN function to compute the usual res struct
-    res_boot{i} = HN_computeLatencyAndNetSpk([], ex_boot);
+    res_boot{i} = HN_computeLatencyAndNetSpk([], ex_boot, 'lat_flag', 0);
     nspk(:,i) = res_boot{i}.netSpikesPerFrame;
     
     

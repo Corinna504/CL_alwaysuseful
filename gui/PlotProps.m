@@ -15,6 +15,7 @@ param.analysisOpts = {'choose analysis', 'compare TC', 'tuning curve', 'waveform
 param.clusterOpts = {'choose cluster', 'c1', 'c1/c0', 'lfp'};
 
 param.axisOpts = {...
+    'dose', ...
     'phase selectivity', ...
     'r2 ag', 'r2 cg', 'r2 rg', 'a ag', 'a cg', 'a rg', ...
     'blank base', 'blank drug', 'blank diff', ...
@@ -81,6 +82,8 @@ param.markerfacecol = [1 0 0];
 param.stimulicond = {'all stimuli cond', 'or', 'sf', 'co', 'sz', 'RC', 'adapt'};
 
 param.eyeopts =  {'all', 'dominant eye', 'non-dominant eye'};
+
+param.datacrit = {'all', 'best r2', 'first ex', 'highest dose', 'lowest dose'};
 
 end
 

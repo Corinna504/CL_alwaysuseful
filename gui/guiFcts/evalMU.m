@@ -13,6 +13,8 @@ if size(dat.x) == size(dat.y)
     dat.info = sprintf([dat.info ' results %3f %3f'], corr(dat.x, dat.y));
 end
 
+dat.expInfo = expInfo;
+
 end
 
 
@@ -26,21 +28,26 @@ err = [];
 
 switch fctname
     
+    case 'dose'
+        val = [expInfo.dose];
     
     case  'r2 ag'
         for i = 1:length(expInfo)
             val(i) = expInfo(i).fitparam_drug.r2_ag;
         end
+        val(val<0) = 0;
         
     case 'r2 cg'
         for i = 1:length(expInfo)
             val(i) = expInfo(i).fitparam_drug.r2_cg;
         end
+        val(val<0) = 0;
         
     case 'r2 rg' 
         for i = 1:length(expInfo)
             val(i) = expInfo(i).fitparam_drug.r2_rg;
         end
+        val(val<0) = 0;
         
     case 'a ag' 
         for i = 1:length(expInfo)
@@ -59,7 +66,7 @@ switch fctname
         
     case 'phase selectivity'
         for i = 1:length(expInfo)
-            val(i) = expInfo(i).phasesel(1);
+            val(i) = expInfo(i).phasesel(2);
         end
         
     case 'c50 base'

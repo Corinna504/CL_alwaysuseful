@@ -92,6 +92,8 @@ fitpar.n = param(3);
 fitpar.m = param(4);
 fitpar.r2 = 1 - ss / sum( (spkrmn(idx) - mean(spkrmn(idx))).^2 );
 
+
+fitpar.auc = sum(hyperratiofct( 0.1:0.1:1, fitpar.rmax, fitpar.c50, fitpar.n, fitpar.m));
 % plot(co(idx), spkrmn(idx), 'o');
 % hold on;
 % y_pred = hyperratiofct( 0:0.01:1, param(1), param(2), param(3), param(4));

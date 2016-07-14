@@ -23,9 +23,9 @@ nfig = length(fig2plot);
 
 if any(strcmp(fig2plot, 'Raster'))
     nfig = nfig+1;
-% % elseif any(strcmp(fig2plot, 'smooth PSTH'))
-% %     nfig = nfig-1;
-%     
+    % % elseif any(strcmp(fig2plot, 'smooth PSTH'))
+    % %     nfig = nfig-1;
+    %
 end
 
 
@@ -34,44 +34,49 @@ temp =[];
 while j<=length(fig2plot)
     
     switch fig2plot{j}
-       
-       case 'Variability'
-            temp = figure; 
+        
+        case 'Variability'
+            temp = figure;
             scatter(datinfo.ratemn, datinfo.ratevars, 'r', 'filled'); hold on;
             scatter(datinfo.ratemn_drug, datinfo.ratevars_drug, 'r');
-            legend('baseline', datinfo.drugname);
-            title(datinfo.figname); 
+            title('base: filled, 5HT/NaCl: empty');
             set(gca, 'XLim', [0 max( [ datinfo.ratevars datinfo.ratevars_drug] )],...
                 'YLim', [0 max( [ datinfo.ratevars datinfo.ratevars_drug] )]);
             set(gca, 'XScale', 'log', 'YScale', 'log');
-                        eqax; unity; 
+            eqax; unity;
             axis square
             
-       case 'Tuning Curve'
-           temp = openfig(datinfo(1).fig_tc, 'invisible');
-           
+        case 'Tuning Curve'
+            datinfo(1).fig_tc = strrep(datinfo(1).fig_tc, 'Analysis', 'GeneralFiles');
+            temp = openfig(datinfo(1).fig_tc, 'invisible');
+            
         case 'LFP'
+            datinfo(1).fig_lfpPow = strrep(datinfo(1).fig_lfpPow, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_lfpPow, 'invisible');
             
         case 'Wave Form'
+            datinfo(1).fig_waveform = strrep(datinfo(1).fig_waveform, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_waveform, 'invisible');
-           
+            
         case 'Regression'
+            datinfo(1).fig_regl = strrep(datinfo(1).fig_regl, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_regl, 'invisible');
             
         case 'ISI'
+            datinfo(1).fig_bri = strrep(datinfo(1).fig_bri, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_bri, 'invisible');
             
         case 'Raster'
+            datinfo(1).fig_raster = strrep(datinfo(1).fig_raster, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_raster, 'invisible');
             
             ax = findobj(temp, 'Type', 'axes');
             newax = copyobj(ax, h);
             close(temp);
-
+            
             newax(1).Position = [0.1+(0.9/nfig)*(pos-1)  ...
                 0.95 (0.9/nfig-0.05)*2 0.05];
-           
+            
             newax(3).Position = [0.1+(0.9/nfig)*(pos-1)  ...
                 0.1 0.9/nfig-0.05 0.8];
             
@@ -81,22 +86,25 @@ while j<=length(fig2plot)
             
             j = j+1;
             pos = pos+1;
-            continue 
+            continue
             
         case 'Phase Select.'
+            datinfo(1).fig_phase = strrep(datinfo(1).fig_phase, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_phase, 'invisible');
             
         case 'smooth PSTH'
+            datinfo(1).fig_psth= strrep(datinfo(1).fig_psth, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_psth);
             ax = findobj(temp, 'Type', 'Axes');
             delete(ax([2,4]))
-
+            
             ylim_ = [0 max( horzcat(ax([3,5]).YLim) )];
-            set(ax([3,5]), 'YLim', ylim_); 
-%             j = j+1;
-%             continue            
+            set(ax([3,5]), 'YLim', ylim_);
+            %             j = j+1;
+            %             continue
             
         case 'Spike Density'
+            strrep(datinfo(1).fig_lfpPow, 'Analysis', 'GeneralFiles')
             temp = openfig(datinfo(1).fig_sdfs, 'invisible');
             ax = findobj(temp, 'Type', 'Axes');
             set(findobj(ax(1), 'LineStyle', '-'), ...
@@ -111,10 +119,10 @@ while j<=length(fig2plot)
     end
     
     
-
+    
     ax = findobj(temp, 'Type', 'axes');
-    newax = copyobj(ax, h);    newax.Title.FontSize = 8;
-
+    newax = copyobj(ax, h);    
+    
     close(temp);
     
     for i = 1:length(newax)
@@ -122,6 +130,7 @@ while j<=length(fig2plot)
             0.12+(0.8/length(newax))*(i-1) ...
             0.85/nfig-0.05 ...
             0.8/length(newax)-0.1];
+        newax(i).Title.FontSize = 8;
     end
     
     pos = pos+1;

@@ -12,19 +12,21 @@ end
 
 
 sd      = sqrt(res.vars2);
-noise   = sd(200:400); 
+noise   = mean(sd(200:400)); 
 
 
 if max(sd)>mean(noise)*5
     
-    sd = sd-mean(noise);     % normalizer for baseline variability
+    sd2 = sd-noise;     % normalizer for baseline variability
     
     % first time of half max of response
-    idx = find( sd >= (max(sd)/2), 1, 'first');  
+    idx = find( sd2 >= (max(sd2)/2), 1, 'first');  
     res.latencyToHalfMax = res.times(idx);
     
-    idx = find( sd >= (max(sd)/2), 1, 'last');  
+    idx = find( sd2 >= (max(sd2)/2), 1, 'last');  
     res.dur = (res.times(idx) - res.latencyToHalfMax)/10;
+    
+    res.latFP = friedmanpriebe(round(sd(200:end).*100))/10;
     
 end
 

@@ -1,4 +1,4 @@
-function res = HN_computeLatencyAndNetSpk(res,ex)
+function res = HN_computeLatencyAndNetSpk(res,ex, varargin)
 
 % takes the output from PlotRevCorAny_tue, 'res' and ex file to compute
 % net-spikes and latency of the orientation selective response.
@@ -7,15 +7,39 @@ function res = HN_computeLatencyAndNetSpk(res,ex)
 % 10/12/15  hn:   wrote it
 
 
+lat_flag = 1;
+k = 1;
+while k <length(varargin)
+    switch varargin{k}
+        case 'lat_flag'
+          lat_flag = varargin{k+1};
+    end
+    k = k+2;
+end
+
+
 if isempty(res) 
 %     res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot');
-    res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot');
+    if isfield(ex, 'Headers')
+        fname = ex.Headers(1).fileName;
+    elseif isfield(ex.Header, 'fileName')
+        fname = ex.Headers(1).fileName;
+    else 
+        fname = '';
+    end
+    
+    if isempty(strfind(fname, 'CO'))
+        res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot');
+    else
+        res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot', 'exp2', 'co');
+    end
 end
    
 if isfield(res, 'vars')
+    if lat_flag
 %     res =  HN_newLatency(res);  % changed cl  11/11/15
-    res =  CL_newLatency(res);  % changed @CL 22.01.2016 
-    
+     res =  CL_newLatency(res);  % changed @CL 22.01.2016 
+    end
     
     
 %     % compute latency old, replaced by newLatency (s.o.)
@@ -35,8 +59,10 @@ if isfield(res, 'vars')
         y = res.sdfs.nspk./res.sdfs.n;
         N = res.sdfs.n;
         for n = 1:length(res.sdfs.extras)
-            y = [y; res.sdfs.extras{n}.nspk/res.sdfs.extras{n}.n];
-            N = [N; res.sdfs.extras{n}.n];
+%             y = [y; res.sdfs.extras{n}.nspk/res.sdfs.extras{n}.n];
+            y = [y; ....
+                repmat(res.sdfs.extras{n}.nspk/res.sdfs.extras{n}.n, 1, size(y,2))];
+            N = [N; repmat(res.sdfs.extras{n}.n, 1, size(y,2))];
         end
         
         % mean # of spikes per frame across all frames (I believe)

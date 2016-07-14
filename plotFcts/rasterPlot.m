@@ -74,6 +74,9 @@ for phase = 1:4
     
 end
 
+
+
+
 xlim([-0.05 0.45]);
 ylim([1, row_i-0.3]);
 plot([0 0], [1, row_i-0.3], 'Color', [0.5 0.5 0.5]);

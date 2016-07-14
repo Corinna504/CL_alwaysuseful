@@ -1,8 +1,7 @@
 function filetxt = file2txtgui( varargin )
 %dosegui lets you compare ex files from same unit with different dose
 
-
-fdir0 = 'D:\data\mango\0243';
+fdir0 = 'D:\data\kaki';
 
 inp = 1;
 while inp<=length(varargin)
@@ -34,55 +33,55 @@ h_fdir = uicontrol(h, 'Style', 'edit', ...
 % --------------------- all files in the directory
 h_files = uicontrol(h, ....
     'Style', 'listbox', ...
-    'String', '', ...    
+    'String', '', ...
     'Position', [20 140 400 200]);
 
 % --------------------- all files in the textfile
 txt_files = uicontrol(h, ....
     'Style', 'listbox', ...
-    'String', filetxt, ...    
+    'String', filetxt, ...
     'Position', [450 140 300 200]);
 
-    
+
 % --------------------- check TC
 uicontrol('Style', 'pushbutton', ...
-        'String', 'Tuning Curve',...
-        'Position', [200 100 100 20], ...
-        'Callback', @callTC);
+    'String', 'Tuning Curve',...
+    'Position', [200 100 100 20], ...
+    'Callback', @callTC);
 
 
 % --------------------- check mean firing rate across files
 uicontrol('Style', 'pushbutton', ...
-        'String', 'Plot Time Course',...
-        'Position', [300 100 100 20], ...
-        'Callback', @callDosePlot);
+    'String', 'Plot Time Course',...
+    'Position', [300 100 100 20], ...
+    'Callback', @callDosePlot);
 
 
 % --------------------- add to text file
 uicontrol('Style', 'pushbutton', ...
-        'String', 'Add to txt',...
-        'Position', [100 100 100 20], ...
-        'Callback', @add2txt);
+    'String', 'Add to txt',...
+    'Position', [100 100 100 20], ...
+    'Callback', @add2txt);
 
-    
+
 % --------------------- remove from text file
 uicontrol('Style', 'pushbutton', ...
-        'String', 'Remove from txt',...
-        'Position', [650 100 100 20], ...
-        'Callback', @rmfile);
-    
+    'String', 'Remove from txt',...
+    'Position', [650 100 100 20], ...
+    'Callback', @rmfile);
+
 % --------------------- save text file
 uicontrol('Style', 'pushbutton', ...
-        'String', 'Save',...
-        'Position', [670 50 80 20], ...
-        'Callback', @savetxt);
-    
- uicontrol('Style', 'edit', ...
-        'String', 'Name',...
-        'Position', [500 50 150 20], ...
-        'Callback', @editfilename);      
-    
-    
+    'String', 'Save',...
+    'Position', [670 50 80 20], ...
+    'Callback', @savetxt);
+
+uicontrol('Style', 'edit', ...
+    'String', 'Name',...
+    'Position', [500 50 150 20], ...
+    'Callback', @editfilename);
+
+
 
 %% update folderfiles
     function updateFolder(~,~)
@@ -93,10 +92,10 @@ uicontrol('Style', 'pushbutton', ...
             fname = dir(fdir);
             fname = fname(...
                 cellfun(@(x) (~isempty(strfind(x, 'c1')) || ...
-                             ~isempty(strfind(x, 'c2'))) && ...
-                             isempty(strfind(x, 'Pos')) && ...
-                             isempty(strfind(x, 'sortKK')), ...
-                        {fname.name}));
+                ~isempty(strfind(x, 'c2'))) && ...
+                isempty(strfind(x, 'Pos')) && ...
+                isempty(strfind(x, 'sortKK')), ...
+                {fname.name}));
             
             set(h_files, 'Value', 1);
             set(h_files, 'String', {fname.name});
@@ -114,12 +113,15 @@ uicontrol('Style', 'pushbutton', ...
         fnames = get(h_files, 'String');
         val = get(h_files, 'Value');
         
+        dose = nan(length(val), 1);
+        id = dose;
+        stim = cell(length(val), 1);
+        meanspk = dose;
         for i = 1:length(val)
-            fname = fnames{val(i)}
-            [temp, dose(i), id(i), stim{i}] = PlotTC(fdir, fname, ...
-                'plot', false); 
+            [temp, dose(i), id(i), stim{i}] = PlotTC(fdir,  fnames{val(i)}, ...
+                'plot', false);
             
-            [~, max_i] = max(mean(temp, 2));            
+            [~, max_i] = max(mean(temp, 2));
             meanspk(i) = nanmean(temp(max_i, :));
         end
         
@@ -151,66 +153,72 @@ uicontrol('Style', 'pushbutton', ...
                 scatter(j, meanspk(i), sz*dose(i), 'd', 'filled', ...
                     'MarkerFaceColor', [.8 .8 .8], ...
                     'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
-            else 
+            else
                 scatter(j, meanspk(i), sz, 'o', 'r', 'filled', ...
                     'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
             end
-               hold on;
-            text(j, meanspk(i)+1, stim{i}); 
+            hold on;
+            text(j, meanspk(i)+1, stim{i});
         end
         
         
         
-%         plot(get(gca, 'xlim'), [0 0], 'Color', [0.6 0.6 0.6]);
+        %         plot(get(gca, 'xlim'), [0 0], 'Color', [0.6 0.6 0.6]);
         title( sprintf(['baseline: filles o, 5HT: white o, ' ...
             'NaCl: grey diamond \n SB: magenta, Ket:orange']));
         ylabel('mean spk resp');
     end
 
-
     function callTC(~,~)
-
+        
         fdir = get(h_fdir, 'String');
         fnames = get(h_files, 'String');
         val = get(h_files, 'Value');
-
-        c = lines(length(val));
-        figure;
-        p = subplot(3,1,[1 2]);
-        for i = 1:length(val)
+        if length(val) > 1
+            c = lines(length(val));
+            figure;
+            p = subplot(3,1,[1 2]);
+            dose = nan(length(val), 1);
+            timeofrec = dose;
+            exname = cell(length(val), 1);
             
-            [~, dose(i), timeofrec(i), ~] = PlotTC(fdir, fnames{val(i)}); h =gcf;
-            ax = findobj(gcf, 'Type', 'Axes');            
-            set(findobj(ax.Children, 'Type', 'ErrorBar'), 'Color', c(i, :));
             
-            copyobj(ax.Children, p);
-            exname{i} = get(h, 'Name');
-            param = ax.XLabel.String;
-            delete(h);
+            for i = 1:length(val)
+                [~, dose(i), timeofrec(i), ~] = PlotTC(fdir, fnames{val(i)}); h =gcf;
+                ax = findobj(gcf, 'Type', 'Axes');
+                set(findobj(ax.Children, 'Type', 'ErrorBar'), 'Color', c(i, :));
+                
+                copyobj(ax.Children, p);
+                exname{i} = get(h, 'Name');
+                param = ax.XLabel.String;
+                delete(h);
+            end
+                        
+            xlabel(param);
+            
+            subplot(3,1,3);
+            ylim([0 length(val)]);
+            for i = 1:length(val)
+                str = sprintf([exname{i} ' dose: ' ...
+                    num2str(dose(i))]);
+                text(0, length(val)-i, str, 'Color', c(i,:), 'FontSize', 12);
+            end
+            axis off            
+            clear i exname ax val fnames fdir p c
+        else
+            PlotTC(fdir, fnames{val});
         end
-        
-        xlabel(param);
-        
-        subplot(3,1,3);
-        ylim([0 length(val)]);
-        for i = 1:length(val)
-            str = sprintf([exname{i} ' dose: ' ...
-                num2str(dose(i))]);
-            text(0, length(val)-i, str, 'Color', c(i,:), 'FontSize', 12);
-        end
-        axis off
-        
     end
 
     function add2txt(~, ~)
         
-        fdir = [get(h_fdir, 'String') '\']; 
+        fdir = [get(h_fdir, 'String') '\'];
         exnames = get(h_files, 'String');
         val = get(h_files, 'Value');
         
         filetxt = [filetxt; strcat(fdir, exnames(val))];
         filetxt = unique(filetxt);
-
+        
         
         txt_files.String = filetxt;
         txt_files.Value = 1;
@@ -228,9 +236,8 @@ uicontrol('Style', 'pushbutton', ...
         fclose(fileID);
     end
 
-
     function rmfile(~, ~)
-
+        
         fnames = get(txt_files, 'String');
         
         if length(fnames) <= 1
@@ -239,7 +246,7 @@ uicontrol('Style', 'pushbutton', ...
             ind = ones(length(fnames),1);
             ind(get(txt_files, 'Value')) = 0;
             ind = logical(ind);
-           
+            
             set(txt_files, 'Value', sum(ind));
             fnames = fnames(ind);
             set(txt_files, 'String', fnames)
@@ -260,5 +267,5 @@ end
 
 
 function PlotTC_helper(~,~,fdir, fname)
-    PlotTC(fdir, fname);
+PlotTC(fdir, fname);
 end

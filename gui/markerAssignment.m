@@ -1,8 +1,8 @@
-function [ marker ] = markerAssignment( input )
+function [ marker ] = markerAssignment( exinfo )
 
 marker = '^';
 
-switch input
+switch exinfo.param1
     case 'or'
         marker = 'o';
     case 'sf'
@@ -12,6 +12,7 @@ switch input
     case 'sz'
         marker = 'p';
 end
+
 
 end
 

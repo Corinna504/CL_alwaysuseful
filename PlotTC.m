@@ -1,4 +1,4 @@
-function [mnspk, dose, timeofrec, stim] = PlotTC( fdir, fname, varargin )
+function [mnspk, dose, timeofrec, stim, varargout] = PlotTC( fdir, fname, varargin )
 % gives a first climps on the tuning curve of the file
 
 
@@ -19,6 +19,8 @@ if isfield(ex.Header, 'fileID')
     timeofrec = datenum(ex.Header.fileID);
 elseif isfield(ex.Header, 'Headers') 
     timeofrec = datenum(ex.Header.Headers(1).fileID);
+elseif isfield(ex, 'fileID')
+    timeofrec = datenum(ex.fileID);
 else
     warning('could not find the experiment date');
 end
@@ -26,31 +28,31 @@ end
 if ~isempty(strfind(fname, '5HTSB'))
     drugname = '5HT';
     lstyle = '--';
-    dose = ex.Header.iontophoresisEjectionCurrent(1);
+    dose = getDose(ex);
     
 elseif ~isempty(strfind(fname, '5HTKet'))
     drugname = '5HT';
     lstyle = '--';
-    dose = ex.Header.iontophoresisEjectionCurrent(1);
+    dose = getDose(ex);
     
 elseif ~isempty(strfind(fname, 'SB'))
     drugname = 'SB';
     lstyle = '--';
-    dose = ex.Header.iontophoresisEjectionCurrent;
+    dose = getDose(ex);
     
 elseif ~isempty(strfind(fname, 'Ket'))
     drugname = 'Ket';
     lstyle = '--';
-    dose = ex.Header.iontophoresisEjectionCurrent;
+   dose = getDose(ex);
     
 elseif ~isempty(strfind(fname, '5HT'))
     drugname = '5HT';
     lstyle = '--';
-    dose = ex.Header.iontophoresisEjectionCurrent;
+   dose = getDose(ex);
 elseif ~isempty(strfind(fname, 'NaCl'))
     drugname = 'NaCl';
     lstyle = '--';
-    dose = ex.Header.iontophoresisEjectionCurrent;
+   dose = getDose(ex);
 else
     drugname = 'Baseline';
     lstyle = '-';
@@ -81,7 +83,7 @@ else
     mnspk = [mn_rate.mn];
 end
 
-
+varargout{1} = sort(unique([ex.Trials.(stim)]));
 end
 
 
@@ -145,38 +147,45 @@ if p_flag
         end
     end
     
+    if isfield(ex.Header, 'Headers')
+        Header = ex.Header.Headers(1);
+    else
+        Header = ex.Header;
+    end
+    
+    
     legend(cellstr(num2str(me')));
     set(gca, 'XTick', 1:length(vals), ...
         'XTickLabel', cellstr(num2str(vals')));
-    
+    volt = getVolt(ex);
     plot(get(gca, 'xlim'), [0 0], 'Color', [0.5 0.5 0.5]);
     
     if ~isempty(strfind(fname, '5HTSB'))
         title(sprintf('5HT   %1.0f nA, %1.2f volt \n SB %1.0f nA, %1.2f volt', ...
             dose, ...
-            ex.Header.iontophoresisVoltage(1), ...
-            ex.Header.iontophoresisEjectionCurrent(2), ...
-            ex.Header.iontophoresisVoltage(2)) );
-        dose = dose(1);
+            volt(1), ...
+            Header.iontophoresisEjectionCurrent(2), ...
+            volt(2)) );
+            dose = dose(1);
     elseif ~isempty(strfind(fname, '5HTKet'))
         title(sprintf('5HT   %1.0f nA, %1.2f volt \n Ket %1.0f nA, %1.2f volt', ...
             dose, ...
-            ex.Header.iontophoresisVoltage(1), ...
-            ex.Header.iontophoresisEjectionCurrent(2), ...
-            ex.Header.iontophoresisVoltage(2)) );
-        dose = dose(1);
+            volt(1), ...
+            Header.iontophoresisEjectionCurrent(2), ...
+            volt(2)) );
+            dose = dose(1);
     elseif ~isempty(strfind(fname, 'Ket'))
         title(sprintf('Ket   %1.0f nA, %1.2f volt', dose, ...
-            ex.Header.iontophoresisVoltage) );    
+            volt) );    
     elseif ~isempty(strfind(fname, 'SB'))
         title(sprintf('SB   %1.0f nA, %1.2f volt', dose, ...
-            ex.Header.iontophoresisVoltage) );
+            volt) );
     elseif ~isempty(strfind(fname, '5HT'))
         title(sprintf('5HT   %1.0f nA, %1.2f volt', dose, ...
-            ex.Header.iontophoresisVoltage) );
+            volt) );
     elseif ~isempty(strfind(fname, 'NaCl'))
         title(sprintf('NaCl   %1.0f nA, %1.2f volt', dose, ...
-            ex.Header.iontophoresisVoltage) );
+            volt) );
     else
         title(drugname);
     end
@@ -184,4 +193,43 @@ if p_flag
     xlabel(stim); ylabel('spike rate');
 end
 
+
+end
+
+
+
+
+function dose = getDose(ex)
+
+if isfield(ex.Header, 'Headers')
+    if isfield(ex.Header.Headers(1), 'iontophoresisEjectionCurrent')
+        dose = ex.Header.Headers(1).iontophoresisEjectionCurrent;
+    else
+        dose = -10;
+    end
+else
+    if isfield(ex.Header, 'iontophoresisEjectionCurrent')
+        dose = ex.Header.iontophoresisEjectionCurrent;
+    else
+        dose = -10;
+    end
+end
+end
+
+
+function volt = getVolt(ex)
+
+if isfield(ex.Header, 'Headers')
+    if isfield(ex.Header.Headers(1), 'iontophoresisVoltage')
+        volt = ex.Header.Headers(1).iontophoresisVoltage;
+    else
+        volt = -10;
+    end
+else
+    if isfield(ex.Header, 'iontophoresisVoltage')
+        volt = ex.Header.iontophoresisVoltage;
+    else
+        volt = -10;
+    end
+end
 end
