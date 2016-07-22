@@ -16,31 +16,31 @@ for neuron = unique([info.id])
     
     %%%
     if any(or_idx)
-        [~, i] = max([info(or_idx).rsqr_both]);
+        [~, i] = max([info(or_idx).r2reg]);
         valid(or_idx(i)) = 1;
     end
     
     %%%
     if any(rc_idx)
-        [~, i] = max([info(rc_idx).rsqr_both]);
+        [~, i] = max([info(rc_idx).r2reg]);
         valid(rc_idx(i)) = 1;
     end
     
     %%%
     if any(sf_idx)
-        [~, i] = max([info(sf_idx).rsqr_both]);
+        [~, i] = max([info(sf_idx).r2reg]);
         valid(sf_idx(i)) = 1;
     end
     
     %%%
     if any(co_idx)
-        [~, i] = max([info(co_idx).rsqr_both]);
+        [~, i] = max([info(co_idx).r2reg]);
         valid(co_idx(i)) = 1;
     end
     
     %%%
     if any(sz_idx)
-        [~, i] = max([info(sz_idx).rsqr_both]);
+        [~, i] = max([info(sz_idx).r2reg]);
         valid(sz_idx(i)) = 1;
     end
     

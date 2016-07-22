@@ -432,7 +432,7 @@ end
     else frameperiod = 1/Expt.setup.refreshRate*10000;
     end
     if ~isfield(Expt,'Stimvals')
-        disp('2')
+        fprintf('2')
         for n = 1:length(Expt.Trials)  
             % why do we need this?--- old code
  %           if length(eval(['Expt.Trials(n).' type ]))>length(Expt.Trials(n).Start);
@@ -529,7 +529,7 @@ if strcmpi(type,'dx') | strcmpi(type,'Pd')|strcmpi(type,'dO') % hn change: bin d
     xvals = unique(xvals);
 end
 if ~isempty(btype)
-    Expt.Trials(1).(btype)
+    Expt.Trials(1).(btype);
     yid = find(~isnan([Expt.Trials.(btype)]));
     ymat = [Expt.Trials.(btype)];
     %    yvals = unique([Expt.Trials.(btype)](yid));
@@ -587,7 +587,7 @@ else
 end
 
 
-disp(Expt.Trials(2).Start(1))
+fprintf(' start: %1.2f \n',Expt.Trials(2).Start(1))
 %
 %
 % check Stimulus durations and make sure that they are all the same.

@@ -47,8 +47,15 @@ while j<=length(fig2plot)
             axis square
             
         case 'Tuning Curve'
-            datinfo(1).fig_tc = strrep(datinfo(1).fig_tc, 'Analysis', 'GeneralFiles');
-            temp = openfig(datinfo(1).fig_tc, 'invisible');
+            if datinfo(1).isRC && ~isempty(strfind(datinfo(1).fname, 'CO'))
+                openfig(datinfo(1).fig_tc);
+                j = j+1;
+                nfig = nfig-1;
+                continue
+            else
+                
+                temp = openfig(datinfo(1).fig_tc, 'invisible');
+            end
             
         case 'LFP'
             datinfo(1).fig_lfpPow = strrep(datinfo(1).fig_lfpPow, 'Analysis', 'GeneralFiles');

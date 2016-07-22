@@ -5,13 +5,23 @@ function expInfo = addStruct( expInfo )
 for i = 1:length(expInfo)
     
     if ~isempty(expInfo(i).fitparam)
-        expInfo(i).gaussr2 = expInfo(i).fitparam.r2;
+        if isfield(expInfo(i).fitparam, 'OR') 
+            maxi = find( max(expInfo(i).sdfs.y(1,:)) == max(expInfo(i).sdfs.y(1,:)), 1, 'first');
+            expInfo(i).gaussr2 = expInfo(i).fitparam.OR(maxi).r2; 
+        else
+            expInfo(i).gaussr2 = expInfo(i).fitparam.r2;
+        end
     else
         expInfo(i).gaussr2 = 0;
     end
     
     if ~isempty(expInfo(i).fitparam_drug)
-        expInfo(i).gaussr2_drug = expInfo(i).fitparam_drug.r2;
+        if isfield(expInfo(i).fitparam_drug, 'OR')
+            maxi = find( max(expInfo(i).sdfs_drug.y(1,:)) == max(expInfo(i).sdfs_drug.y(1,:)), 1, 'first');
+            expInfo(i).gaussr2 = expInfo(i).fitparam_drug.OR(maxi).r2;
+        else
+            expInfo(i).gaussr2_drug = expInfo(i).fitparam_drug.r2;
+        end
     else
         expInfo(i).gaussr2_drug = 0;
     end

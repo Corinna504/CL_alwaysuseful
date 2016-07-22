@@ -4,7 +4,7 @@ if nargin == 0
     load('C:\Users\Corinna\Documents\CODE\CL_alwaysuseful\expInfo.mat', 'expInfo');
 end
 
-expInfo = expInfo([expInfo.rsqr_both]>0);
+% expInfo = expInfo([expInfo.r2reg]>0);
 expInfo = addLM2Struct(expInfo);
 expInfo = addStruct(expInfo);
 
@@ -527,7 +527,7 @@ fig2plot_check(10) = uicontrol(fig_h, ...
                
         %%% simple numerical inclusion criteria
         UpdateInclusionHelper(1, ...
-            ['[expInfo.rsqr_both] ' get(editr2_h, 'String')]);
+            ['[expInfo.r2reg] ' get(editr2_h, 'String')]);
         UpdateInclusionHelper(strcmp(stimulicond(get(pop_Xspec, 'Value')), 'RC'),...
             ['[expInfo.lat] ' get(editlatency_h, 'String') ' & '...
             '[expInfo.lat_drug] ' get(editlatency_h, 'String') ]);

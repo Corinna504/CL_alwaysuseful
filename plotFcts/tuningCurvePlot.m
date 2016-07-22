@@ -5,7 +5,11 @@ function h = tuningCurvePlot(exinfo, fit_flag)
 h = figure('Name', exinfo.figname);
 
 if strcmp(exinfo.param1, 'or')
-    fittedTC_or(exinfo)
+    if isfield(exinfo.fitparam, 'others')
+        fittedTC_orco(exinfo)
+    else
+        fittedTC_or(exinfo)
+    end
 elseif strcmp(exinfo.param1, 'co')
     fittedTC_co(exinfo)
 else
@@ -50,7 +54,63 @@ axis square; box off;
 
 end
 
+%% orientation contrast RC
 
+function fittedTC_orco(exinfo)
+
+n = ceil(length(exinfo.fitparam.others.OR)/2)+1;
+for i = 1:length(exinfo.fitparam.others.OR)
+    
+    subplot( n , 2, i)
+    exinfo_temp = exinfo;
+    exinfo_temp.fitparam  = exinfo.fitparam.others.OR(i);    
+    exinfo_temp.fitparam_drug  = exinfo.fitparam_drug.others.OR(i);
+    fittedTC_or(exinfo_temp); xlabel(''); ylabel('');
+    ylabel(['co = ' num2str(exinfo.sdfs.y(1,i))]);
+end
+
+% difference
+s_diff = subplot( n, 2, 6);
+[~, idx] = sort(exinfo.sdfs.y(1,:));
+surf(exinfo.sdfs.x(:,1), exinfo.sdfs.y(1,idx), ...
+    exinfo.sdfs.mn_rate(1).mn(:, idx)'- exinfo.sdfs_drug.mn_rate(1).mn(:, idx)'); ho
+title('Difference (Base-Drug)');ylabel('co'); xlabel('or'); zlabel('spk/frame');
+
+caxis([min(min([exinfo.ratemn,exinfo.ratemn_drug])) , ...
+    max(max([exinfo.ratemn,exinfo.ratemn_drug]))])
+colormap jet;
+set(s_diff, 'YScale', 'log')
+
+
+
+minc = min(min([exinfo.sdfs.mn_rate(1).mn; exinfo.sdfs_drug.mn_rate(1).mn]));
+maxc = max(max([exinfo.sdfs.mn_rate(1).mn; exinfo.sdfs_drug.mn_rate(1).mn]));
+
+
+% Baseline
+s(1) = subplot( n, 2, 7);
+[~, idx] = sort(exinfo.sdfs.y(1,:));
+surf(exinfo.sdfs.x(:,1), exinfo.sdfs.y(1,idx), exinfo.sdfs.mn_rate(1).mn(:, idx)'); ho
+title('Baseline');ylabel('co'); xlabel('or'); zlabel('spk/frame');
+caxis([minc maxc]);
+
+
+% 5HT/NaCl
+s(2) = subplot( n, 2, 8);
+[~, idx] = sort(exinfo.sdfs_drug.y(1,:));
+surf(exinfo.sdfs_drug.x(:,1), exinfo.sdfs_drug.y(1,idx),exinfo.sdfs_drug.mn_rate(1).mn(:, idx)');
+title(exinfo.drugname); ylabel('co'); xlabel('or'); zlabel('spk/frame');
+caxis([minc maxc]);
+
+
+set(s, 'YScale', 'log', 'ZLim', ...
+    [min([s(1).ZLim(1), s(2).ZLim(1)]),  max([s(1).ZLim(2), s(2).ZLim(2)])], ...
+    'XLim', [0 180], 'YLim', [min(exinfo.sdfs_drug.y(1,:)) max(exinfo.sdfs_drug.y(1,:))]);
+
+
+set(findobj('Type', 'Axes'), 'FontSize', 6)
+set(gcf, 'Position', [1229         206         436         763]);
+end
 
 %% orientation data
 function fittedTC_or(exinfo)
@@ -86,10 +146,10 @@ end
 xlim([min(temp)-5 max(temp)+5]);
 
 
-title( sprintf( ['Baseline: pf=%1.2f, bw=%1.2f, amp=%1.2f, off=%1.2f \n' ...
-    exinfo.drugname ': pf=%1.2f, bw=%1.2f, amp=%1.2f, off=%1.2f \n'], ...
+title( sprintf( ['B: pf=%1.0f, bw=%1.0f, amp=%1.1f, off=%1.1f \n' ...
+    exinfo.drugname ': pf=%1.0f, bw=%1.0f, amp=%1.1f, off=%1.1f \n'], ...
     ft.mu, ft.sig, ft.a, ft.b, ...
-    ft_drug.mu, ft_drug.sig, ft_drug.a, ft_drug.b) );
+    ft_drug.mu, ft_drug.sig, ft_drug.a, ft_drug.b), 'FontSize', 8);
 
 
 

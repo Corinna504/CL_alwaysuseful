@@ -7,24 +7,51 @@ ex = loadCluster( fname ); % load raw data
 ex.Trials = ex.Trials([ex.Trials.me] == exinfo.ocul);
 
 
-%% LFP
-fname_lfp = strrep(fname, exinfo.cluster, 'lfp');
-if exist(fname_lfp)
-    [powstim_mn, powstim_sd, powbase_mn, powbase_sd] = ...
-        frequAnalysis(exinfo,  fname_lfp );
-else
-    powstim_mn = 0;    powstim_sd = 0;    powbase_mn = 0;     powbase_sd = 0;
-end
+% %% LFP
+% fname_lfp = strrep(fname, exinfo.cluster, 'lfp');
+% if exist(fname_lfp)
+%     ex_lfp = loadCluster( fname_lfp );
+%     ex_lfp.Trials = ex_lfp.Trials([ex_lfp.Trials.me] == exinfo.ocul);
+%     idx = ~cellfun(@isempty, {ex_lfp.Trials.LFP});
+%     ex_lfp.Trials = ex_lfp.Trials( idx ); 
+%     
+%     if ~isempty(ex_lfp.Trials)
+%         [~, lfp_avg, pow_avg]= frequAnalysis( ex_lfp, 'timeplot', 1, 'powplot', 1 );
+%         
+%         exspk = ex; exspk.Trials = exspk.Trials(idx);
+%         spiketriglfp( exspk, ex_lfp, 'plot', true);
+%     else
+%         lfp_avg = []; pow_avg = [];
+%     end
+%     
+%     h = findobj('Tag', 'pow');
+%     if ~isempty(h) && (~isempty(strfind(fname, '5HT')) || ~isempty(strfind(fname, 'NaCl')))
+%         set(h, 'Name', exinfo.figname); savefig(h, exinfo.fig_lfpPow); close(h)
+%         
+%         h = findobj('Tag', 'lfp'); set(h, 'Name', exinfo.figname); 
+%         savefig(h, exinfo.fig_lfpSpec); close(h)
+%     end
+%     
+%     h2 = findobj('Tag', 'SpkTrigLFP');
+%     if ~isempty(h2) && (~isempty(strfind(fname, '5HT')) || ~isempty(strfind(fname, 'NaCl')))
+%         set(h2, 'Name', exinfo.figname);
+%         savefig(h2, exinfo.fig_lfpAvgSpk); close(h2)
+%     end
+%     
+% else
+    lfp_avg = []; pow_avg = [];
+% end
 
-%% Spiking
+
+%% Spiking 
 %%% z normed spike rates entered in ex.Trials
 [ex, spkstats, phaseResp, f1] = znormex(ex, exinfo, rate_flag);
 
 %%% Fano Factors
-    [ ff.classic, ff.fit, ff.mitchel, ff.church ] = ...
-        FanoFactors( ex, [spkstats.mn], [spkstats.var], exinfo.param1);
-% ff = [];
+[ ff.classic, ff.fit, ff.mitchel, ff.church ] = ...
+    FanoFactors( ex, [spkstats.mn], [spkstats.var], exinfo.param1);
 
+%%% Cluster Analysis
 fnamec0 = strrep(fname, exinfo.cluster, 'c0'); % load cluster 0
 exc0 = loadCluster( fnamec0 );
 exc0.Trials = exc0.Trials([exc0.Trials.me] == exinfo.ocul);
@@ -35,7 +62,7 @@ exc0.Trials = exc0.Trials([exc0.Trials.me] == exinfo.ocul);
 
 %%% Signale Correlation
 [rsig, prsig] = corr([spkstats.mn]', [spkstatsc0.mn]', 'rows', 'complete');
-  
+
 
 
 %% Fitting
@@ -66,10 +93,6 @@ eX = -10^3;
 eY = -10^3;
 
 
-%% Latency
-% [lat, psth] = getLatencyPerWindow(exinfo, ex);
-
-
 %% Phase dependence
 spkwoblank = [spkstats( [spkstats.(exinfo.param1)] < 1000).mn];
 phasesel(1) = nanmean(f1(:,1)./spkwoblank');
@@ -80,13 +103,12 @@ phasesel(2) = nanmean(f1(:,2));
 
 %% assign output arguments
 argout =  {'fitparam', fitparam, ...
-    'rateMN', [spkstats.mn], 'rateVARS', [spkstats.var], ...
-    'ratePAR', [spkstats.(exinfo.param1)], 'rateSME', [spkstats.sd], ...
+    'rateMN', [spkstats.mn]', 'rateVARS', [spkstats.var]', ...
+    'ratePAR', [spkstats.(exinfo.param1)]', 'rateSME', [spkstats.sd]', ...
     'rsc', rsc, 'prsc', prsc, ...
     'rsig', rsig, 'prsig', prsig, ...
     'ff', ff, 'tcdiff', tcdiff, ...
-    'powst_mn', powstim_mn, 'powst_sd', powstim_sd, ...
-    'powbs_mn', powbase_mn, 'powbs_sd', powbase_sd, ...
+    'powst_mn', pow_avg, 'lfpst_mn', lfp_avg, ...
     'ed', ed, 'eX', eX, 'eY', eY, 'phasesel', phasesel, 'phaseRespM', phaseResp};
 end
 

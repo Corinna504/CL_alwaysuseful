@@ -93,7 +93,7 @@ function expInfo_out = singleUnitsOnly(expInfo)
         if sum([expInfo.id] == id(i)) > 1
         
             idx_idi = find([expInfo.id] == id(i));
-            [~,k] = max([expInfo(idx_idi).rsqr_both]);
+            [~,k] = max([expInfo(idx_idi).r2reg]);
             idxsu = [idxsu; idx_idi(k)];
         else
             idxsu = [idxsu; find([expInfo.id] == id(i))];

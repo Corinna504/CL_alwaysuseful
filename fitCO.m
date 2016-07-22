@@ -30,7 +30,6 @@ opt = optimset('MaxIter', 10^4, 'MaxFunEvals', 10^4, 'TolFun', 0.001);
 
 
 % have muliple random starting points
-            
 n_start = 50; 
 p0 = [randn(n_start,1)*5+repmat(max(spkrmn), n_start, 1), ...  % rmax 
     randn(n_start,1)/100+0.5, ...                    % c50
@@ -91,7 +90,8 @@ fitpar.c50 = param(2);
 fitpar.n = param(3);
 fitpar.m = param(4);
 fitpar.r2 = 1 - ss / sum( (spkrmn(idx) - mean(spkrmn(idx))).^2 );
-
+fitpar.val = spkrmn;
+fitpar.co = co;
 
 fitpar.auc = sum(hyperratiofct( 0.1:0.1:1, fitpar.rmax, fitpar.c50, fitpar.n, fitpar.m));
 % plot(co(idx), spkrmn(idx), 'o');

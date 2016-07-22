@@ -1,7 +1,6 @@
-function [beta1, beta0, xvarX, xvarY, xvarXY]  = type2reg(exinfo, p_flag)
+function [beta1, beta0, xvar]  = type2reg(exinfo, p_flag)
 % type2reg returns the offset and slope for the best fit linear regression
 % that is subject to both errors (x and y).
-
 
 
 % % only take those conditions that are present in both experiments
@@ -9,12 +8,12 @@ s1 = exinfo.ratepar;  %or/sf/co/... values used in the experiment
 s2 = exinfo.ratepar_drug;
 
 cont = exinfo.ratemn( ismember( s1, s2 ) );
-drug = exinfo.ratemn_drug( ismember( s2, s1 ) );
+drug = exinfo.ratemn_drug( ismember( s2, s1 ));
 
 
 % calculate perpendicular distance minimizing fit
-[beta0, beta1, xvarX, xvarY, xvarXY] = perpendicularfit(cont, drug, var(drug)/var(cont));
-
+[beta0, beta1, xvar] = ...
+    perpendicularfit(cont, drug, var(drug)/var(cont));
 
 % triangular fit
 % [Lt, beta1, xvarXY] = trianglefit(x, y) ;
@@ -26,7 +25,6 @@ if p_flag
     scatter(cont, drug, 100, getCol(exinfo), 'filled',...
         'MarkerFaceAlpha', 0.5); hold on;
     
-
     if any(s1)>1000 && any(s2)>1000
         scatter(cont(end), drug(end), 100, 'g', 'filled',...
             'MarkerFaceAlpha', 0.5); hold on;
@@ -35,27 +33,26 @@ if p_flag
     eqax;
     xlim_ = get(gca, 'xlim');
     plot(xlim_, xlim_.*beta1 + beta0, getCol(exinfo), 'LineWidth', 2); hold on;
-
+    
     xlabel('baseline');
     ylabel(exinfo.drugname);
     
-    title(sprintf( 'gain = %1.2f, add = %1.2f, \n r2_{x}=%1.2f  r2_{y}=%1.2f r2_{xy}=%1.2f', ...
-        beta1, beta0, xvarX, xvarY, xvarXY));
+    title(sprintf( 'gain = %1.2f, add = %1.2f, \n r2=%1.2f', ...
+        beta1, beta0, xvar),'FontSize', 8);
     unity; axis square; box off;
     
     ylim_ = get(gca, 'YLim');
     hold on
     plot([mean(cont) mean(cont)], ylim_, 'Color', [0.5 0.5 0.5 0.5])
     plot(xlim_, [mean(drug) mean(drug)], 'Color', [0.5 0.5 0.5 0.5])
-    
     savefig(h, exinfo.fig_regl);
     close(h);
+    
 end
 
-
-if isnan(xvarX) 
-    xvarX = 0;    xvarY = 0;    xvarXY = 0;
-    beta0 = -inf; beta1 = 0;
+if any(isnan(xvar))
+    xvar(isnan(xvar)) = 0;
+    beta0(isnan(xvar)) = -inf; beta1(isnan(xvar)) = 0;
 end
 
 end
