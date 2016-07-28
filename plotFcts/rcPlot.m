@@ -58,7 +58,7 @@ legend(leg, 'Location', 'EastOutside');
 s = horzcat(exinfo.sdfs.s{:, co_idx});
 meanfr = mean(mean(s(201:400),2));
 title(sprintf('base lat: %1.1f, dur: %1.1f, \n average sd: %1.2f, mean fr: %1.2f',...
-    exinfo.lat(co_idx), exinfo.dur(co_idx), mean(sqrt(exinfo.resvars(201:400, co_idx))), meanfr));
+    exinfo.lat, exinfo.dur, mean(sqrt(exinfo.resvars(201:400, co_idx))), meanfr));
 ylim([0 160]); set(gca, 'XScale', 'log');
 grid on;
 xlim([min(exinfo.sdfs.y(1,:)), max(exinfo.sdfs.y(1,:))])
@@ -102,7 +102,7 @@ s_drug = horzcat(exinfo.sdfs_drug.s{:, co_idx_drug});
 meanfr_drug = mean(mean(s_drug(201:400),2));
 
 title(sprintf('drug lat: %1.1f, dur: %1.1f, \n average sd: %1.2f, meanfr: %1.2f',...
-    exinfo.lat_drug(co_idx_drug), exinfo.dur_drug(co_idx_drug), ...
+    exinfo.lat_drug, exinfo.dur_drug, ...
     mean(sqrt(exinfo.resvars_drug(201:400, co_idx_drug))), ...
     meanfr_drug));
 
@@ -115,8 +115,8 @@ ylim_ = [0, max([max(get(s1, 'ylim')), max(get(s2, 'ylim'))])];
 set(s1, 'ylim', ylim_); % equalize y axis
 set(s2, 'ylim', ylim_); % equalize y axis
 
-lat = exinfo.lat(co_idx); lat_drug = exinfo.lat_drug(co_idx_drug);
-dur = exinfo.dur(co_idx); dur_drug = exinfo.dur_drug(co_idx_drug);
+lat = exinfo.lat; lat_drug = exinfo.lat_drug;
+dur = exinfo.dur; dur_drug = exinfo.dur_drug;
 
 plot(s1, [lat lat], ylim_, 'k');
 plot(s2, [lat_drug lat_drug], ylim_, 'k');
@@ -163,22 +163,23 @@ ylim([0 160]);
      
     subplot(nplot*2, 2, nplot*4-1)
     
-    plot(co, exinfo.lat(coidx), '.-', 'Color', lines(1)); ho;
-    plot(co, exinfo.lat_drug(coidx), '.-', 'Color', c);
-    plot(co, exinfo.lat2Hmax(coidx), '.--', 'Color', lines(1)); ho;
-    plot(co, exinfo.lat2Hmax_drug(coidx), '.--', 'Color', c);
+    plot(co, exinfo.sdfs.lat2hmax(coidx), '.--', 'Color', lines(1)); ho;
+    plot(co, exinfo.sdfs_drug.lat2hmax(coidx), '.--', 'Color', c);
+    plot(co, exinfo.sdfs.latFP(coidx), '.-', 'Color', lines(1)); ho;
+    plot(co, exinfo.sdfs_drug.latFP(coidx), '.-', 'Color', c);
     xlabel('co'); set(gca, 'XScale', 'log');
-    title('latency (-fp, --hmax/2)')
+    title('latency (-fp, - -hmax/2)')
+    xlim([min(exinfo.sdfs.y(1,:)), max(exinfo.sdfs.y(1,:))])
+    
+    
+    subplot(nplot*2, 2, nplot*4)
+    plot(co, exinfo.sdfs.dur(coidx), '.-', 'Color', lines(1)); ho;
+    plot(co, exinfo.sdfs_drug.dur(coidx), '.-', 'Color', c);
+    xlabel('co'); set(gca, 'XScale', 'log');
+    title('duration (blue:baseline)');
     xlim([min(exinfo.sdfs.y(1,:)), max(exinfo.sdfs.y(1,:))])
 
     
-    subplot(nplot*2, 2, nplot*4)
-    plot(co, exinfo.dur(coidx), '.-', 'Color', lines(1)); ho;
-    plot(co, exinfo.dur_drug(coidx), '.-', 'Color', c);
-    xlabel('co'); set(gca, 'XScale', 'log');
-    title('duration');
-    xlim([min(exinfo.sdfs.y(1,:)), max(exinfo.sdfs.y(1,:))])
-
  end
 
  

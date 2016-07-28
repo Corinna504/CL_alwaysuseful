@@ -14,8 +14,8 @@ else
 end
 
 
+disp(datinfo(1).fname);
 
-h = figure('Visible', 'off');
 
 j = 1;
 pos = 1;
@@ -23,18 +23,47 @@ nfig = length(fig2plot);
 
 if any(strcmp(fig2plot, 'Raster'))
     nfig = nfig+1;
-    % % elseif any(strcmp(fig2plot, 'smooth PSTH'))
-    % %     nfig = nfig-1;
-    %
+elseif any(strcmp(fig2plot, 'LFP'))
+    nfig = nfig-1;
+    
 end
 
+
+if nfig > 0
+    h = figure('Visible', 'off');
+end
 
 
 temp =[];
 while j<=length(fig2plot)
     
     switch fig2plot{j}
-        
+       
+        case 'LFP'
+            
+            exSpkin = loadCluster(datinfo(1).fname);
+            exSpkin2 = loadCluster(datinfo(1).fname_drug);
+            if datinfo(1).isc2
+                exLFPin = loadCluster(strrep(datinfo(1).fname, 'c2', 'lfp'));
+                exLFPin2 = loadCluster(strrep(datinfo(1).fname_drug, 'c2', 'lfp'));
+            else
+                exLFPin = loadCluster(strrep(datinfo(1).fname, 'c1', 'lfp'));
+                exLFPin2 = loadCluster(strrep(datinfo(1).fname_drug, 'c1', 'lfp'));
+            end
+            
+            
+            exSpkin.Trials = exSpkin.Trials( [exSpkin.Trials.me] == datinfo(1).ocul);
+            exSpkin2.Trials = exSpkin2.Trials( [exSpkin2.Trials.me] == datinfo(1).ocul);
+            
+            exLFPin.Trials = exLFPin.Trials( [exLFPin.Trials.me] == datinfo(1).ocul);
+            exLFPin2.Trials = exLFPin2.Trials( [exLFPin2.Trials.me] == datinfo(1).ocul);
+
+            
+            LFPGui( exSpkin, exLFPin, exSpkin2, exLFPin2)
+            set(findobj('Type', 'figure'), 'Name', datinfo(1).figname)
+            j = j+1;
+            continue
+            
         case 'Variability'
             temp = figure;
             scatter(datinfo.ratemn, datinfo.ratevars, 'r', 'filled'); hold on;
@@ -50,17 +79,10 @@ while j<=length(fig2plot)
             if datinfo(1).isRC && ~isempty(strfind(datinfo(1).fname, 'CO'))
                 openfig(datinfo(1).fig_tc);
                 j = j+1;
-                nfig = nfig-1;
                 continue
             else
-                
                 temp = openfig(datinfo(1).fig_tc, 'invisible');
-            end
-            
-        case 'LFP'
-            datinfo(1).fig_lfpPow = strrep(datinfo(1).fig_lfpPow, 'Analysis', 'GeneralFiles');
-            temp = openfig(datinfo(1).fig_lfpPow, 'invisible');
-            
+            end            
         case 'Wave Form'
             datinfo(1).fig_waveform = strrep(datinfo(1).fig_waveform, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_waveform, 'invisible');
@@ -114,15 +136,17 @@ while j<=length(fig2plot)
             strrep(datinfo(1).fig_lfpPow, 'Analysis', 'GeneralFiles')
             temp = openfig(datinfo(1).fig_sdfs, 'invisible');
             ax = findobj(temp, 'Type', 'Axes');
-            set(findobj(ax(1), 'LineStyle', '-'), ...
-                'Color', 'b', 'LineWidth', 1.5);
-            set(findobj(ax(1), 'LineStyle', '--'), ...
-                'LineStyle', '-', 'LineWidth', 1.5);
-            ax(1).XLim = [0 160];
-            ax(2).XTick = [];   ax(3).XTick = [];
-            ax(1).XLabel.String = ax(2).XLabel.String ;
-            ax(2).XLabel.String = '';
-            
+            if length(ax)<4
+                set(findobj(ax(1), 'LineStyle', '-'), ...
+                    'Color', lines(1), 'LineWidth', 1);
+                set(findobj(ax(1), 'LineStyle', '--'), ...
+                    'LineStyle', '-', 'LineWidth', 1);
+                ax(1).XLim = [0 160];
+                ax(2).XTick = [];   ax(3).XTick = [];
+                ax(1).XLabel.String = ax(2).XLabel.String ;
+                ax(2).XLabel.String = '';
+            end
+
     end
     
     
@@ -144,11 +168,11 @@ while j<=length(fig2plot)
     j = j+1;
 end
 
-h.Position = [287   500   350*nfig  450];
-h.Name = datinfo(1).figname;
-h.UserData = datinfo;
-h.Visible = 'on';
-if nfig==0
-    close(h);
+
+if nfig>0
+    h.Position = [287   500   350*nfig  450];
+    h.Name = datinfo(1).figname;
+    h.UserData = datinfo;
+    h.Visible = 'on';
 end
 end

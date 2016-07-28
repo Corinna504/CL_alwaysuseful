@@ -11,6 +11,7 @@ dat.x = val.x;
 dat.y = val.y;
 dat.xlab = [val.xlab ' '  spec.stimx ' ' spec.eyex];
 dat.ylab = [val.ylab ' ' spec.stimy ' ' spec.eyey];
+dat.expInfo = val.exinfo;
 clearvars val
 
 
@@ -35,7 +36,8 @@ for lll = 1:length(dat.x)
     temp(lll,1) = dat.expInfo(lll).id;
     temp(lll,2) = dat.x(lll);
     temp(lll,3) = dat.y(lll);
-    
+    temp(lll,4) = dat.expInfo(lll).isc2;
+
 end
 
 disp('id x y');

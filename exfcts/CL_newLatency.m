@@ -11,19 +11,24 @@ for i = 1:size(res.sdfs.s, 2)
         res.vars2(:,i) = var(horzcat(res.sdfs.s{:, i}), 0, 2);
     end
     
-    [res.lat(i), res.dur(i), res.latFP(i)] = ...
+    [res.sdfs.lat2hmax(i), res.sdfs.dur(i), res.sdfs.latFP(i)] = ...
         CL_newLatency_helper(res.vars2(:,i), res.times);
 end
 
+[~,co_idx]= max(res.sdfs.y(1,:));
+res.lat = res.sdfs.lat2hmax(co_idx);
+res.dur = res.sdfs.dur(co_idx);
+res.latFP = res.sdfs.latFP(co_idx);
+
 end
 
 
 
 
-function [lat, dur, latfp] = CL_newLatency_helper(vars, times)
+function [lat2hmax, dur, latfp] = CL_newLatency_helper(vars, times)
 
 
-lat     = -1;
+lat2hmax     = -1;
 dur     = -1;
 latfp   = -1;
 sd      = sqrt(vars);
@@ -36,10 +41,10 @@ if max(sd)>mean(noise)*5
     
     % first time of half max of response
     idx = find( sd2 >= (max(sd2)/2), 1, 'first');  
-    lat = times(idx)/10;
+    lat2hmax = times(idx)/10;
     
     idx = find( sd2 >= (max(sd2)/2), 1, 'last');  
-    dur = times(idx)/10 - lat;
+    dur = times(idx)/10 - lat2hmax;
     
     latfp = friedmanpriebe(round(sd(200:end).*100))/10;
     

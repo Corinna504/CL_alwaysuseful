@@ -2,18 +2,18 @@ function wdt = waveWidth( exinfo, w0, w1, p_flag )
 
 
 
-[ wdt(1), mnw0, sdw0 ] = waveWidth_helper( w0 );
-[ wdt(2), mnw1, sdw1 ] = waveWidth_helper( w1 );
+[ wdt(1), mnw0, sdw0, tstrt0] = waveWidth_helper( w0 );
+[ wdt(2), mnw1, sdw1, tstrt1 ] = waveWidth_helper( w1 );
 
 exinfo.wdt = wdt;
 if p_flag
-    wavePlot(mnw0, mnw1, sdw0, sdw1, exinfo);
+    wavePlot(mnw0, mnw1, sdw0, sdw1, tstrt0, tstrt1, exinfo);
 end
 
 end
 
 
-function [ wdt, mnwave, sdwave ] = waveWidth_helper( Waves )
+function [ wdt, mnwave, sdwave, tstrt ] = waveWidth_helper( Waves )
 %WAVEWIDTH returns the duration between lowest and following highest point
 %in the mean spike wave form.
 
@@ -28,6 +28,7 @@ Waves(isinf(Waves)) = nan;
 if all(isnan(Waves))
     
     wdt = 0;
+    tstrt = 0;
     mnwave = zeros(length(timeX),1);
     sdwave = zeros(length(timeX),1);
 else
@@ -49,7 +50,7 @@ else
         idxmax = temp;
     end
     
-    
+    tstrt =timeX(idxmin);
     wdt = timeX(idxmax) - timeX(idxmin);
     % mnwave = mnwave / abs(mnwave(idxmax) - mnwave(idxmin));
 end
@@ -59,7 +60,7 @@ end
 
 
 
-function wavePlot(mnw0, mnw1, sdw0, sdw1, exinfo)
+function wavePlot(mnw0, mnw1, sdw0, sdw1, tstrt0, tstrt1, exinfo)
 %%% plot
 
 c = getCol(exinfo);
@@ -70,6 +71,9 @@ plot(timeX, mnw0, 'b', 'LineWidth', 3); hold on
 plot(timeX, mnw1, c, 'LineWidth', 3);
 plot(timeX, mnw0-sdw0, timeX, mnw0+sdw0, 'b', 'LineStyle', ':');
 plot(timeX, mnw1-sdw1, timeX, mnw1+sdw1, c, 'LineStyle', ':');
+plot([tstrt0 tstrt0], get(gca, 'YLim'), 'b--');
+plot([tstrt1 tstrt1], get(gca, 'YLim'), '--', 'Color', c);
+
 
 legend('baseline', exinfo.drugname);
 

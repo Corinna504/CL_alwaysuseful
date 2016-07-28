@@ -6,6 +6,7 @@ fileID = fopen(filename, 'r');
 fnames = textscan(fileID, '%s'); fnames = fnames{1};
 fnames = strrep(fnames, 'J', 'D');
 
+fdir = 'D:\data';
 
 if isempty(strfind(fnames{1}, 'mango'))
     uidx = 14:17;
@@ -16,10 +17,9 @@ dat = struct('unit', []);
 
 i =1;
 for k = 1:length(fnames)
-
-    fdir = [fnames{k}(1:uidx(end)), '\']
-    k
     
+    fdir = [fnames{k}(1:uidx(end)), '\'];
+    fprintf('processing k=%1.0f \n', k);
     if isempty(strfind(fnames{k}, 'CO')) || ~isempty(strfind(fnames{k}, 'RC'))
         continue
     end
@@ -92,7 +92,7 @@ for k = 1:length(fnames)
         stim2 = ismember(dat(ind).vals, dat(i).vals);
         
     [dat(i).yoff, dat(i).gslope,...
-        dat(i).rsqr_both,~,~] =perpendicularfit(dat(ind).frate(stim1), dat(i).frate(stim2), ...
+        dat(i).regr2] =perpendicularfit(dat(ind).frate(stim1), dat(i).frate(stim2), ...
                     var(dat(i).frate(stim2))/var(dat(ind).frate(stim1)));
     catch ME
         warning(ME.message)

@@ -31,7 +31,7 @@ for t = 1:ntrial
     raster(t, idx) = 1;
 end
 
-psth = (sum(raster, 1) ./ size(raster, 1)) .*100 ;
+psth = (sum(raster, 1) ./ size(raster, 1)) *100 ;
 
 
 % psth smoothing
@@ -40,21 +40,10 @@ kernel = kernel/sum(kernel);
 
 psth_smooth = conv(psth, kernel);
 psth_smooth = psth_smooth(1:end-71);
-% noize = mean(psth_smooth(1:20));
-% psth_rel = psth_smooth-noize;
-% psth_rel = psth_rel(30:end); % the relevant part start after 30ms
-
-% % latency calculation
-% [~, pki] = findpeaks(psth_rel, 'MinPeakHeight', max(psth_rel)/2);
 
 
 if ~isempty(oTrials)
-%     % first time of half max of response
-%     lat_i= find( psth_rel >= psth_rel(pki(1))/2, 1, 'first');
-%     lat = time(lat_i+30)*1000;
-
     sprintf('id %d par %1.1f', exinfo.id, oTrials(1).(exinfo.param1));
-
     [lat, ~, pval] = friedmanpriebe(sum(raster, 1)', 'minTheta', 20, ...
         'maxTheta', 150, 'responseSign', 1);
 else

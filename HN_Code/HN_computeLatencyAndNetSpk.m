@@ -31,7 +31,7 @@ if isempty(res)
     if isempty(strfind(fname, 'CO'))
         res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot');
     else
-        res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot', 'exp2', 'co');
+        res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot', 'exp2', 'co_seq');
     end
 end
    

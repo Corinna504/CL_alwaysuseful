@@ -60,7 +60,6 @@ function fittedTC_orco(exinfo)
 
 n = ceil(length(exinfo.fitparam.others.OR)/2)+1;
 for i = 1:length(exinfo.fitparam.others.OR)
-    
     subplot( n , 2, i)
     exinfo_temp = exinfo;
     exinfo_temp.fitparam  = exinfo.fitparam.others.OR(i);    
@@ -69,20 +68,22 @@ for i = 1:length(exinfo.fitparam.others.OR)
     ylabel(['co = ' num2str(exinfo.sdfs.y(1,i))]);
 end
 
+
 % difference
 s_diff = subplot( n, 2, 6);
 [~, idx] = sort(exinfo.sdfs.y(1,:));
 surf(exinfo.sdfs.x(:,1), exinfo.sdfs.y(1,idx), ...
     exinfo.sdfs.mn_rate(1).mn(:, idx)'- exinfo.sdfs_drug.mn_rate(1).mn(:, idx)'); ho
 title('Difference (Base-Drug)');ylabel('co'); xlabel('or'); zlabel('spk/frame');
-
-caxis([min(min([exinfo.ratemn,exinfo.ratemn_drug])) , ...
-    max(max([exinfo.ratemn,exinfo.ratemn_drug]))])
 colormap jet;
-set(s_diff, 'YScale', 'log')
+set(s_diff, 'YScale', 'log', ...
+    'XLim', [0 180], ...
+    'YLim', [min(exinfo.sdfs_drug.y(1,:)) max(exinfo.sdfs_drug.y(1,:))])
+colorbar
 
 
 
+% color axis specification
 minc = min(min([exinfo.sdfs.mn_rate(1).mn; exinfo.sdfs_drug.mn_rate(1).mn]));
 maxc = max(max([exinfo.sdfs.mn_rate(1).mn; exinfo.sdfs_drug.mn_rate(1).mn]));
 

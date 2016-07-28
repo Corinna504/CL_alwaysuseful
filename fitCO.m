@@ -1,4 +1,4 @@
-function fitpar = fitCO(spkrmn, co, varargin)
+function fitpar = fitCO(spkrmn, co_in, varargin)
 % fit hyperbolic function to contrast spike rates
 % 
 % If blanks occured as additional condition, their average spike rate is
@@ -22,6 +22,7 @@ end
 
 
 % index for non-blank values
+co = co_in;
 co(co>10) =0;
 idx = co<1000;
 
@@ -93,6 +94,8 @@ fitpar.r2 = 1 - ss / sum( (spkrmn(idx) - mean(spkrmn(idx))).^2 );
 fitpar.val = spkrmn;
 fitpar.co = co;
 
+fitpar.x = 0.1:0.1:1;
+fitpar.y = hyperratiofct(fitpar.x, fitpar.rmax, fitpar.c50, fitpar.n, fitpar.m);
 fitpar.auc = sum(hyperratiofct( 0.1:0.1:1, fitpar.rmax, fitpar.c50, fitpar.n, fitpar.m));
 % plot(co(idx), spkrmn(idx), 'o');
 % hold on;

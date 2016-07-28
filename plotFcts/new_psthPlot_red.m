@@ -81,6 +81,7 @@ box off;
 axes(s(1))
 rightAdjTitle(['all ' titletxt]); 
 xlabel('time');
+ylabel('spk/s');
 
 
 %%%

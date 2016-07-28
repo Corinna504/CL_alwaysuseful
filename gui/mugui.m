@@ -523,7 +523,8 @@ fig2plot_check(10) = uicontrol(fig_h, ...
         
         %%% simple (logical) inclusion criteria
 %         UpdateHNfiles(strcmp(stimulicond(get(pop_Xspec, 'Value')), 'RC'), 1);
-
+        
+        
                
         %%% simple numerical inclusion criteria
         UpdateInclusionHelper(1, ...
@@ -584,7 +585,7 @@ fig2plot_check(10) = uicontrol(fig_h, ...
         allax = findobj(gcf, 'Type', 'axes');
         
         % X AXES
-        if (strcmp(fctX, 'gain change') || ~isempty(strfind(fctX, 'fano')))
+        if (~isempty(strfind(fctX, 'gain')) || ~isempty(strfind(fctX, 'fano')))
             
             % log scaled axes
             if length(allax) > 1
@@ -595,7 +596,7 @@ fig2plot_check(10) = uicontrol(fig_h, ...
         end
         
         % Y AXES
-        if (strcmp(fctY, 'gain change') || ...
+        if (~isempty(strfind(fctY, 'gain')) || ...
                 (~isempty(strfind(fctY, 'fano')) && isempty(strfind(fctY, 'diff'))))
             
             if length(allax) >1

@@ -65,7 +65,10 @@ if isfield(exinfo.fitparam, 'others')
     exinfo.fitparam.others.CO.yoff = beta0;
     exinfo.fitparam.others.CO.gslope = beta1;
     exinfo.fitparam.others.CO.r2reg = xvar;
-        
+     
+    plotCOTC(exinfo);
+   
+    
 end
 
 
@@ -75,7 +78,8 @@ if isfield(ex0.Trials, 'Waves') && isfield(ex2.Trials, 'Waves')
     ind2 = ~cellfun(@isempty, {ex2.Trials.Waves});
     exinfo.wdt = waveWidth( exinfo, vertcat(ex0.Trials(ind0).Waves),...
         vertcat(ex2.Trials(ind2).Waves), p_flag );
-    
+else
+   fprintf(['missing wave file' exinfo.fname '\n']); 
 end
 
 
@@ -108,6 +112,57 @@ if strcmp(exinfo.param1, 'or');
 end
 end
 
+
+function  plotCOTC(exinfo)
+
+ % tuning curve
+    h = figure('Name', exinfo.figname);
+    
+    ratemn = exinfo.fitparam.others.CO.val;
+    ratemn_drug = exinfo.fitparam_drug.others.CO.val;
+    
+    
+    [co, idx] = sort(exinfo.fitparam.others.CO.co);
+    ratemn = ratemn(idx);
+    [co_drug, idx_drug] = sort(exinfo.fitparam_drug.others.CO.co);
+    ratemn_drug = ratemn_drug(idx_drug);
+    
+       
+    %%%%%%%    
+    subplot(1,2,1)
+    %baseline
+    plot(co, ratemn, 'o', 'MarkerEdgeColor', getCol(exinfo)); ho % raw
+    plot(exinfo.fitparam.others.CO.x, ... 
+        exinfo.fitparam.others.CO.y, '--', 'Color', getCol(exinfo)); ho % fit
+    %drug
+    plot(co_drug, ratemn_drug, 'o', 'MarkerEdgeColor', getCol(exinfo), ...
+        'MarkerFaceColor', getCol(exinfo)); ho % raw
+    plot(exinfo.fitparam_drug.others.CO.x, ... 
+        exinfo.fitparam_drug.others.CO.y, '-', 'Color', getCol(exinfo)); ho % fit
+    
+    legend('baseline', exinfo.drugname, 'Orientation', 'horizontal', ...
+        'Location', 'Northoutside');
+    set(gca, 'XScale', 'log'); xlabel('contrast'); ylabel('spk/frame')
+    xlim([min(co) max(co)]);
+    
+    
+    subplot(1,2,2);
+    scatter(ratemn, ratemn_drug, 40, getCol(exinfo), 'MarkerFaceColor', getCol(exinfo)); ho
+    
+    plot(ratemn, ...
+        ratemn.*exinfo.fitparam.others.CO.gslope+exinfo.fitparam.others.CO.yoff, ...
+        'Color', getCol(exinfo));
+       
+    eqax; crossl; unity; hold on
+    xlabel('Baseline'); ylabel(exinfo.drugname);
+    
+    title(sprintf('contrast: gain %1.2f, offset: %1.2f, r2 %1.2f', ...
+        exinfo.fitparam.others.CO.gslope,...
+        exinfo.fitparam.others.CO.yoff,...
+        exinfo.fitparam.others.CO.r2reg));
+    savefig(h, exinfo.fig_phase);
+    close(h)
+end
 
 
 

@@ -12,7 +12,7 @@ while j<=length(varargin)
         case 'reward'
             onlyrewarded_flag = varargin{j+1};
         case 'p_flag'
-            onlyrewarded_flag = varargin{j+1};
+            p_flag = varargin{j+1};
     end
     j=j+1;
 end

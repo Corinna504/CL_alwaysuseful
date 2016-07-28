@@ -13,9 +13,8 @@ else
     iy = findCorrespStimIdx(spec.stimy, spec.eyey, expInfo);
 end
 
-
-expInfo_out = singleUnitsOnly(expInfo(ix | iy));
-
+% expInfo_out = singleUnitsOnly(expInfo(ix | iy));
+expInfo_out = expInfo(ix & iy);
 end
 
 
@@ -28,7 +27,18 @@ end
 
 switch speceye
     case 'all'
-        eye_spec = [expInfo.cmpExp];
+        eye_spec = zeros(1, length(expInfo));
+        
+        for uid = unique([expInfo.idi]);
+            
+            idx = find([expInfo.idi] == uid);
+            [~, maxi] =  max( cellfun(@max, {expInfo(idx).ratemn} ) );
+            
+            if ~isempty(idx)
+                eye_spec(idx(maxi)) = 1;
+            end
+        end
+        
     case 'dominant eye'
         eye_spec = [expInfo.isdominant];
     case 'non-dominant eye'
@@ -86,17 +96,17 @@ function expInfo_out = singleUnitsOnly(expInfo)
 % if there are conflicting data from the same session, the one with best
 % regression fit is used
 
-    id = unique([expInfo.id]);
+    idi = unique([expInfo.idi]);
     idxsu = [];
-    for i = 1:length(id) 
+    for i = 1:length(idi) 
        
-        if sum([expInfo.id] == id(i)) > 1
+        if sum([expInfo.idi] == idi(i)) > 1
         
-            idx_idi = find([expInfo.id] == id(i));
+            idx_idi = find([expInfo.id] == idi(i));
             [~,k] = max([expInfo(idx_idi).r2reg]);
             idxsu = [idxsu; idx_idi(k)];
         else
-            idxsu = [idxsu; find([expInfo.id] == id(i))];
+            idxsu = [idxsu; find([expInfo.id] == idi(i))];
         
         end
     end

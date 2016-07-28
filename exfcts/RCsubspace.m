@@ -31,7 +31,7 @@ fitparam = fitOR(mn_rate, p_flag, res.sdfs.n);
 if size(res.sdfs.mn_rate(1).mn,1)>1 && size(res.sdfs.mn_rate(1).mn,2)>1
     
     % I am not sure here how to fit in 2D therefore I fit each orientation
-    % TC at each contrast and one contrast TC for mean orientations
+    % TC at each contrast and one contrast TC collapsed over all orientations
     for i = 1:size(res.sdfs.mn_rate(1).mn,2)
         temp.mn     = res.sdfs.mn_rate(1).mn(:,i);
         temp.sem    = res.sdfs.mn_rate(1).sem(:,i);
@@ -39,7 +39,13 @@ if size(res.sdfs.mn_rate(1).mn,1)>1 && size(res.sdfs.mn_rate(1).mn,2)>1
         fitparam.others.OR(i) = fitOR(temp, p_flag, res.sdfs.n(:,i));
     end
     
-    fitparam.others.CO = fitCO( mean(res.sdfs.mn_rate(1).mn, 1), res.sdfs.y(1,:));
+    corate = mean(res.sdfs.mn_rate(1).mn, 1);
+    copar = res.sdfs.y(1,:);
+    if length(res.sdfs.mn_rate)>1
+        corate = [corate, res.sdfs.mn_rate(2).mn];
+        copar = [copar, 3];
+    end
+    fitparam.others.CO = fitCO( corate, copar);
 end
 
 
@@ -146,8 +152,8 @@ end
 mn_rate.or= res.sdfs.x(:,1);
 [~, maxi]= max(res.sdfs.y(1,:));
 
-mn_rate.mn  = res.sdfs.mn_rate(1).mn(:, maxi);
-mn_rate.sem = res.sdfs.mn_rate(1).sem(:, maxi);
+mn_rate.mn  = nanmean(res.sdfs.mn_rate(1).mn,2);
+mn_rate.sem = nanmean(res.sdfs.mn_rate(1).sem, 2);
 
 
 %for blanks

@@ -1,7 +1,7 @@
 function dat = setConstraints(dat)
 
 reg_r2 = .7; % regression fit
-dat = dat([dat.rsqr_both] > reg_r2);
+dat = dat([dat.regr2] > reg_r2);
 
 
 tc_r2 = .7; % tuning fit
@@ -18,7 +18,7 @@ dat  = dat(idx);
 
 
 % remove the files with NaCl
-is5HT = [find([dat.is5HT]), find([dat.is5HT])-1];
+is5HT = [find([dat.is5HT]), find([dat.is5HT])-1, find([dat.numinexp]==1)];
 dat  = dat(sort(is5HT));
 
 

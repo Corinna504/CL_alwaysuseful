@@ -267,6 +267,7 @@ end
 
 %btype = 'phase_seq';
 
+
 result.calctime(1) = now;
 colors =  mycolors;
 excolors = mycolors;
