@@ -359,7 +359,14 @@ switch fctname
         lab = fctname;
         
     case 'latency base'
-        val = [exinfo.lat];
+        if exinfo(1).isRC
+            val = [exinfo.lat];
+        else
+            for i = 1:length(exinfo)
+                val(i) = exinfo(i).lat(;
+                
+            
+        end
         lab = fctname;
         
     case 'latency drug'
@@ -371,6 +378,7 @@ switch fctname
         lab = fctname;
         
     case 'latency hmax drug'
+               
         val = [exinfo.lat2Hmax_drug];
         lab = fctname;
         

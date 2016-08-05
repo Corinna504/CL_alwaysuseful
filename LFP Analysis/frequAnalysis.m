@@ -51,7 +51,7 @@ clearvars k;
 [b_notch,a_notch] = butter(notchord, notchf, 'stop' );
 [b_notch2,a_notch2] = butter(4, notchf.*2, 'stop' );
 % lowpass filter
-[b_lowp, a_lowp] = butter(lowpord,[ 0.002, lowpf], 'bandpass');
+[b_lowp, a_lowp] = butter(lowpord,[ 0.0014, lowpf], 'bandpass');
 % [b_lowp, a_lowp] = butter(lowpord, 0.001, 'high');
 % [b_lowp, a_lowp] = butter(lowpord, lowpf);
 

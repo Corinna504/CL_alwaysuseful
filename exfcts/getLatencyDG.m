@@ -4,7 +4,7 @@ function [lat, pval, psth_out, ntrial] = getLatencyDG(exinfo, oTrials, smooth_fl
 
 
 if exinfo.isadapt
-    time = 0:0.001:5;
+    time = 0:0.001:0.5;
 else 
     time = 0.001:0.001:0.45;
 end

@@ -1,4 +1,4 @@
-function new_psthPlot_red( exinfo, exB, exD )
+function exinfo = new_psthPlot_red( exinfo, exB, exD )
 %plots a smoothed psth for every window
 % NOTE: LATENCY IS OVERWRITTEN TO FULL POPULATION RESUTLS
 
@@ -44,7 +44,15 @@ end
 %% finals
 savefig(h, exinfo.fig_psth);
 close(h);
+
+
+%% add latency to exinfo
+
+exinfo.lat = [parB; latB'; pvalB'];
+exinfo.lat = [parD; latD'; pvalD'];
+
 end
+
 
 
 %%
