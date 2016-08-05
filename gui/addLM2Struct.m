@@ -11,9 +11,8 @@ for i = 1:length( info )
         if any(info(i).id == [simlm.id]);
             info(i).reg_slope = simlm(info(i).id == [simlm.id]).std_slope;
             info(i).reg_off  = simlm(info(i).id == [simlm.id]).std_off;
-            
-            
-            info(i).latcorrect_drug = info(i).lat_drug - ...
+                        
+            info(i).latcorrect_drug = info(i).lat2Hmax_drug - ...
                 ( info(i).reg_slope.* mean(sqrt(info(i).resvars_drug(lat_std_t))) - ...
                 info(i).reg_slope.* mean(sqrt(info(i).resvars(lat_std_t))) ); 
 

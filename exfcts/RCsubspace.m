@@ -26,8 +26,6 @@ nsmpl = 10;       % number of resampling processes
 % fit tuning curves
 fitparam = fitOR(mn_rate, p_flag, res.sdfs.n);
 
-
-
 if size(res.sdfs.mn_rate(1).mn,1)>1 && size(res.sdfs.mn_rate(1).mn,2)>1
     
     % I am not sure here how to fit in 2D therefore I fit each orientation

@@ -21,8 +21,6 @@ varbinspk = vertcat(mSpk.varspk);
 mnbinspk       = reshape(mnbinspk(:, 1:4), length(mnbinspk)*4, 1);
 varbinspk      = reshape(varbinspk(:, 1:4), length(varbinspk)*4, 1);
 
-
-
 [mnspkvar, bindata] = mitchelPlot(mnbinspk, varbinspk);    
 
 mitchel_mn  = mnspkvar(:,1);

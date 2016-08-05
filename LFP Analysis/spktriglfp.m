@@ -2,7 +2,7 @@ function spkavelfp = spktriglfp( exSpk, exLFP, varargin)
 %
 
 p_flag = true;
-time = 0.05;
+time = 0.08;
 rawflag = false;
 
 k = 1;
@@ -18,10 +18,11 @@ while k<=length(varargin)
     k=k+1;
 end
 
-spklfp = [];
+spklfp = []; nspk = 0;
 for t = 1:length(exSpk.Trials)
     spk = getSpks(exSpk.Trials(t), rawflag);
     spklfp = [spklfp; getLFP(exLFP.Trials(t), spk, time, rawflag)];
+    nspk = nspk+length(spk);
 end
 spkavelfp = nanmean(spklfp);
 stdspklfp = nanstd(spklfp) ./ sqrt(size(spklfp, 2));
@@ -38,6 +39,7 @@ if p_flag
     xlabel('time rel to spk [s]');
     ylabel('avg LFP');
     xlim([-time time]);
+    title(sprintf('#spk: %1.0f', nspk));
     crossl
 end
 

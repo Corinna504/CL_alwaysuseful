@@ -15,7 +15,12 @@ end
 
 
 dat.exinfo = exinfo(~isnan(dat.x));
-dat.y  = dat.y(~isnan(dat.x));
+
+if size(dat.y,1)>1
+    dat.y  = dat.y(~isnan(dat.x),:);
+else
+    dat.y  = dat.y(~isnan(dat.x));
+end
 dat.x  = dat.x(~isnan(dat.x));
 
 end
@@ -66,6 +71,16 @@ switch fctname
         end
         val(val<0) = 0;
         
+        
+    case 'r2 rg cg diff'
+        val = assignFct('r2 rg' , exinfo) - ...
+            assignFct('r2 cg' , exinfo);
+        
+        
+    case 'r2 ag cg diff'
+        val = assignFct('r2 ag' , exinfo) - ...
+            assignFct('r2 cg' , exinfo);
+                
     case 'a ag' 
         for i = 1:length(exinfo)
             val(i) = exinfo(i).fitparam_drug.a_ag;
@@ -371,12 +386,12 @@ switch fctname
         lab = 'latency fp diff (drug-base)';
         
     case 'latency base corrected'
-        val = [exinfo.lat] - [exinfo.reg_slope].*assignFct('latnoise', exinfo);
+        val = [exinfo.lat2Hmax] - [exinfo.reg_slope].*assignFct('latnoise', exinfo);
 %         val = [exinfo.lat];
         lab = fctname;
         
     case 'latency drug corrected'
-        val = [exinfo.lat_drug] - [exinfo.reg_slope].*assignFct('latnoise drug', exinfo);
+        val = [exinfo.lat2Hmax_drug] - [exinfo.reg_slope].*assignFct('latnoise drug', exinfo);
 %         val = [exinfo.lat_drug] - ...
 %             ([exinfo.reg_slope].*assignFct('latnoise drug', exinfo) -...
 %             [exinfo.reg_slope].*assignFct('latnoise', exinfo) );
@@ -542,13 +557,13 @@ switch fctname
         
     case 'fano factor base'
         for i = 1:length(exinfo)
-            val(i) = [exinfo(i).ff.classic];
+            val(i) = nanmean([exinfo(i).ff.classic]);
         end
         lab = 'fano factor';
         
     case 'fano factor drug'
         for i = 1:length(exinfo)
-            val(i) = [exinfo(i).ff_drug.classic];
+            val(i) = nanmean([exinfo(i).ff_drug.classic]);
         end
         lab = 'fano factor drug';
         

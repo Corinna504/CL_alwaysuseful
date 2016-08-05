@@ -21,6 +21,7 @@ isntnan = find(~isnan(dat.x) & ~isnan(dat.y));
 dat.x       = dat.x(isntnan);            
 dat.y      = dat.y(isntnan);
 dat.is5HT   = [dat.expInfo(isntnan).is5HT];  
+dat.expInfo  = dat.expInfo(isntnan);  
 dat.is5HT  = logical(dat.is5HT);
 
 % edit marker

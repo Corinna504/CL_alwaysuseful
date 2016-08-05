@@ -393,7 +393,7 @@ fig2plot_check(10) = uicontrol(fig_h, ...
 %                 incl_i =  intersect( incl_i, ...
 %                     find([expInfo.gslope]<1));
                 
-                UpdatePlotSpec();
+%                 UpdatePlotSpec();
                 createPlotHelper(get(addHistograms, 'Value') );
 
                 dat.expInfo = expInfo(incl_i);
@@ -404,7 +404,7 @@ fig2plot_check(10) = uicontrol(fig_h, ...
             elseif (strcmp(spec.stimx, 'all stimuli cond') && strcmp(spec.stimy, 'all stimuli cond') ...
                     && strcmp(spec.eyex, 'all') && strcmp(spec.eyey, 'all'))
                 UpdateInclusion(editlatency_h, eventdata);
-                UpdatePlotSpec();
+%                 UpdatePlotSpec();
                 createPlotHelper(get(addHistograms, 'Value') );
             
                 dat.expInfo = expInfo(incl_i);
@@ -480,7 +480,7 @@ fig2plot_check(10) = uicontrol(fig_h, ...
         
         
         if ~isempty([dat.err])
-            c = 'b';
+            c = 'r--';
             for j = 1:size(dat.y, 2)
                 errorbar(dat.x, dat.y(:, j), dat.err(:,j), c); hold on;
                 c = 'r';

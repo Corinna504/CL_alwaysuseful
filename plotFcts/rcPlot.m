@@ -61,8 +61,10 @@ title(sprintf('base lat: %1.1f, dur: %1.1f, \n average sd: %1.2f, mean fr: %1.2f
     exinfo.lat, exinfo.dur, mean(sqrt(exinfo.resvars(201:400, co_idx))), meanfr));
 ylim([0 160]); set(gca, 'XScale', 'log');
 grid on;
-xlim([min(exinfo.sdfs.y(1,:)), max(exinfo.sdfs.y(1,:))])
 
+if nplot > 3
+    xlim([min(exinfo.sdfs.y(1,:)), max(exinfo.sdfs.y(1,:))])
+end
 %------------------------------------------- drug
 s2 = subplot(nplot,1,2);
 [~,co_idx_drug]= max(exinfo.sdfs_drug.y(1,:));
@@ -108,7 +110,10 @@ title(sprintf('drug lat: %1.1f, dur: %1.1f, \n average sd: %1.2f, meanfr: %1.2f'
 
 ylim([0 160]); set(gca, 'XScale', 'log');
 grid on;
-xlim([min(exinfo.sdfs.y(1,:)), max(exinfo.sdfs.y(1,:))])
+if nplot > 3
+    xlim([min(exinfo.sdfs_drug.y(1,:)), max(exinfo.sdfs_drug.y(1,:))])
+end
+
 %--------------------------------- equalize y axis and plot latency line
 
 ylim_ = [0, max([max(get(s1, 'ylim')), max(get(s2, 'ylim'))])]; 
@@ -151,7 +156,9 @@ ylabel('time');
 
 legend('base', exinfo.drugname);
 grid on;
-xlim([min(exinfo.sdfs.y(1,:)), max(exinfo.sdfs.y(1,:))])
+if nplot > 3
+    xlim([min(exinfo.sdfs.y(1,:)), max(exinfo.sdfs.y(1,:))])
+end
 ylim([0 160]);
 
 

@@ -35,7 +35,7 @@ end
 
 if lambda<1
     varargin{1}
-    disp('Warning!! Do not try and resample with lambda<1. It is a better idea to swap your data over and get lambda > 1')
+%     disp('Warning!! Do not try and resample with lambda<1. It is a better idea to swap your data over and get lambda > 1')
 end
 
 ybar = mean(y);

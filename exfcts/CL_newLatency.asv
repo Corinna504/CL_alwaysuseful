@@ -1,0 +1,91 @@
+function res = CL_newLatency(res)
+%modified latency for variance between 0:20ms to stimuli onset
+% 
+%@CL 22.01.2016
+% %
+
+% for i = 1:size(res.sdfs.s, 2)
+%     if ~isempty(res.sdfs.extras)
+%         res.vars2(:,i) = var([horzcat(res.sdfs.s{:, i}), res.sdfs.extras{1}.sdf], 0, 2);
+%     else
+%         res.vars2(:,i) = var(horzcat(res.sdfs.s{:, i}), 0, 2);
+%     end
+%     
+%     [res.sdfs.lat2hmax(i), res.sdfs.dur(i), res.sdfs.latFP(i)] = ...
+%         CL_newLatency_helper(res.vars2(:,i), res.times);
+% end
+% 
+% [~,co_idx]= max(res.sdfs.y(1,:));
+% res.lat = res.sdfs.lat2hmax(co_idx);
+% res.dur = res.sdfs.dur(co_idx);
+% res.latFP = res.sdfs.latFP(co_idx);
+
+
+psth = res.sdfs.psth;
+n_or = size(psth, 1);
+
+[~, co_idx] = sort(res.sdfs.y(1,:));
+n_co = size(psth, 2);
+
+h = findobj('Tag', 'latency');
+if exist(h)
+    fi
+h = figure;
+for or = 1:n_or
+    kk = 1;
+    for co = co_idx
+        
+       [lat2hmax_orco(or,kk), ~, latfp_orxco(or, kk), pPoisson(or, kk)] =...
+           CL_newLatency_helper(res.sdfs.s{or,co}, -20:0.1:160);
+       
+        subplot(n_or, n_co, kk+ (or-1)*n_co);
+        plot(0:0.1:160, res.sdfs.s{or,co}(201:end)); hold on;
+        title(sprintf('lat: %1.1f, p=%1.2f', latfp_orxco(or,kk)/10, pPoisson(or,kk)));
+        
+        plot([latfp_orxco(or,kk) latfp_orxco(or,kk)], get(gca, 'YLim'), 'k' )
+        xlim([0,160]);
+        kk = kk+1;
+    end
+end
+
+res.latfp_orxco = latfp_orxco;
+res.latfp_pPoisson_orxco = pPoisson;
+
+
+savefig(h, 
+
+
+end
+
+
+
+
+function [lat2hmax, dur, latfp, pPoisson] = CL_newLatency_helper(vars, times)
+
+
+lat2hmax     = -1;
+dur     = -1;
+latfp   = -1;
+pPoisson = 0;
+sd      = vars; %sqrt(vars);
+noise   = mean(sd(200:400)); 
+
+
+if max(sd)>mean(noise)*3.5
+    
+    sd2 = sd-noise;     % normalizer for baseline variability
+    
+    % first time of half max of response
+    idx = find( sd2 >= (max(sd2)/2), 1, 'first');  
+    lat2hmax = times(idx)/10;
+    
+    idx = find( sd2 >= (max(sd2)/2), 1, 'last');  
+    dur = times(idx)/10 - lat2hmax;
+    
+    [latfp, ~, pPoisson] = friedmanpriebe(round(sd(200:end).*100), ...
+        'minTheta', 250);
+    latfp = latfp/10;
+end
+
+end
+

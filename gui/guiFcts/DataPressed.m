@@ -14,7 +14,7 @@ else
 end
 
 
-disp(datinfo(1).fname);
+disp(datinfo(1).fname_drug);
 
 
 j = 1;

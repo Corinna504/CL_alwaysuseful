@@ -20,22 +20,26 @@ res.lat = res.sdfs.lat2hmax(co_idx);
 res.dur = res.sdfs.dur(co_idx);
 res.latFP = res.sdfs.latFP(co_idx);
 
+
+
+
 end
 
 
 
 
-function [lat2hmax, dur, latfp] = CL_newLatency_helper(vars, times)
+function [lat2hmax, dur, latfp, pPoisson] = CL_newLatency_helper(vars, times)
 
 
 lat2hmax     = -1;
 dur     = -1;
 latfp   = -1;
+pPoisson = 0;
 sd      = sqrt(vars);
 noise   = mean(sd(200:400)); 
 
 
-if max(sd)>mean(noise)*5
+if max(sd)>mean(noise)*3.5
     
     sd2 = sd-noise;     % normalizer for baseline variability
     
@@ -46,8 +50,9 @@ if max(sd)>mean(noise)*5
     idx = find( sd2 >= (max(sd2)/2), 1, 'last');  
     dur = times(idx)/10 - lat2hmax;
     
-    latfp = friedmanpriebe(round(sd(200:end).*100))/10;
-    
+    [latfp, ~, pPoisson] = friedmanpriebe(round(sd(200:end).*100), ...
+        'minTheta', 250, 'responseSign', 0);
+    latfp = latfp/10;
 end
 
 end

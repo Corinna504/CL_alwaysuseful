@@ -150,7 +150,7 @@ UpdateAxes([], [])
         axes(ax_spktrigavg_t); hold off; 
         spktriglfp( exspk, exlfp, 'plot', true, 'rawflag', true);
         sta_base = spktriglfp(exspk, exlfp, 'plot', true);
-        title('blue: raw     filtered:red'); ylim auto
+        ylim auto
 
         % Spike Field Coherence
         axes(ax_spkfieldcoh); hold off; 
@@ -186,7 +186,7 @@ UpdateAxes([], [])
         axes(ax_spkfieldcoh2); hold off; 
         [coh_drug, fcoh_drug] = spkfieldcoh(exspk_drug, exlfp_drug, params); xlim(params.fpass);
         
-       
+        
         
         
         %---------------------------------- comparison
@@ -222,7 +222,7 @@ UpdateAxes([], [])
         lfpFreqDomain(exlfp, params.fpass); 
         set(findobj(ax_lfp_f_cmp,'type', 'line'), 'Color', 'k');
         lfpFreqDomain(exlfp_drug, params.fpass);
-
+        
         
         % Spike Field Coherence
         axes(ax_spkfieldcoh_cmp); hold off; 
@@ -231,9 +231,8 @@ UpdateAxes([], [])
         spkfieldcoh(exspk_drug, exlfp_drug, params); 
         xlim(params.fpass);
         legend('baseline', 'drug', 'Location', 'EastOutside');
-
         
-
+        
         % Spike triggered average
         axes(ax_spktrigavg_t_cmp); hold off; 
         spktriglfp( exspk, exlfp, 'plot', true);hold on
@@ -241,7 +240,7 @@ UpdateAxes([], [])
         set(findobj(ax_spktrigavg_t_cmp,'type', 'line'), 'Color', 'k');
         hold on
         spktriglfp( exspk_drug, exlfp_drug, 'plot', true);
-        ylim auto
+        title('blue: raw     filtered:red'); ylim auto
         
         %----------------------------- stimulus averaged values
         x = vals;

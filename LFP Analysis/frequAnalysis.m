@@ -49,8 +49,9 @@ clearvars k;
 
 % notch filter
 [b_notch,a_notch] = butter(notchord, notchf, 'stop' );
+[b_notch2,a_notch2] = butter(4, notchf.*2, 'stop' );
 % lowpass filter
-[b_lowp, a_lowp] = butter(lowpord,[ 0.001, lowpf], 'bandpass');
+[b_lowp, a_lowp] = butter(lowpord,[ 0.002, lowpf], 'bandpass');
 % [b_lowp, a_lowp] = butter(lowpord, 0.001, 'high');
 % [b_lowp, a_lowp] = butter(lowpord, lowpf);
 
@@ -59,8 +60,8 @@ for ind = 1:length(ex.Trials)
    
     %%% lowpass and notch filter
     lowpassfilt = filtfilt(b_lowp, a_lowp, ex.Trials(ind).LFP);
-    ex.Trials(ind).LFP_filt = filtfilt(b_notch, a_notch, lowpassfilt);
-    
+    bandstop50 = filtfilt(b_notch, a_notch, lowpassfilt);
+    ex.Trials(ind).LFP_filt = filtfilt(b_notch2, a_notch2, bandstop50);
     
     %%% interpolate the time of stimulus presentation
     t_strt = ex.Trials(ind).Start - ex.Trials(ind).TrialStart;

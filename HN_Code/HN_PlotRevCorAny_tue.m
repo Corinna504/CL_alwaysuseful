@@ -814,7 +814,7 @@ for loop = aloop: nloops;
                     alltriggers{tidx(k)} = [ alltriggers{tidx(k)}; Expt.Trials(tidx(k)).Trigger'];
             end
             if ~isempty(tidx) & (n > nmin);
-                [sdf, n,nspk] = trigsdfa_hn(Expt.Trials(tidx),sdfw,times,smtype);
+                [sdf, n,nspk, psth] = HN_trigsdfa_hn(Expt.Trials(tidx),sdfw,times,smtype);
                 sdfs.x(nx, ny, loopctr) = x;
                 sdfs.y(nx, ny, loopctr) = y;
                 sdfs.n(nx, ny, loopctr) = n;
@@ -823,6 +823,8 @@ for loop = aloop: nloops;
                     sdfs.z(nx, ny, loopctr) = xvals(loop);
                 end
                 sdfs.s{nx, ny, loopctr} = sdf;
+                sdfs.psth{nx,ny,loopctr} = psth;
+
                 if ~showplot
                     
                 elseif ny > 1
@@ -909,7 +911,7 @@ for j = 1:nextra * npsych
         if choiceval == 1
             goodextras = goodextras+1;
         end
-        [sdf, n,nspk] = trigsdfa_hn(Expt.Trials(tidx),sdfw,times,smtype);
+        [sdf, n,nspk ,psth] = HN_trigsdfa_hn(Expt.Trials(tidx),sdfw,times,smtype);
         if showplot
             h(np+nex-1) = plot(times(pid)/10,sdf(pid),':','color',excolors{nex - (choiceval-1)*goodextras},'linestyle',linestyles{3+choiceval-1},'linew',2);
             labels{np+nex-1} = [extralabel{lid} sprintf(' n = %d',n)];
@@ -918,6 +920,7 @@ for j = 1:nextra * npsych
         sdfs.extras{lid,choiceval}.n = n;
         sdfs.extras{lid,choiceval}.label = extralabel{lid};
         sdfs.extras{lid,choiceval}.nspk = nspk;
+        sdfs.extras{lid,choiceval}.psth = psth;
         nex = nex+1;
     end
 end
