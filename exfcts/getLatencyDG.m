@@ -31,7 +31,7 @@ for t = 1:ntrial
     raster(t, idx) = 1;
 end
 
-psth = (sum(raster, 1) ./ size(raster, 1)) *100 ;
+psth = (sum(raster, 1) ./ size(raster, 1)) *1000 ; %convert to spk/s
 
 
 % psth smoothing
@@ -45,7 +45,7 @@ psth_smooth = psth_smooth(1:end-71);
 if ~isempty(oTrials)
     sprintf('id %d par %1.1f', exinfo.id, oTrials(1).(exinfo.param1));
     [lat, ~, pval] = friedmanpriebe(sum(raster, 1)', 'minTheta', 20, ...
-        'maxTheta', 150, 'responseSign', 1);
+        'maxTheta', 100, 'responseSign', 1);
 else
     lat = 0;
     pval = 1;

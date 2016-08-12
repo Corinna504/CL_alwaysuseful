@@ -4,14 +4,136 @@ function h = rcPlot( exinfo )
 %make two subplots for each baseline and drug condition
 %
 % @CL 22.01.2016
+h = figure('Name', exinfo.figname, 'UserData', exinfo, 'Position', [ 680   274   560   704]);
 
 
 if ~isempty(strfind(exinfo.fname, 'CO'))
-    nplot = 4;
+    plotRCxORxCO(exinfo)
 else
-    nplot=3;
+    plotRCxOR(exinfo)
 end
 
+%--------------------------------- save
+set(findobj('type', 'axes'), 'fontsize', 8)
+savefig(h, exinfo.fig_sdfs);
+close(h);
+
+end
+
+function plotRCxOR(exinfo)
+
+
+c = hsv(length(exinfo.sdfs.s));
+g = [0.9 0.9 0.9];
+%------------------------------------------ baseline
+s1 = subplot(3,1,1);
+
+% responses
+for i = 1:length(exinfo.sdfs.s)
+    plot(exinfo.times/10, exinfo.sdfs.s{i}, 'Color', c(i,:)); ho
+    leg{i} = sprintf('%1.0f \t n=%1.0f', exinfo.sdfs.x(i), exinfo.sdfs.n(i));
+end
+if ~isempty(exinfo.sdfs.extras)
+    plot(exinfo.times/10, exinfo.sdfs.extras{1}.sdf, 'r:'); ho
+    leg{i+1} = sprintf('blank \t n=%1.0f', exinfo.sdfs.extras{1}.n);
+end
+
+xlabel('time'); ylabel('spk/s');
+ylim_ = get(s1, 'ylim');
+
+% window for noise calculation
+fill([exinfo.times(201)/10,  exinfo.times(201)/10, ...
+    exinfo.times(400)/10, exinfo.times(400)/10] , ...
+    [0 ylim_(2)/10 ylim_(2)/10 0], g, 'EdgeColor', g); ho
+
+
+legend(leg, 'Location', 'EastOutside');
+s = horzcat(exinfo.sdfs.s{:});
+meanfr = mean(mean(s(201:400),2));
+title(sprintf('base lat: %1.1f, dur: %1.1f, \n average sd: %1.2f, mean fr: %1.2f',...
+    exinfo.lat, exinfo.dur, mean(sqrt(exinfo.resvars(201:400))), meanfr));
+xlim([0 160]); grid on;
+
+
+%------------------------------------------- drug
+s2 = subplot(3,1,2);
+
+% responses
+for i = 1:length(exinfo.sdfs_drug.s)
+    plot(exinfo.times_drug/10, exinfo.sdfs_drug.s{i}, 'Color', c(i,:)); ho
+    leg{i} = sprintf('%1.0f \t n=%1.0f', exinfo.sdfs_drug.x(i), ...
+        exinfo.sdfs_drug.n(i));
+end
+if ~isempty(exinfo.sdfs_drug.extras)
+    plot(exinfo.times_drug/10, exinfo.sdfs_drug.extras{1}.sdf, 'r:'); ho
+    leg{i+1} = ...
+        sprintf('blank \t n=%1.0f', exinfo.sdfs_drug.extras{1}.n); 
+end
+
+% window for noise calculation
+fill([exinfo.times_drug(201)/10,  exinfo.times_drug(201)/10, ...
+    exinfo.times_drug(400)/10, exinfo.times_drug(400)/10 ], ...
+    [0 ylim_(2)/10 ylim_(2)/10 0], g, 'EdgeColor', g); 
+
+
+legend(leg, 'Location', 'EastOutside');
+xlabel('time');
+
+s_drug = horzcat(exinfo.sdfs_drug.s{:});
+meanfr_drug = mean(mean(s_drug(201:400),2));
+
+title(sprintf('drug lat: %1.1f, dur: %1.1f, \n average sd: %1.2f, meanfr: %1.2f',...
+    exinfo.lat_drug, exinfo.dur_drug, ...
+    mean(sqrt(exinfo.resvars_drug(201:400))), ...
+    meanfr_drug));
+
+xlim([0 160]); 
+grid on;
+
+%--------------------------------- equalize y axis and plot latency line
+ylim_ = [0, max([max(get(s1, 'ylim')), max(get(s2, 'ylim'))])]; 
+set(s1, 'ylim', ylim_); % equalize y axis
+set(s2, 'ylim', ylim_); % equalize y axis
+
+lat = exinfo.lat; lat_drug = exinfo.lat_drug;
+dur = exinfo.dur; dur_drug = exinfo.dur_drug;
+
+plot(s1, [lat lat], ylim_, 'k');
+plot(s2, [lat_drug lat_drug], ylim_, 'k');
+
+plot(s1, [lat+dur, lat+dur], ylim_, 'k');
+plot(s2, [lat_drug+dur_drug, lat_drug+dur_drug], ylim_, 'k');
+
+
+%--------------------------------- third plot showing normalized sdf dev
+
+s3 = subplot(3,1,3);
+
+% amplified deviation to mean response
+c = getCol(exinfo);
+
+plot(exinfo.times/10, ...
+    sqrt(exinfo.resvars)./ max(sqrt(exinfo.resvars)), ...
+    'Color', lines(1), 'LineWidth', 1); hold on;
+plot(exinfo.times_drug/10, ...
+    sqrt(exinfo.resvars_drug)./ ...
+    max(sqrt(exinfo.resvars_drug)), ...
+    c, 'LineWidth', 1);
+
+plot([lat lat], get(gca, 'YLim'), 'Color', lines(1));
+plot([lat_drug lat_drug], get(gca, 'YLim'), c);
+
+
+xlabel('time');
+legend('base', exinfo.drugname);
+grid on;
+xlim([0 160]);
+
+end
+
+function plotRCxORxCO(exinfo)
+
+nplot = ceil(length(exinfo.sdfs.y(1,:))/2);
 
 c = hsv(length(exinfo.sdfs.s));
 h = figure('Name', exinfo.figname, 'UserData', exinfo, 'Position', [ 680   274   560   704]);
@@ -163,39 +285,29 @@ ylim([0 160]);
 
 
 % -------------------------------- latency
- if nplot > 3
-    
-    co = exinfo.sdfs.y(1,:);
-    [co, coidx] = sort(co);
-     
-    subplot(nplot*2, 2, nplot*4-1)
-    
-    plot(co, exinfo.sdfs.lat2hmax(coidx), '.--', 'Color', lines(1)); ho;
-    plot(co, exinfo.sdfs_drug.lat2hmax(coidx), '.--', 'Color', c);
-    plot(co, exinfo.sdfs.latFP(coidx), '.-', 'Color', lines(1)); ho;
-    plot(co, exinfo.sdfs_drug.latFP(coidx), '.-', 'Color', c);
-    xlabel('co'); set(gca, 'XScale', 'log');
-    title('latency (-fp, - -hmax/2)')
-    xlim([min(exinfo.sdfs.y(1,:)), max(exinfo.sdfs.y(1,:))])
-    
-    
-    subplot(nplot*2, 2, nplot*4)
-    plot(co, exinfo.sdfs.dur(coidx), '.-', 'Color', lines(1)); ho;
-    plot(co, exinfo.sdfs_drug.dur(coidx), '.-', 'Color', c);
-    xlabel('co'); set(gca, 'XScale', 'log');
-    title('duration (blue:baseline)');
-    xlim([min(exinfo.sdfs.y(1,:)), max(exinfo.sdfs.y(1,:))])
 
-    
- end
+co = exinfo.sdfs.y(1,:);
+[co, coidx] = sort(co);
+
+subplot(nplot*2, 2, nplot*4-1)
+
+plot(co, exinfo.sdfs.lat2hmax(coidx), '.--', 'Color', lines(1)); ho;
+plot(co, exinfo.sdfs_drug.lat2hmax(coidx), '.--', 'Color', c);
+plot(co, exinfo.sdfs.latFP(coidx), '.-', 'Color', lines(1)); ho;
+plot(co, exinfo.sdfs_drug.latFP(coidx), '.-', 'Color', c);
+xlabel('co'); set(gca, 'XScale', 'log');
+title('latency (-fp, - -hmax/2)')
+xlim([min(exinfo.sdfs.y(1,:)), max(exinfo.sdfs.y(1,:))])
+
+
+subplot(nplot*2, 2, nplot*4)
+plot(co, exinfo.sdfs.dur(coidx), '.-', 'Color', lines(1)); ho;
+plot(co, exinfo.sdfs_drug.dur(coidx), '.-', 'Color', c);
+xlabel('co'); set(gca, 'XScale', 'log');
+title('duration (blue:baseline)');
+xlim([min(exinfo.sdfs.y(1,:)), max(exinfo.sdfs.y(1,:))])
+
+
 
  
-
-
-
-%--------------------------------- save
-set(findobj('type', 'axes'), 'fontsize', 8)
-savefig(h, exinfo.fig_sdfs);
-close(h);
-
 end

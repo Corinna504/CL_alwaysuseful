@@ -1,12 +1,12 @@
-function mugui(expInfo)
+function mugui(exinfo)
 
 if nargin == 0
-    load('C:\Users\Corinna\Documents\CODE\CL_alwaysuseful\expInfo.mat', 'expInfo');
+    load('C:\Users\Corinna\Documents\CODE\CL_alwaysuseful\exinfo.mat', 'exinfo');
 end
 
-% expInfo = expInfo([expInfo.r2reg]>0);
-expInfo = addLM2Struct(expInfo);
-expInfo = addStruct(expInfo);
+% exinfo = exinfo([exinfo.r2reg]>0);
+exinfo = addLM2Struct(exinfo);
+exinfo = addStruct(exinfo);
 
 guiprop = PlotProps();
 fig2plot = {};
@@ -25,13 +25,13 @@ datacrit = guiprop.datacrit;
 stimulicond = guiprop.stimulicond;
 eyeopts = guiprop.eyeopts;
 
-markeredge = zeros(length(expInfo) ,3);
-markerface = zeros(length(expInfo) ,3);
-marker = repmat({'^'}, length(expInfo), 1);
+markeredge = zeros(length(exinfo) ,3);
+markerface = zeros(length(exinfo) ,3);
+marker = repmat({'^'}, length(exinfo), 1);
 
 dat = [];
 margins = 0.03;
-incl_i = 1:length(expInfo);
+incl_i = 1:length(exinfo);
 
 %%  gui code
 
@@ -386,17 +386,17 @@ fig2plot_check(10) = uicontrol(fig_h, ...
             if ~isempty(strfind(fctY, 'mitchel')) && isempty(strfind(spec.stimy, 'all'))
                 UpdateInclusion(editlatency_h, eventdata);
                 incl_i =  intersect( incl_i, ...
-                    find(cellfun(@(x) strcmp(x,spec.stimy), {expInfo.param1})));
+                    find(cellfun(@(x) strcmp(x,spec.stimy), {exinfo.param1})));
                 incl_i =  intersect( incl_i, ...
-                    find(~[expInfo.isRC]));
+                    find(~[exinfo.isRC]));
                 
 %                 incl_i =  intersect( incl_i, ...
-%                     find([expInfo.gslope]<1));
+%                     find([exinfo.gslope]<1));
                 
 %                 UpdatePlotSpec();
                 createPlotHelper(get(addHistograms, 'Value') );
 
-                dat.expInfo = expInfo(incl_i);
+                dat.exinfo = exinfo(incl_i);
                 set(gcf, 'UserData', dat);
                 
                 
@@ -407,13 +407,13 @@ fig2plot_check(10) = uicontrol(fig_h, ...
 %                 UpdatePlotSpec();
                 createPlotHelper(get(addHistograms, 'Value') );
             
-                dat.expInfo = expInfo(incl_i);
+                dat.exinfo = exinfo(incl_i);
                 set(gcf, 'UserData', dat);
                 
             %%% specific conditions are excluded
             else
                 UpdateInclusion(editlatency_h, eventdata);
-                dat = createUnitPlot(expInfo(incl_i), fctX, fctY, spec, ...
+                dat = createUnitPlot(exinfo(incl_i), fctX, fctY, spec, ...
                     fig2plot, get(addHistograms, 'Value'));
                 
                 set(gcf, 'UserData', dat);
@@ -438,7 +438,7 @@ fig2plot_check(10) = uicontrol(fig_h, ...
         fctX = axisopts{get(popX_h, 'Value')-1};
         fctY = axisopts{get(popY_h, 'Value')-1};
         
-        dat = evalMU(fctX, fctY, expInfo(incl_i));
+        dat = evalMU(fctX, fctY, exinfo(incl_i));
         
         % add histograms
         if hist_flag
@@ -490,17 +490,17 @@ fig2plot_check(10) = uicontrol(fig_h, ...
             for j = 1:size(dat.y, 1)
                 for i = 1:length(dat.x)
                     scatter(dat.x(i), dat.y(j, i), ...
-                        markerAssignment(dat.expInfo(i).param1),...
-                        'MarkerFaceColor', markerFaceAssignment( dat.expInfo(i) ),...
+                        markerAssignment(dat.exinfo(i).param1),...
+                        'MarkerFaceColor', markerFaceAssignment( dat.exinfo(i) ),...
                         'MarkerEdgeColor', markeredge(i,:), ...
-                        'ButtonDownFcn', {@DataPressed, expInfo(incl_i(i)), ...
+                        'ButtonDownFcn', {@DataPressed, exinfo(incl_i(i)), ...
                         dat.xlab, dat.ylab, fig2plot} );
                     hold on;
                 end
             end
         end
         
-        getID(expInfo(incl_i));
+        getID(exinfo(incl_i));
         xlabel(dat.xlab); ylabel(dat.ylab);
         hold off;
         set(gca, 'Position', pos_hist(3,:), 'UserData', dat);
@@ -519,7 +519,7 @@ fig2plot_check(10) = uicontrol(fig_h, ...
 
 %-------------------------------------------------------------------------
     function UpdateInclusion(check_incl, eventdata)
-        incl_i = 1:length(expInfo);
+        incl_i = 1:length(exinfo);
         
         %%% simple (logical) inclusion criteria
 %         UpdateHNfiles(strcmp(stimulicond(get(pop_Xspec, 'Value')), 'RC'), 1);
@@ -528,33 +528,37 @@ fig2plot_check(10) = uicontrol(fig_h, ...
                
         %%% simple numerical inclusion criteria
         UpdateInclusionHelper(1, ...
-            ['[expInfo.r2reg] ' get(editr2_h, 'String')]);
-        UpdateInclusionHelper(strcmp(stimulicond(get(pop_Xspec, 'Value')), 'RC'),...
-            ['[expInfo.lat] ' get(editlatency_h, 'String') ' & '...
-            '[expInfo.lat_drug] ' get(editlatency_h, 'String') ]);
+            ['[exinfo.r2reg] ' get(editr2_h, 'String')]);
+        datalatency = evalMU('latency base', 'latency drug', exinfo);
+        if strcmp(stimulicond(get(pop_Xspec, 'Value')), 'RC')
+            cond =  ['datalatency.x'  get(editlatency_h, 'String') ' & ' ...
+                'datalatency.y'  get(editlatency_h, 'String') ];                
+            eval(['incl_i = intersect( incl_i, find(' cond '));'] );
+        end
+        
         UpdateInclusionHelper(1,...
-            ['[expInfo.gaussr2] ' get(editr2gauss_h, 'String') ...
-            ' & [expInfo.gaussr2_drug] ' get(editr2gauss_h, 'String')]);
+            ['[exinfo.gaussr2] ' get(editr2gauss_h, 'String') ...
+            ' & [exinfo.gaussr2_drug] ' get(editr2gauss_h, 'String')]);
         
         % monkeys
-        UpdateInclusionHelper(r2.Value, '[expInfo.ismango]');
-        UpdateInclusionHelper(r3.Value, '~[expInfo.ismango]');
+        UpdateInclusionHelper(r2.Value, '[exinfo.ismango]');
+        UpdateInclusionHelper(r3.Value, '~[exinfo.ismango]');
         
         %%% data critera via popup popC_h
-        idx = getCritIdx(expInfo(incl_i), popC_h.String{popC_h.Value});
+        idx = getCritIdx(exinfo(incl_i), popC_h.String{popC_h.Value});
         incl_i = incl_i(idx);
     end
 
     function UpdateInclusionHelper(val, cond)
         if val
             eval(['incl_i = intersect( incl_i, find(' cond '));']);
-%             fprintf([cond '\n']);
+            fprintf([cond '\n']);
         end
     end
 
     function UpdateHNfiles(val, all_flag)
         if val
-            incl_i = intersect(incl_i, find( cmpFiles(expInfo, 'rc_all')));
+            incl_i = intersect(incl_i, find( cmpFiles(exinfo, 'rc_all')));
         end
     end
 
@@ -565,8 +569,8 @@ fig2plot_check(10) = uicontrol(fig_h, ...
 
 %     function editMarker(popM_h, eventdata)
 %         
-%         len = length(expInfo(incl_i));
-%         stimcond = {expInfo(incl_i).param1};
+%         len = length(exinfo(incl_i));
+%         stimcond = {exinfo(incl_i).param1};
 %         
 %         marker = repmat({'^'}, len, 1);
 %         

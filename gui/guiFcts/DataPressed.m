@@ -118,11 +118,9 @@ while j<=length(fig2plot)
             continue
             
         case 'Phase Select.'
-            datinfo(1).fig_phase = strrep(datinfo(1).fig_phase, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_phase, 'invisible');
             
         case 'smooth PSTH'
-            datinfo(1).fig_psth= strrep(datinfo(1).fig_psth, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_psth);
             ax = findobj(temp, 'Type', 'Axes');
             delete(ax([2,4]))
@@ -136,17 +134,6 @@ while j<=length(fig2plot)
             strrep(datinfo(1).fig_lfpPow, 'Analysis', 'GeneralFiles')
             temp = openfig(datinfo(1).fig_sdfs, 'invisible');
             ax = findobj(temp, 'Type', 'Axes');
-            if length(ax)<4
-                set(findobj(ax(1), 'LineStyle', '-'), ...
-                    'Color', lines(1), 'LineWidth', 1);
-                set(findobj(ax(1), 'LineStyle', '--'), ...
-                    'LineStyle', '-', 'LineWidth', 1);
-                ax(1).XLim = [0 160];
-                ax(2).XTick = [];   ax(3).XTick = [];
-                ax(1).XLabel.String = ax(2).XLabel.String ;
-                ax(2).XLabel.String = '';
-            end
-
     end
     
     

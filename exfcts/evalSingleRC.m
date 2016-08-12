@@ -3,13 +3,12 @@ function [ex, argout] = evalSingleRC( exinfo, fname )
 
 
 
-% load raw data
-ex = loadCluster( fname );
-ex.Trials = ex.Trials([ex.Trials.me] == exinfo.ocul);
-
-
 %% Mean and Variance
 ex_ = load( fname ); ex =ex_.ex;
+% ex.Trials = ex.Trials(1:ceil(length(ex.Trials)/2));   % to test for
+% changes in latency over time
+% ex.Trials = ex.Trials(floor(length(ex.Trials)/2):end);
+
 [ res, spkstats, fitparam ] = RCsubspace(ex);
 
 res = getLat2D(res, exinfo);
@@ -40,9 +39,7 @@ end
 
 
 
-function res = getLat2D(res, exinfo);
-
-
+function res = getLat2D(res, exinfo)
 
 psth = res.sdfs.psth;
 n_or = size(psth, 1);
@@ -71,7 +68,7 @@ for or = 1:n_or
         plot(0:0.1:160, res.sdfs.s{or,co}(201:end), 'Color', col); hold on;
         
         plot([latfp_orxco(or,kk) latfp_orxco(or,kk)], get(gca, 'YLim'), 'k' )
-        xlim([0,160]);
+        xlim([-10,160]);
         kk = kk+1;
     end
 end
@@ -86,6 +83,7 @@ h = findobj('Tag', 'done latency');
 if ~isempty(h)
     set(h, 'Name', exinfo.figname);
     savefig(h, exinfo.fig_raster);
+    close(h);
 end
 end
 

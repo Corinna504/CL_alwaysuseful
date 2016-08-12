@@ -49,7 +49,7 @@ close(h);
 %% add latency to exinfo
 
 exinfo.lat = [parB; latB'; pvalB'];
-exinfo.lat = [parD; latD'; pvalD'];
+exinfo.lat_drug = [parD; latD'; pvalD'];
 
 end
 
