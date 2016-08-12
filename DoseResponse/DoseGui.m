@@ -29,7 +29,8 @@ uicontrol(fig_h,...
 
     function call_ploterr(~, ~)
         delete(gca)
-        ploterr(setConstraints(dat), x_h.String{x_h.Value}, y_h.String{y_h.Value})
+        ploterr(setConstraints(dat), x_h.String{x_h.Value}, ...
+            y_h.String{y_h.Value}, z_h.String{z_h.Value})
         set(gca, 'Position', [0.35 0.15 0.6 0.7]);
         crossl;
     end

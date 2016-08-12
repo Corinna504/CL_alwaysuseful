@@ -94,7 +94,8 @@ uicontrol('Style', 'edit', ...
                 cellfun(@(x) (~isempty(strfind(x, 'c1')) || ...
                 ~isempty(strfind(x, 'c2'))) && ...
                 isempty(strfind(x, 'Pos')) && ...
-                isempty(strfind(x, 'sortKK')), ...
+                isempty(strfind(x, 'sortKK'))&& ...
+                isempty(strfind(x, 'XX')), ...
                 {fname.name}));
             
             set(h_files, 'Value', 1);
@@ -114,11 +115,11 @@ uicontrol('Style', 'edit', ...
         val = get(h_files, 'Value');
         
         dose = nan(length(val), 1);
-        id = dose;
+        id = nan(length(val), 1);
         stim = cell(length(val), 1);
-        meanspk = dose;
+        meanspk = nan(length(val), 1);
         for i = 1:length(val)
-            [temp, dose(i), id(i), stim{i}] = PlotTC(fdir,  fnames{val(i)}, ...
+            [temp, dose(i), volt(i), id(i), stim{i}] = PlotTC(fdir,  fnames{val(i)}, ...
                 'plot', false);
             
             [~, max_i] = max(mean(temp, 2));
@@ -158,7 +159,7 @@ uicontrol('Style', 'edit', ...
                     'ButtonDownFcn', {@PlotTC_helper, fdir, fnames{val(i)}} );
             end
             hold on;
-            text(j, meanspk(i)+1, stim{i});
+            text(j, meanspk(i), [stim{i} ',' num2str(volt(i))]);
         end
         
         
@@ -178,13 +179,13 @@ uicontrol('Style', 'edit', ...
             c = lines(length(val));
             figure;
             p = subplot(3,1,[1 2]);
-            dose = nan(length(val), 1);
+            dose = nan(length(val), 1); volt = nan(length(val), 1); 
             timeofrec = dose;
             exname = cell(length(val), 1);
             
             
             for i = 1:length(val)
-                [~, dose(i), timeofrec(i), ~] = PlotTC(fdir, fnames{val(i)}); h =gcf;
+                [~, dose(i), volt(i),timeofrec(i), ~] = PlotTC(fdir, fnames{val(i)}); h =gcf;
                 ax = findobj(gcf, 'Type', 'Axes');
                 set(findobj(ax.Children, 'Type', 'ErrorBar'), 'Color', c(i, :));
                 
@@ -199,9 +200,9 @@ uicontrol('Style', 'edit', ...
             subplot(3,1,3);
             ylim([0 length(val)]);
             for i = 1:length(val)
-                str = sprintf([exname{i} ' dose: ' ...
-                    num2str(dose(i))]);
-                text(0, length(val)-i, str, 'Color', c(i,:), 'FontSize', 12);
+                str = sprintf([exname{i} ' dose: %1.0f nA, %1.1f volt' ],...
+                    dose(i), volt(i));
+                text(0, length(val)-i, str, 'Color', c(i,:), 'FontSize', 10);
             end
             axis off            
             clear i exname ax val fnames fdir p c

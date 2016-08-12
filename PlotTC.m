@@ -1,4 +1,4 @@
-function [mnspk, dose, timeofrec, stim, varargout] = PlotTC( fdir, fname, varargin )
+function [mnspk, dose, volt, timeofrec, stim, varargout] = PlotTC( fdir, fname, varargin )
 % gives a first climps on the tuning curve of the file
 
 
@@ -28,35 +28,31 @@ end
 if ~isempty(strfind(fname, '5HTSB'))
     drugname = '5HT';
     lstyle = '--';
-    dose = getDose(ex);
-    
+    dose = getDose(ex); volt = getVolt(ex);
 elseif ~isempty(strfind(fname, '5HTKet'))
     drugname = '5HT';
     lstyle = '--';
-    dose = getDose(ex);
-    
+    dose = getDose(ex); volt = getVolt(ex);
 elseif ~isempty(strfind(fname, 'SB'))
     drugname = 'SB';
     lstyle = '--';
-    dose = getDose(ex);
-    
+    dose = getDose(ex); volt = getVolt(ex);
 elseif ~isempty(strfind(fname, 'Ket'))
     drugname = 'Ket';
     lstyle = '--';
-   dose = getDose(ex);
-    
+   dose = getDose(ex); volt = getVolt(ex);
 elseif ~isempty(strfind(fname, '5HT'))
     drugname = '5HT';
     lstyle = '--';
-   dose = getDose(ex);
+   dose = getDose(ex); volt = getVolt(ex);
 elseif ~isempty(strfind(fname, 'NaCl'))
     drugname = 'NaCl';
     lstyle = '--';
-   dose = getDose(ex);
+   dose = getDose(ex); volt = getVolt(ex);
 else
     drugname = 'Baseline';
     lstyle = '-';
-    dose = 0;
+    dose = 0; volt = getVolt(ex);
 end
 
 
@@ -199,19 +195,17 @@ end
 
 
 
-function dose = getDose(ex)
+function [dose, volt] = getDose(ex)
+
+dose = -10;
 
 if isfield(ex.Header, 'Headers')
     if isfield(ex.Header.Headers(1), 'iontophoresisEjectionCurrent')
         dose = ex.Header.Headers(1).iontophoresisEjectionCurrent;
-    else
-        dose = -10;
     end
 else
     if isfield(ex.Header, 'iontophoresisEjectionCurrent')
         dose = ex.Header.iontophoresisEjectionCurrent;
-    else
-        dose = -10;
     end
 end
 end
