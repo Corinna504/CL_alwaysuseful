@@ -34,7 +34,7 @@ if p_flag
     a1.FaceColor = [0.5 0.5 0.5]; a1.FaceAlpha = 0.4;
     a1.EdgeColor = 'w'; a1.EdgeAlpha = 0; hold on;
     
-    plot(-time:0.001:time, spkavelfp, ...
+    plot(-time:0.001:time, spkavelfp, 'Color',  lines(1),...
         'ButtonDownFcn', {@PlotSingleTrials, time, spklfp, spk, exLFP.Trials(t)});
     xlabel('time rel to spk [s]');
     ylabel('avg LFP');

@@ -15,6 +15,16 @@ drug = exinfo.ratemn_drug( ismember( s2, s1 ));
 [beta0, beta1, xvar] = ...
     perpendicularfit(cont, drug, var(drug)/var(cont));
 
+
+if any(drug<0)||any(cont<0)
+drug2 = drug + abs(min([drug; cont])); cont2 = cont +abs(min([drug; cont]));
+else
+   drug2 = drug; cont2 = cont; 
+end
+drug2 = drug2./max(cont2); cont2 = cont2./max(cont2);
+[beta0(2), beta1(2), xvar(2)] = ...
+    perpendicularfit(cont2, drug2, var(drug2)/var(cont2));
+
 % triangular fit
 % [Lt, beta1, xvarXY] = trianglefit(x, y) ;
 % beta0 = mean(y)-m*mean(x);
@@ -22,29 +32,53 @@ drug = exinfo.ratemn_drug( ismember( s2, s1 ));
 if p_flag
     
     h = figure('Name', exinfo.figname);
+    subplot(1,2,1);
     scatter(cont, drug, 100, getCol(exinfo), 'filled',...
         'MarkerFaceAlpha', 0.5); hold on;
-    
     if any(s1)>1000 && any(s2)>1000
         scatter(cont(end), drug(end), 100, 'g', 'filled',...
             'MarkerFaceAlpha', 0.5); hold on;
     end
-    
     eqax;
     xlim_ = get(gca, 'xlim');
-    plot(xlim_, xlim_.*beta1 + beta0, getCol(exinfo), 'LineWidth', 2); hold on;
+    plot(xlim_, xlim_.*beta1(1) + beta0(1), getCol(exinfo), 'LineWidth', 2); hold on;
     
     xlabel('baseline');
     ylabel(exinfo.drugname);
     
     title(sprintf( 'gain = %1.2f, add = %1.2f, \n r2=%1.2f', ...
-        beta1, beta0, xvar),'FontSize', 8);
+        beta1(1), beta0(1), xvar(1)),'FontSize', 8);
     unity; axis square; box off;
     
     ylim_ = get(gca, 'YLim');
     hold on
     plot([mean(cont) mean(cont)], ylim_, 'Color', [0.5 0.5 0.5 0.5])
     plot(xlim_, [mean(drug) mean(drug)], 'Color', [0.5 0.5 0.5 0.5])
+    
+    %%% normalized
+    subplot(1,2,2);
+        scatter(cont2, drug2, 100, getCol(exinfo), 'filled',...
+        'MarkerFaceAlpha', 0.5); hold on;
+    if any(s1)>1000 && any(s2)>1000
+        scatter(cont2(end), drug2(end), 100, 'g', 'filled',...
+            'MarkerFaceAlpha', 0.5); hold on;
+    end
+    eqax;
+    xlim_ = get(gca, 'xlim');
+    plot(xlim_, xlim_.*beta1(2) + beta0(2), getCol(exinfo), 'LineWidth', 2); hold on;
+    
+    xlabel('baseline');
+    ylabel(exinfo.drugname);
+    
+    title(sprintf( 'normalized gain = %1.2f, add = %1.2f, \n r2=%1.2f', ...
+        beta1(2), beta0(2), xvar(2)),'FontSize', 8);
+    unity; axis square; box off;
+    
+    ylim_ = get(gca, 'YLim');
+    hold on
+    plot([mean(cont) mean(cont)], ylim_, 'Color', [0.5 0.5 0.5 0.5])
+    plot(xlim_, [mean(drug) mean(drug)], 'Color', [0.5 0.5 0.5 0.5])
+    
     savefig(h, exinfo.fig_regl);
     close(h);
     

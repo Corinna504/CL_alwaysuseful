@@ -1,37 +1,41 @@
-function expInfo = addStruct( expInfo )
+function exinfo = addStruct( exinfo )
 % post hoc expansion of expInfo struct
 
 
-for i = 1:length(expInfo)
+for i = 1:length(exinfo)
     
-    if ~isempty(expInfo(i).fitparam)
-        if isfield(expInfo(i).fitparam, 'OR') 
-            maxi = find( max(expInfo(i).sdfs.y(1,:)) == max(expInfo(i).sdfs.y(1,:)), 1, 'first');
-            expInfo(i).gaussr2 = expInfo(i).fitparam.OR(maxi).r2; 
+    if ~isempty(exinfo(i).fitparam)
+        if isfield(exinfo(i).fitparam, 'OR') && isfield(exinfo(i).fitparam, 'r2');
+            maxi = find( max(exinfo(i).sdfs.y(1,:)) == max(exinfo(i).sdfs.y(1,:)), 1, 'first');
+            exinfo(i).gaussr2 = exinfo(i).fitparam.OR(maxi).r2; 
+        elseif isfield(exinfo(i).fitparam, 'r2');
+            exinfo(i).gaussr2 = exinfo(i).fitparam.r2;
         else
-            expInfo(i).gaussr2 = expInfo(i).fitparam.r2;
+            exinfo(i).gaussr2 = 0;
         end
     else
-        expInfo(i).gaussr2 = 0;
+        exinfo(i).gaussr2 = 0;
     end
-    
-    if ~isempty(expInfo(i).fitparam_drug)
-        if isfield(expInfo(i).fitparam_drug, 'OR')
-            maxi = find( max(expInfo(i).sdfs_drug.y(1,:)) == max(expInfo(i).sdfs_drug.y(1,:)), 1, 'first');
-            expInfo(i).gaussr2 = expInfo(i).fitparam_drug.OR(maxi).r2;
+       
+    if ~isempty(exinfo(i).fitparam_drug)
+        if isfield(exinfo(i).fitparam_drug, 'OR') && isfield(exinfo(i).fitparam_drug, 'r2')
+            maxi = find( max(exinfo(i).sdfs_drug.y(1,:)) == max(exinfo(i).sdfs_drug.y(1,:)), 1, 'first');
+            exinfo(i).gaussr2 = exinfo(i).fitparam_drug.OR(maxi).r2;
+        elseif isfield(exinfo(i).fitparam_drug, 'r2')
+            exinfo(i).gaussr2_drug = exinfo(i).fitparam_drug.r2;
         else
-            expInfo(i).gaussr2_drug = expInfo(i).fitparam_drug.r2;
+            exinfo(i).gaussr2_drug = 0;
         end
     else
-        expInfo(i).gaussr2_drug = 0;
+        exinfo(i).gaussr2_drug = 0;
     end
     
-    if isempty( expInfo(i).lat )
-        expInfo(i).lat = -10;
+    if isempty( exinfo(i).lat )
+        exinfo(i).lat = -10;
     end
     
-    if isempty( expInfo(i).lat_drug )
-        expInfo(i).lat_drug = -10;
+    if isempty( exinfo(i).lat_drug )
+        exinfo(i).lat_drug = -10;
     end
     
 %     if expInfo(i).id == 176 && expInfo(i).isRC

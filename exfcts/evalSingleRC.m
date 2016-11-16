@@ -10,6 +10,15 @@ ex_ = load( fname ); ex =ex_.ex;
 % ex.Trials = ex.Trials(floor(length(ex.Trials)/2):end);
 
 [ res, spkstats, fitparam ] = RCsubspace(ex);
+if isempty(strfind(fname, '5HT')) && isempty(strfind(fname, 'NaCl'))
+    set(gcf, 'Name', [exinfo.figname '_base']);
+    savefig(gcf, [exinfo.fig_sdfs(1:end-4) '_mlfit_drug.fig'])
+else
+    set(gcf, 'Name', [exinfo.figname '_drug']);
+    savefig(gcf, [exinfo.fig_sdfs(1:end-4) '_mlfit_base.fig'])
+end
+
+close all
 
 res = getLat2D(res, exinfo);
 

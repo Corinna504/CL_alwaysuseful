@@ -150,7 +150,7 @@ UpdateAxes([], [])
         axes(ax_spktrigavg_t); hold off; 
         spktriglfp( exspk, exlfp, 'plot', true, 'rawflag', true);
         sta_base = spktriglfp(exspk, exlfp, 'plot', true);
-        ylim auto
+        ax_spktrigavg_t.Children(1).LineStyle = '--'; ylim auto
 
         % Spike Field Coherence
         axes(ax_spkfieldcoh); hold off; 
@@ -181,6 +181,7 @@ UpdateAxes([], [])
         axes(ax_spktrigavg_t2); hold off; 
         spktriglfp( exspk_drug, exlfp_drug, 'plot', true, 'rawflag', true);
         sta_drug = spktriglfp( exspk_drug, exlfp_drug, 'plot', true); ylim auto
+       ax_spktrigavg_t2.Children(1).LineStyle = '--';
         
         % Spike Field Coherence
         axes(ax_spkfieldcoh2); hold off; 
@@ -240,6 +241,7 @@ UpdateAxes([], [])
         set(findobj(ax_spktrigavg_t_cmp,'type', 'line'), 'Color', 'k');
         hold on
         spktriglfp( exspk_drug, exlfp_drug, 'plot', true);
+
         title('blue: raw     filtered:red'); ylim auto
         
         %----------------------------- stimulus averaged values

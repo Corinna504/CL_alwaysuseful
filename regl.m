@@ -35,12 +35,12 @@ if strcmp(get(gca, 'XScale'), 'log')
 %         mdl.Coefficients.Estimate(1), 'b--', 'LineWidth', 2); hold on;
 
     
-    [beta0, beta1] = fit_bothsubj2error(log(xdat), ydat); ho;
+    [beta0, beta1] = fit_bothsubj2error(log(xdat), ydat, var(ydat)/var(log(xdat))); ho;
     plot(get(gca, 'xlim'), log(get(gca, 'xlim')).*beta1 +beta0, 'k--', 'LineWidth', 2);
    
 else
     nani=isnan(xdat)|isnan(ydat); 
-    [beta0, beta1] = fit_bothsubj2error(xdat(~nani), ydat(~nani)); ho; 
+    [beta0, beta1] = fit_bothsubj2error(xdat(~nani), ydat(~nani), var(ydat(~nani))/var(xdat(~nani))); ho; 
     plot(get(gca, 'xlim'), get(gca, 'xlim').*beta1 +beta0, 'k--', 'LineWidth', 2)
 end
 

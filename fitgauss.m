@@ -6,7 +6,11 @@ theta   = theta( theta < 370 );    % ignore blanks
 spkmn   = spkmn( theta < 370 );
 spksd  = spksd( theta < 370 );
 
-theta_val = mod(theta, 180);        % collapse data
+if any(theta>100)
+ theta_val = mod(theta, 180);        % collapse data
+else
+    theta_val = theta;
+end
 uqang = unique(theta_val);
 
 %%% get mean and standard deviation of collapsed data
@@ -16,15 +20,17 @@ if nargin < 4
         val.sd(i, 1)   = spksd(theta_val == uqang(i));
     end
 else
-    uqang = val.uqang;
+    uqang = val.uqang; % unique orientation angles
 end
 
 
 %%% center around data with highest peak
 pk = uqang(find(max(val.mn) == val.mn, 1, 'first'));
 
-uqang(uqang <= pk-90) = uqang(uqang <= pk-90) +180;
-uqang(uqang >= pk+90) = uqang(uqang >= pk+90) -180;
+if any(any(uqang>100))
+    uqang(uqang <= pk-90) = uqang(uqang <= pk-90) +180;
+    uqang(uqang >= pk+90) = uqang(uqang >= pk+90) -180;
+end
 
 [val.uqang, idx] = sort(uqang);
 val.mn = val.mn(idx);
@@ -33,11 +39,11 @@ val.sd = val.sd(idx);
 %%% transpose if necessary
 if size(val.uqang, 2) > size(val.uqang, 1);     val.uqang = val.uqang'; end
 
-if sum(pk <= uqang) > 4
+if sum(pk <= uqang) > 4 && any(uqang>100)
     val.uqang = [val.uqang(1)-22.5; val.uqang];
     val.mn = [val.mn(end); val.mn];
     val.sd = [val.sd(end); val.sd];
-elseif sum(pk <= uqang) < 4
+elseif sum(pk <= uqang) < 4 && any(uqang>100)
     val.uqang = [val.uqang; val.uqang(end)+22.5];
     val.mn = [val.mn; val.mn(1)];
     val.sd = [val.sd; val.sd(1)];
@@ -67,10 +73,10 @@ r2 = gof2.rsquare;
 
 
 % shift if the preferred orientation is outside 0-180 window
-if fitpar.mu > 180
+if fitpar.mu > 180 && any(uqang>100)
     fitpar.mu = fitpar.mu -180;
     val.uqang = val.uqang-180;
-elseif  fitpar.mu < 0
+elseif  fitpar.mu < 0 && any(uqang>100)
     fitpar.mu = fitpar.mu +180;
     val.uqang = val.uqang+180;
 end

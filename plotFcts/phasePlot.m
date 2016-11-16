@@ -1,46 +1,76 @@
-function phasePlot( exinfo )
-% plots the two heat maps of stimuliXphase against each other
-
-h = figure('Name', exinfo.figname, 'UserData', exinfo);
-
-colormap(jet);
-
-%%% Baseline
-stimwoblank = exinfo.ratepar( exinfo.ratepar < 1000 );
-
-subplot(2,1,1);
-imagesc('XData',1:4,'YData',1:length(stimwoblank),'CData', exinfo.phaseRespM);
-
-title(sprintf(['baseline f1/f0 all (' exinfo.param1 ' = %1.1f) =%1.2f (%1.2f)'], ...
-    exinfo.ratepar(exinfo.pfi), exinfo.phasesel));
-set(gca, 'YTick', 1:length(stimwoblank), 'YTickLabel', cellstr(num2str(stimwoblank')), 'XTick', []);
-
-ylabel(exinfo.param1);
-ylim([0.5 length(stimwoblank)+0.5])
-xlim([0.5 4.5]);
-colorbar
+function exinfo = phasePlot( exinfo, ex0, ex2 )
 
 
-%%% Drug
-stimwoblank = exinfo.ratepar_drug( exinfo.ratepar_drug < 1000 );
+hnew = figure('Name', exinfo.figname, 'UserData', exinfo, ...
+    'Position', [288   144   849   853]);
 
-subplot(2,1,2);
-imagesc('XData',1:4,'YData', 1:length(stimwoblank),'CData', exinfo.phaseRespM_drug);
+%%
+% load baseline and 5HT/NaCl plots
+exinfo.phasesel = getPhaseSelectivity(ex0, 'stim', exinfo.param1, 'plot',true);
+h0 = gcf;
+ax0 = h0.Children(2:end);
 
-title(sprintf([exinfo.drugname ' f1/f0 all (' exinfo.param1 ' = %1.1f) =%1.2f (%1.2f)'], ...
-    exinfo.ratepar_drug(exinfo.pfi_drug), exinfo.phasesel_drug));
-
-xlabel('phase'); ylabel(exinfo.param1);
-set(gca, 'YTick', 1:length(stimwoblank),  'YTickLabel', cellstr(num2str(stimwoblank')), ...
-    'Xtick', 1:4);
-ylim([0.5 length(stimwoblank)+0.5])
-xlim([0.5 4.5]);
-colorbar
+exinfo.phasesel_drug = getPhaseSelectivity(ex2, 'stim', exinfo.param1, 'plot',true);
+h2 = gcf;
+ax2 = h2.Children(2:end);
 
 
-savefig(h, exinfo.fig_phase);
 
-close(h);
+%% Plot in new Figure
+figure(hnew)
+% psth with stimulus
+for i = 1:length(ax0)-2
+    s0(i) = subplot(length(ax0)-2, 3, (i*3)-2);
+    copyobj(ax0(i+2).Children, s0(i));
+    title(ax0(i+2).Title.String)
+    x = ax0(i+2).Children.XData;
+    xlim([x(1) x(end)]); xlabel spk/s;
+end
+for i = 1:length(ax2)-2
+    s2(i) = subplot(length(ax2)-2, 3, (i*3)-1);
+    copyobj(ax2(i+2).Children, s2(i));
+    title(ax2(i+2).Title.String); 
+    xlim([x(1) x(end)]); xlabel spk/s;
+end
+
+s0(1).Title.String = sprintf(['Baseline \n' s0(1).Title.String]);
+s2(1).Title.String = sprintf([exinfo.drugname '\n' s2(1).Title.String]);
+
+% f1/f0 vs stimulus
+s(1) = subplot(2, 3, 3);
+plot(vertcat(ax0(2).Children.XData)', ...
+    vertcat(ax0(2).Children.YData)'); hold on
+plot(vertcat(ax2(2).Children.XData)', ...
+    vertcat(ax2(2).Children.YData)', getCol(exinfo)); 
+legend('baseline', exinfo.drugname);
+xlabel stim;    ylabel f1/f0;
+
+% f1/f0 vs stimulus - Baseline
+s(2) = subplot(4, 3, 9);
+plot(ax0(1).Children(1).XData, ax0(1).Children(1).YData, '--', 'Color', lines(1)); hold on;
+plot(ax0(1).Children(1).XData, ax0(1).Children(2).YData, '-', 'Color', lines(1)); 
+title(['Baseline: ' ax0(2).Title.String])
+legend( h0.Children(1).String)
+
+
+% f1/f0 vs stimulus - Drug
+s(3) = subplot(4, 3, 12);
+plot(ax2(1).Children(1).XData, ax2(1).Children(1).YData, '--', 'Color', getCol(exinfo)); hold on;
+plot(ax2(1).Children(1).XData, ax2(1).Children(2).YData, '-', 'Color', getCol(exinfo)); 
+title([exinfo.drugname ':' ax2(2).Title.String])
+legend( h2.Children(1).String)
+
+set(s, 'XTick', ax0(2).XTick, 'XTickLabel', ax0(2).XTickLabel, ...
+    'XLim', ax0(2).XLim); 
+set(findobj(hnew, 'Type', 'axes'), 'FontSize', 8)
+
+xlabel stim;
+
+
+%%
+savefig(hnew, exinfo.fig_phase);
+
+close(hnew); close(h0); close(h2);
 
 end
 

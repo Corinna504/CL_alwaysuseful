@@ -28,11 +28,11 @@ if isempty(res)
         fname = '';
     end
     
-    if isempty(strfind(fname, 'CO'))
+%     if isempty(strfind(fname, 'CO'))
         res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot');
-    else
-        res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot', 'exp2', 'co_seq');
-    end
+%     else
+%         res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot', 'exp2', 'co_seq');
+%     end
 end
    
 if isfield(res, 'vars')

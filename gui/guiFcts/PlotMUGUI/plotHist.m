@@ -52,9 +52,18 @@ end
 
 med_r = nanmedian(val(i_sub));
 med_b = nanmedian(val(~i_sub));
+qua_r =  quantile(val(i_sub), [.25 .75]);
+qua_b =  quantile(val(~i_sub), [.25 .75]);
 
 mn_r = nanmean(val(i_sub));
 mn_b = nanmean(val(~i_sub));
+std_r = nanstd(val(i_sub));
+std_b = nanstd(val(~i_sub));
+
+
+
+
+
 
 
 if strcmp(ax_spec, 'log')
@@ -72,10 +81,10 @@ if strcmp(ax_spec, 'log')
 else
     
     title(cax, sprintf(['p_{tt}=%1.3f, p_{wilc}=%1.3f \n n_{red}=%1.0f , p_{ttvs0}=%1.3f,  p_{wilvs0}=%1.3f,  '...
-        '\\mu=%1.2f, med=%1.2f' ...
-        '\n n_{black}=%1.0f , p_{ttvs0}=%1.3f,  p_{wilvs0}=%1.3f, \\mu=%1.2f, med=%1.2f'], ...
-        p_tt, p_wil, length(val(i_sub)), p20r, psignr, mn_r, med_r, ...
-        length(val(~i_sub)), p20b, psignb, mn_b, med_b), 'FontSize', 8, 'FontWeight', 'bold');
+        '\\mu=%1.2f +/- %1.2f, med=%1.2f qu = %1.2f, %1.2f' ...
+        '\n n_{black}=%1.0f , p_{ttvs0}=%1.3f,  p_{wilvs0}=%1.3f, \\mu=%1.2f +/- %1.2f, med=%1.2f qu = %1.2f, %1.2f'], ...
+        p_tt, p_wil, length(val(i_sub)), p20r, psignr, mn_r, std_r,  med_r, qua_r(1), qua_r(2),...
+        length(val(~i_sub)), p20b, psignb,  mn_b, std_b,  med_b, qua_b(1), qua_b(2)), 'FontSize', 8, 'FontWeight', 'bold');
     
     
 end

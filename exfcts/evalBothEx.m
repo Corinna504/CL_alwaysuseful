@@ -32,13 +32,20 @@ exinfo.upfi_drug = find(exinfo.ratepar_drug == exinfo.ratepar( exinfo.upfi ));
 
 
 %% gain change
-[exinfo.gslope, ...
-    exinfo.yoff, ...
-    exinfo.r2reg] = ...
-    type2reg(exinfo, p_flag);
+[gslope, yoff, r2] = type2reg(exinfo, p_flag);
+
+exinfo.gslope = gslope(1);
+exinfo.yoff = yoff(1);
+exinfo.r2reg = r2(1);
+
+
+exinfo.gslope_rel = gslope(2);
+exinfo.yoff_rel = yoff(2);
+exinfo.r2reg_rel = r2(2);
+
 
 %% fitting parameters
-if isfield(exinfo.fitparam, 'others')
+if isfield(exinfo.fitparam, 'others') && isfield(exinfo.fitparam.others, 'OR')
     
     %%% orientation
     for i = 1:length(exinfo.fitparam.others.OR)
@@ -104,12 +111,18 @@ if strcmp(exinfo.param1, 'or');
         if abs(exinfo.fitparam.mu - exinfo.fitparam_drug.mu) > 150
             if exinfo.fitparam.mu < exinfo.fitparam_drug.mu
                 exinfo.fitparam.mu = exinfo.fitparam.mu +180;
+                exinfo.fitparam.val.uqang = exinfo.fitparam.val.uqang +180;
             elseif exinfo.fitparam_drug.mu < exinfo.fitparam.mu
                 exinfo.fitparam_drug.mu = exinfo.fitparam_drug.mu +180;
+                exinfo.fitparam_drug.val.uqang = exinfo.fitparam_drug.val.uqang +180;
             end
         end
     end
 end
+
+
+
+
 end
 
 

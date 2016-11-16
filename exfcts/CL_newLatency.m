@@ -20,9 +20,6 @@ res.lat = res.sdfs.lat2hmax(co_idx);
 res.dur = res.sdfs.dur(co_idx);
 res.latFP = res.sdfs.latFP(co_idx);
 
-
-
-
 end
 
 
@@ -39,7 +36,7 @@ sd      = sqrt(vars);
 noise   = mean(sd(200:400)); 
 
 
-if max(sd)>mean(noise)*3.5
+if max(sd)>mean(noise)*4
     
     sd2 = sd-noise;     % normalizer for baseline variability
     
@@ -51,8 +48,9 @@ if max(sd)>mean(noise)*3.5
     dur = times(idx)/10 - lat2hmax;
     
     [latfp, ~, pPoisson] = friedmanpriebe(round(sd(200:end).*100), ...
-        'minTheta', 250, 'responseSign', 0);
+        'minTheta', 250, 'responseSign', 0, 'graphics', true);
     latfp = latfp/10;
+    
 end
 
 end

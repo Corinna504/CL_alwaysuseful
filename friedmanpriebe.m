@@ -179,7 +179,7 @@ if (p.Results.graphics)
      ylabel 'Cumulative Spike Count'
     suptitle ('Press any key to continue...')
     disp('Press any key to continue...')
-     pause
+%      pause
 end
 
 end
@@ -207,6 +207,7 @@ end
 function  v= fastfactorial(n)
 % Same as Matlab factorial except that it does not check that n is 
 % integer, >=0, double and real (this checking takes most of the time).
+n = round(n);
 N = n(:);
 n(N>170) = 171;
 m = max([1; n(:)]);

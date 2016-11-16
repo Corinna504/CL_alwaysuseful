@@ -3,15 +3,23 @@ function dat = createUnitPlot(expInfo, fctX, fctY, spec, fig2plot, hist_flag)
 
 
 % get Data per Unit
-dat.expInfo = getUnitComp(spec, expInfo);
+[ix, iy] = getUnitComp(spec, expInfo);
 
-val = evalMU(fctX, fctY, dat.expInfo);
 
-dat.x = val.x; 
-dat.y = val.y;
+% if the 
+if all(ix==iy)
+    val = evalMU(fctX, fctY, expInfo(ix&iy));
+    dat.x = val.x;
+    dat.y = val.y;
+else
+    val = evalMU(fctX, fctY, expInfo(ix|iy));
+    dat.x = val.x(ix);
+    dat.y = val.y(iy);
+end
 dat.xlab = [val.xlab ' '  spec.stimx ' ' spec.eyex];
 dat.ylab = [val.ylab ' ' spec.stimy ' ' spec.eyey];
 dat.expInfo = val.exinfo;
+
 clearvars val
 
 
@@ -80,13 +88,14 @@ if hist_flag
 end
 
 for i = 1:length(dat.x)
-    scatter(dat.x(i), dat.y(i), ...
-        markerAssignment(dat.expInfo(i)),...
-        'MarkerFaceColor', markerFaceAssignment( dat.expInfo(i) ),...
-        'MarkerEdgeColor', markerface(i,:), ...
-        'MarkerFaceAlpha', 0.7,...
-        'ButtonDownFcn', { @DataPressed, dat.expInfo(i), ...
-        dat.xlab, dat.ylab, fig2plot} );
+        scatter(dat.x(i), dat.y(i), 50, ...
+            markerAssignment(dat.expInfo(i).param1, dat.expInfo(i).monkey ),...
+            'MarkerFaceColor', markerFaceAssignment( dat.expInfo(i) ),...
+            'MarkerEdgeColor', markerface(i,:), ...
+            'MarkerFaceAlpha', 0.4,...
+            'ButtonDownFcn', { @DataPressed, dat.expInfo(i), ...
+            dat.xlab, dat.ylab, fig2plot} );
+
     hold on;
 end
 

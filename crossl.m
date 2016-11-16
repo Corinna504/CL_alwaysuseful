@@ -1,4 +1,4 @@
-function crossl 
+function x=  crossl 
 
 hold on;
 ax = gca;
@@ -7,17 +7,17 @@ xlim_ = get(ax, 'xlim');
 ylim_ = get(ax, 'ylim');
 
 if strcmp(get(ax, 'xscale'), 'log')
-    plot([1 1], ylim_, 'k--');
+   x(1) = plot([1 1], ylim_, 'k--');
 else
-    plot([0 0], ylim_, 'k--');
+    x(1) =plot([0 0], ylim_, 'k--');
 end
 
 
 if strcmp(get(ax, 'yscale'), 'log')
-    plot(xlim_, [1 1], 'k--');
+    x(2) =plot(xlim_, [1 1], 'k--');
 else
 %     plot( [min(horzcat(c.XData)) max(horzcat(c.XData))] , [0 0], 'k--');
-    plot(xlim_, [0 0], 'k--');
+   x(2) = plot(xlim_, [0 0], 'k--');
 end
 
 
@@ -27,9 +27,9 @@ ylim(ylim_);
 try
     ax = gca;
     for i = 1:2
-        ax.Children(i).Color = [0 0 0 0.3];
-        ax.Children(i).LineStyle = '-';
-        ax.Children(i).LineWidth = 2;
+        x(i).Color = [0 0 0 0.3];
+        x(i).LineStyle = '-';
+        x(i).LineWidth = 2;
     end
     uistack(ax.Children(1:2), 'bottom');
 catch

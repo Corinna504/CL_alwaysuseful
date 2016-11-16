@@ -76,27 +76,23 @@ while j<=length(fig2plot)
             axis square
             
         case 'Tuning Curve'
-            if datinfo(1).isRC && ~isempty(strfind(datinfo(1).fname, 'CO'))
-                openfig(datinfo(1).fig_tc);
-                j = j+1;
-                continue
-            else
+%             if datinfo(1).isRC && ~isempty(strfind(datinfo(1).fname, 'CO'))
+%                 openfig(datinfo(1).fig_tc);
+%                 j = j+1;
+%                 continue
+%             else
                 temp = openfig(datinfo(1).fig_tc, 'invisible');
-            end            
+%             end            
         case 'Wave Form'
-            datinfo(1).fig_waveform = strrep(datinfo(1).fig_waveform, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_waveform, 'invisible');
             
         case 'Regression'
-            datinfo(1).fig_regl = strrep(datinfo(1).fig_regl, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_regl, 'invisible');
             
         case 'ISI'
-            datinfo(1).fig_bri = strrep(datinfo(1).fig_bri, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_bri, 'invisible');
             
         case 'Raster'
-            datinfo(1).fig_raster = strrep(datinfo(1).fig_raster, 'Analysis', 'GeneralFiles');
             temp = openfig(datinfo(1).fig_raster, 'invisible');
             
             ax = findobj(temp, 'Type', 'axes');
@@ -118,8 +114,13 @@ while j<=length(fig2plot)
             continue
             
         case 'Phase Select.'
-            temp = openfig(datinfo(1).fig_phase, 'invisible');
-            
+            temp = openfig(datinfo(1).fig_phase);  
+            if exist( datinfo(1).fig_phasetf )
+                temp = openfig(datinfo(1).fig_phasetf);
+            end
+            j = j+1; 
+
+            continue
         case 'smooth PSTH'
             temp = openfig(datinfo(1).fig_psth);
             ax = findobj(temp, 'Type', 'Axes');
@@ -131,9 +132,18 @@ while j<=length(fig2plot)
             %             continue
             
         case 'Spike Density'
-            strrep(datinfo(1).fig_lfpPow, 'Analysis', 'GeneralFiles')
-            temp = openfig(datinfo(1).fig_sdfs, 'invisible');
-            ax = findobj(temp, 'Type', 'Axes');
+%                 openfig([datinfo(1).fig_sdfs(1:end-4) '_mlfit_drug.fig']);
+%                 openfig([datinfo(1).fig_sdfs(1:end-4) '_mlfit_base.fig']);
+                
+            if isempty(strfind(datinfo(1).fname, 'CO'))
+                temp = openfig(datinfo(1).fig_sdfs, 'invisible');
+                ax = findobj(temp, 'Type', 'Axes');
+            else
+                temp = openfig(datinfo(1).fig_sdfs);
+                j = j+1;
+                pos = pos+1;
+                continue
+            end
     end
     
     

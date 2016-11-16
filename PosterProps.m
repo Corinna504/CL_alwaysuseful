@@ -51,11 +51,9 @@ function PosterProps(ax, xlim_, ylim_, varargin)
 
 
 
-set(gcf, 'Position', [492   269   650   600]);
+set(gcf, 'Position', [492   269   550   500]);
 axis square 
 box off
-
-delete(findobj(gca, 'Type', 'Line'));
 
 
 fsz = 25;
@@ -87,9 +85,6 @@ while j <= length(varargin)
     j = j+1;
 end
        
-if delete_unity
-    delete(findobj(ax, 'LineStyle', '--'));
-end
 
 
 set(ax, 'xlim', [xlim_(1) xlim_(2)], ...
@@ -97,7 +92,7 @@ set(ax, 'xlim', [xlim_(1) xlim_(2)], ...
         'XTick', [xlim_(1) xlim_(2)], ...
         'YTick', [ylim_(1) ylim_(2)], ...
         'TickDir', 'out', ...
-        'LineWidth', 1, ...
+        'LineWidth', 0.5, ...
         'XTickLabel', {num2str(xlim_(1)), num2str(xlim_(2)) }, ...
         'YTickLabel', {num2str(ylim_(1)), num2str(ylim_(2)) }, ...
         'Position', [0.2 0.2 0.6 0.6], 'FontSize', fsz);
@@ -111,24 +106,19 @@ set(findobj(ax,'Type', 'Errorbar'), 'MarkerSize', 10);
 
 
 if unity_flag 
-    unity;
-    h = findobj(ax,'LineStyle', '--', 'Color', 'k');
-    set(h, 'Color', ones(1,3)*greyf, 'LineStyle', '-', 'LineWidth', 4)
-    h = ax.Children(1:length( ax.Children.findobj('Type', 'Line') ));
+    u=unity;
+    u.Color = ones(1,3)*greyf;
 end
 if cross_flag
-    crossl
-    h = findobj(ax, 'LineStyle', '--');
-    set(h, 'Color', ones(1,3)*greyf, 'LineStyle', '-', 'LineWidth', 4)
-    
-    uistack(ax.Children(1:2), 'bottom');
+    c = crossl;
+    set(c, 'Color', ones(1,3)*greyf);
 end
    
 
 ax.XLabel.String = '';
 ax.YLabel.String = '';
 ax.Layer = 'top';
-ax.LineWidth = 2;
+ax.LineWidth = 1;
 
 end
 

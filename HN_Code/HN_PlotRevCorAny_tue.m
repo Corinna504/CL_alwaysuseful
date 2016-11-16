@@ -269,10 +269,10 @@ end
 
 
 result.calctime(1) = now;
-colors =  mycolors;
-excolors = mycolors;
-excolors{4} = [0.6 0.4 0]; %% dotted yellow invisible
-colors = {colors{:} colors{:}}; % just in case second order makes many lines
+% colors =  mycolors;
+% excolors = mycolors;
+% excolors{4} = [0.6 0.4 0]; %% dotted yellow invisible
+% colors = {colors{:} colors{:}}; % just in case second order makes many lines
 if ~isfield(Expt.Header,'RCparams')
     if isfield(Expt.Header,'StoreErr')
         for j = 1:length(Expt.Trials)

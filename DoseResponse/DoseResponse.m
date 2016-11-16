@@ -1,58 +1,30 @@
-function dat = DoseResponse(filename)
+function dat = DoseResponse()
 
 
-clear dat 
-fileID = fopen(filename, 'r');
+clear dat
+fileID = fopen('filenames.txt', 'r');
 fnames = textscan(fileID, '%s'); fnames = fnames{1};
-fnames = strrep(fnames, 'J', 'D');
 
-fdir = 'D:\data';
-
-if isempty(strfind(fnames{1}, 'mango'))
-    uidx = 14:17;
-else 
-    uidx = 15:18;
-end
 dat = struct('unit', []);
 
-i =1;
-for k = 1:length(fnames)
+figure;
+
+for i = 1:length(fnames)
+
     
-    fdir = [fnames{k}(1:uidx(end)), '\'];
-    fprintf('processing k=%1.0f \n', k);
-    if isempty(strfind(fnames{k}, 'CO')) || ~isempty(strfind(fnames{k}, 'RC'))
-        continue
-    end
+    fdir = [fnames{i}(1:18) '\'];
+    dat(i).fname = fnames{i}(19:end);
+    dat(i).unit = str2double(fdir(15:18));
     
-    dat(i).fdir = fdir;
-    dat(i).fname = fnames{k}(19:end);
-    dat(i).unit = str2double(fdir(uidx));
     dat(i).is5HT= ~isempty(strfind(dat(i).fname, '5HT'));
-    dat(i).isNaCl= ~isempty(strfind(dat(i).fname, 'NaCl'));
     dat(i).isc1 = ~isempty(strfind(dat(i).fname, 'c1'));
-    dat(i).isRC = ~isempty(strfind(fnames{k}, 'RC'));
-    
-    % and get mean firing rate
-    [mnspk, dat(i).dose, dat(i).timeofrec, dat(i).stim, dat(i).vals] = ...
-        PlotTC( fdir, dat(i).fname, 'plot', false );
-    [~, mnspk_i] = max(max(mnspk,[],2));
-    mnspk = mnspk(mnspk_i, :);
-    
-    if strcmp(dat(i).stim, 'co') 
-        dat(i).fitparam = fitCO(mnspk, dat(i).vals);
-        dat(i).auc = dat(i).fitparam.auc;
-    else
-        dat(i).fitparam = [];
-        dat(i).auc = 0;
-    end
     
     
     % add the experiment number in the order of recording
     if length(dat)==1
         dat(i).numinexp = 1;
     else
-        if dat(i).unit==dat(i-1).unit && dat(i).isc1 == dat(i-1).isc1 ...
-                && strcmp(dat(i).stim, dat(i-1).stim)
+        if dat(i).unit==dat(i-1).unit && dat(i).isc1 == dat(i-1).isc1
             dat(i).numinexp = dat(i-1).numinexp+1;
         else
 %             plotDat(dat, i)
@@ -61,58 +33,39 @@ for k = 1:length(fnames)
     end
             
 
-    if dat(i).dose >= 1
-        if dat(i).dose <= 10
-            dat(i).bindose=5;
-        elseif dat(i).dose <= 20
-            dat(i).bindose=15;
-        elseif dat(i).dose <= 30
-            dat(i).bindose=25;
-        elseif dat(i).dose <= 40
-            dat(i).bindose=35;
-        else
-            dat(i).bindose=45;
-        end
-    elseif dat(i).dose == 0
-        dat(i).bindose=0;
-    else
-        dat(i).bindose=-1;
-    end
-        
-        
+    % and get mean firing rate
+    [mnspk, dat(i).dose, dat(i).timeofrec] = PlotTC( fdir, dat(i).fname, 'plot', false );
+%     if abs(dat(i).dose-5)<=2
+%         dat(i).dose=5;
+%     elseif abs(dat(i).dose-15)<=2
+%         dat(i).dose=15;
+%     elseif abs(dat(i).dose-20)<=2
+%         dat(i).dose=20;
+%     elseif abs(dat(i).dose-25)<=2
+%         dat(i).dose=25;
+%     end
+    
     dat(i).frate = mnspk;
     
     % get the firing relative to the baseline response
-    ind = find([dat.unit]==dat(i).unit & [dat.numinexp]==1 & ...
-        [dat.isc1] == dat(i).isc1 & strcmp({dat.stim}, dat(i).stim), 1, 'first');
+    ind = find([dat.unit]==dat(i).unit & [dat.numinexp]==1 & [dat.isc1] == dat(i).isc1, 1, 'first');
     
     % only gain
-    try
-        stim1 = ismember(dat(i).vals, dat(ind).vals);
-        stim2 = ismember(dat(ind).vals, dat(i).vals);
-        
-    [dat(i).yoff, dat(i).gslope,...
-        dat(i).regr2] =perpendicularfit(dat(ind).frate(stim1), dat(i).frate(stim2), ...
-                    var(dat(i).frate(stim2))/var(dat(ind).frate(stim1)));
-    catch ME
-        warning(ME.message)
-    end
-    
-%     dat(i).relfrate = log(dat(i).relfrate);
-    dat(i).relauc = dat(i).auc/dat(ind).auc;
-    
+    [dat(i).linfrate, dat(i).relfrate] = ...
+        fit_bothsubj2error(dat(ind).frate, dat(i).frate);
+    dat(i).relfrate = log(dat(i).relfrate);
     
     % alternatively modulation index
     dat(i).moduidx = (sum(dat(i).frate) - sum(dat(ind).frate)) / ....
         (sum(dat(i).frate) + sum(dat(ind).frate));
-    i = i+1;
 end
 
 
-% if dat(1).relfrate == 1
-%     set(gca, 'YScale', 'log');
-% end
-% crossl
+
+if dat(1).relfrate == 1
+    set(gca, 'YScale', 'log');
+end
+crossl
 
 for unt = unique([dat.unit])
     for cluster = 1:2

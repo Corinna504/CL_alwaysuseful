@@ -22,15 +22,18 @@ load(fname);
 
 
 % collapse orientations to [0 180]
-if isfield(ex.Trials, 'or')
+if strcmp(ex.exp.e1.type, 'or')
     trials = mod([ex.Trials.or], 180)'; trials = num2cell(trials);
     idx = [ex.Trials.or]<=360;
     [ex.Trials(idx).or] = deal(trials{idx});
+elseif strcmp(ex.exp.e1.type, 'co')
+    co = [ex.Trials.co]'; co(co>1000)=0; 
+    co = num2cell(co);
+    [ex.Trials.co] = deal(co{:});
 end
-
 % pupil sizes 
 if isempty(strfind(fname, 'c0')) && isempty(strfind(fname, 'lfp'))
-    [~, ex.Trials] = fctPupilSizeTrial(ex, fname, p_flag);
+%     [~, ex.Trials] = fctPupilSizeTrial(ex, fname, p_flag);
 end
 
 

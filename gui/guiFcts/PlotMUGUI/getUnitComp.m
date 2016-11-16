@@ -1,6 +1,7 @@
-function expInfo_out = getUnitComp(spec, expInfo)
+function [ix, iy] = getUnitComp(spec, expInfo)
 % when there are is a comparison inside a unit this functions looks
 % to assign the data correctly
+
 
 if strcmp(spec.stimx, 'all stimuli cond') && ~(strcmp(spec.stimy, spec.stimx))
     ix = findCorrespStimIdx(spec.stimy, spec.eyex, expInfo, 0);
@@ -14,7 +15,7 @@ else
 end
 
 % expInfo_out = singleUnitsOnly(expInfo(ix | iy));
-expInfo_out = expInfo(ix & iy);
+% expInfo_out = expInfo(ix & iy);
 end
 
 
@@ -28,10 +29,9 @@ end
 switch speceye
     case 'all'
         eye_spec = zeros(1, length(expInfo));
-        
-        for uid = unique([expInfo.idi]);
+        for idi = unique([expInfo.idi]);
             
-            idx = find([expInfo.idi] == uid);
+            idx = find([expInfo.idi] == idi);
             [~, maxi] =  max( cellfun(@max, {expInfo(idx).ratemn} ) );
             
             if ~isempty(idx)

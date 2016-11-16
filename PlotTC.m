@@ -14,7 +14,7 @@ end
 
 
 % load file
-load(fullfile(fdir, fname));
+ex = loadCluster(fullfile(fdir, fname));
 if isfield(ex.Header, 'fileID')
     timeofrec = datenum(ex.Header.fileID);
 elseif isfield(ex.Header, 'Headers') 
@@ -56,42 +56,54 @@ else
 end
 
 
-
-if ~isempty(strfind(fname, 'CO'))
-    stim = 'co';
-elseif ~isempty(strfind(fname, 'OR'))
-    stim = 'or';
-elseif ~isempty(strfind(fname, 'SF'))
-    stim = 'sf';
-elseif ~isempty(strfind(fname, 'TF'))
-    stim = 'tf';
-elseif ~isempty(strfind(fname, 'SZ'))
-    stim = 'sz';
-else
-   error('do not know which parameter was manipulated'); 
-end
-
+type = ex.exp.e1.type;
 
 if isempty(strfind(fname, 'RC'))
-    mnspk = getspkDG(ex, p_flag, drugname, dose, lstyle, stim, fname);
+    [mnspk, vals, me] = getspkDG(ex, p_flag, drugname, dose, lstyle, type, fname);
 else
-    [ ~, mn_rate, ~ ] = RCsubspace(ex, 'plot' ,p_flag);    
-    mnspk = [mn_rate.mn];
+    res = HN_computeLatencyAndNetSpk([],ex, 'lat_flag', false);
+    
+    if size(res.netSpikesPerFrame, 2)>1
+        [~, idx] = max(res.sdfs.y(1,:));
+        mnspk = res.netSpikesPerFrame(:, idx)';
+        vals = res.sdfs.x(:, idx);
+    else
+        mnspk = res.netSpikesPerFrame';
+        vals = res.sdfs.x;
+    end
+    
+    if  p_flag
+        figure('Name', fname);
+        if strcmp(drugname, 'Baseline');
+            plot(mnspk, 'Displayname', 'base');
+        else
+            plot(mnspk, '--', 'Displayname', drugname)
+        end
+        for i_n = 1:length(mnspk)            
+            text(i_n, mnspk(i_n), num2str(res.sdfs.n(i_n)), ...
+                'FontSize', 10);
+        end
+            
+    end
+end
+stim.val = vals;
+stim.type = type;
+varargout{1} = sort(unique([ex.Trials.(type)]));
+varargout{2} = drugname;
 end
 
-varargout{1} = sort(unique([ex.Trials.(stim)]));
-end
 
 
+function [mnspk, vals, me] = getspkDG(ex, p_flag, drugname, dose, lstyle, type, fname)
 
-function mnspk = getspkDG(ex, p_flag, drugname, dose, lstyle, stim, fname)
+ex.Trials = ex.Trials([ex.Trials.Reward]== 1);
 
 % preallocate variables
 me = unique([ex.Trials.me]);
 me = sort(me);
-vals = unique([ex.Trials.(stim)]);
+vals = unique([ex.Trials.(type)]);
 
-mnspk = nan(length(me), length(vals));
+mnspk = zeros(length(me), length(vals));
 sdspk = mnspk;
 ntrial= mnspk;
 
@@ -100,27 +112,13 @@ ntrial= mnspk;
 for i_me = 1:length(me)
     for i_vals = 1:length(vals)
         
-        trials = ex.Trials( [ex.Trials.Reward]== 1 & ...
-            [ex.Trials.me]== me(i_me) & ...
-            [ex.Trials.(stim)]== vals(i_vals) );
-        
-        
+        trials = ex.Trials([ex.Trials.me]== me(i_me) & ...
+            [ex.Trials.(type)]== vals(i_vals) );
+       
         n = length(trials);
-        spkrate = nan(1, n);
         
-        for i  = 1:n
-            
-            t_strt = trials(i).Start - trials(i).TrialStart;
-            t_strt = [t_strt t_strt(end)+mean(diff(t_strt))];
-            
-            spk = trials(i).Spikes >= t_strt(1) & ...
-                trials(i).Spikes <= t_strt(end);
-            
-            spkrate(i) = sum(spk) / (t_strt(end)-t_strt(1));
-        end
-        
-        mnspk(i_me, i_vals) = nanmean( spkrate );
-        sdspk(i_me, i_vals) = nanstd( spkrate );
+        mnspk(i_me, i_vals) = nanmean( [trials.spkRate] );
+        sdspk(i_me, i_vals) = nanstd( [trials.spkRate] )/sqrt(n);
         
         ntrial(i_me, i_vals) = n;
     end
@@ -135,11 +133,12 @@ if p_flag
     
     for i_me = 1:length(me)
         errorbar(mnspk(i_me, :), sdspk(i_me, :), ...
-            'Color',col(i_me, :), 'LineWidth', 1.5, 'LineStyle', lstyle);
+            'Color',col(i_me, :), 'LineWidth', 1.5, 'LineStyle', lstyle, ...
+            'Displayname', num2str(me(i_me)));
         hold on;
         for i_n = 1:length(ntrial)            
             text(i_n, mnspk(i_me, i_n), num2str(ntrial(i_me, i_n)), ...
-                'FontWeight', 'bold');
+                'FontSize', 10);
         end
     end
     
@@ -149,12 +148,11 @@ if p_flag
         Header = ex.Header;
     end
     
-    
-    legend(cellstr(num2str(me')));
+    legend('show')
     set(gca, 'XTick', 1:length(vals), ...
         'XTickLabel', cellstr(num2str(vals')));
     volt = getVolt(ex);
-    plot(get(gca, 'xlim'), [0 0], 'Color', [0.5 0.5 0.5]);
+    
     
     if ~isempty(strfind(fname, '5HTSB'))
         title(sprintf('5HT   %1.0f nA, %1.2f volt \n SB %1.0f nA, %1.2f volt', ...
@@ -186,7 +184,7 @@ if p_flag
         title(drugname);
     end
     
-    xlabel(stim); ylabel('spike rate');
+    xlabel(type); ylabel('spike rate');
 end
 
 
@@ -197,15 +195,15 @@ end
 
 function [dose, volt] = getDose(ex)
 
-dose = -10;
+dose = nan;
 
 if isfield(ex.Header, 'Headers')
     if isfield(ex.Header.Headers(1), 'iontophoresisEjectionCurrent')
-        dose = ex.Header.Headers(1).iontophoresisEjectionCurrent;
+        dose = ex.Header.Headers(1).iontophoresisEjectionCurrent(1);
     end
 else
     if isfield(ex.Header, 'iontophoresisEjectionCurrent')
-        dose = ex.Header.iontophoresisEjectionCurrent;
+        dose = ex.Header.iontophoresisEjectionCurrent(1);
     end
 end
 end
@@ -213,17 +211,14 @@ end
 
 function volt = getVolt(ex)
 
+volt = nan;
 if isfield(ex.Header, 'Headers')
     if isfield(ex.Header.Headers(1), 'iontophoresisVoltage')
         volt = ex.Header.Headers(1).iontophoresisVoltage;
-    else
-        volt = -10;
     end
 else
     if isfield(ex.Header, 'iontophoresisVoltage')
         volt = ex.Header.iontophoresisVoltage;
-    else
-        volt = -10;
     end
 end
 end

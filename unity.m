@@ -1,5 +1,4 @@
-
-function unity()
+function u = unity()
 % plots a unity line in the current axis
 
 hold on;
@@ -17,13 +16,13 @@ if strcmp(get(gca, 'XScale'), 'log') && strcmp(get(gca, 'YScale'), 'log')
             xlim_(1) = minx;
         end
     end
-    plot(xlim_', xlim_', '--k');
+    u = plot(xlim_', xlim_', '--k');
 elseif strcmp(get(gca, 'XScale'), 'log')
-    plot(xlim_, xlim_, '--c');
+    u = plot(xlim_, xlim_, '--c');
 elseif strcmp(get(gca, 'YScale'), 'log')
-    plot(ylim_, ylim_, '--k');
+    u = plot(ylim_, ylim_, '--k');
 else
-    plot(xlim_, xlim_, '--k');
+    u = plot(xlim_, xlim_, '--k');
 end
 
 try

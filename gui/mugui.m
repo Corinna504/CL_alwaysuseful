@@ -4,11 +4,9 @@ if nargin == 0
     load('C:\Users\Corinna\Documents\CODE\CL_alwaysuseful\exinfo.mat', 'exinfo');
 end
 
-% exinfo = exinfo([exinfo.r2reg]>0);
 exinfo = addLM2Struct(exinfo);
-exinfo = addStruct(exinfo);
-
 guiprop = PlotProps();
+
 fig2plot = {};
 
 %% predefining
@@ -21,6 +19,7 @@ colorOpts = guiprop.faceColorOpts;
 edgeColorOpts = guiprop.edgeColorOpts;
 markerOpts = guiprop.markerOpts;
 datacrit = guiprop.datacrit;
+electrodecrit = guiprop.electrodecrit;
 
 stimulicond = guiprop.stimulicond;
 eyeopts = guiprop.eyeopts;
@@ -88,7 +87,7 @@ txt = uicontrol(fig_h, 'Style','text',...
     'HorizontalAlignment', 'left');
 editr2_h = uicontrol(fig_h, 'Style','edit',...
     'Position',[pos(3)*(margins+0.05) pos(4)*0.24 pos(3)*0.04 pos(4)*0.03], ...
-    'String', ' > -inf ', ...
+    'String', ' > 0.7 ', ...
     'Callback', @UpdateInclusion);
 
 %------------------------- gain restriction
@@ -109,7 +108,7 @@ txt3 = uicontrol(fig_h, 'Style','text',...
     'HorizontalAlignment', 'left');
 editr2gauss_h = uicontrol(fig_h, 'Style','edit',...
     'Position',[pos(3)*(margins+0.05) pos(4)*0.12 pos(3)*0.04 pos(4)*0.03], ...
-    'String', ' > -inf ' , ...
+    'String', ' > 0.7 ' , ...
     'Callback', @UpdateInclusion);
 
 
@@ -126,6 +125,13 @@ popC_h = uicontrol(fig_h, ....
     'Style',  'popupmenu',...
     'String', datacrit,...
     'Position', [pos(3)*margins pos(4)*0.7 pos(3)*0.15 pos(4)*0.1],...
+    'Callback', @UpdateInclusion);
+
+%--------------------------- popup for Data Criteria - Electrode broken
+popEcrit_h = uicontrol(fig_h, ....
+    'Style',  'popupmenu',...
+    'String', electrodecrit,...
+    'Position', [pos(3)*margins pos(4)*0.65 pos(3)*0.15 pos(4)*0.1],...
     'Callback', @UpdateInclusion);
 
 %--------------------------- radiobuttons for monkeys
@@ -390,10 +396,6 @@ fig2plot_check(10) = uicontrol(fig_h, ...
                 incl_i =  intersect( incl_i, ...
                     find(~[exinfo.isRC]));
                 
-%                 incl_i =  intersect( incl_i, ...
-%                     find([exinfo.gslope]<1));
-                
-%                 UpdatePlotSpec();
                 createPlotHelper(get(addHistograms, 'Value') );
 
                 dat.exinfo = exinfo(incl_i);
@@ -404,7 +406,6 @@ fig2plot_check(10) = uicontrol(fig_h, ...
             elseif (strcmp(spec.stimx, 'all stimuli cond') && strcmp(spec.stimy, 'all stimuli cond') ...
                     && strcmp(spec.eyex, 'all') && strcmp(spec.eyey, 'all'))
                 UpdateInclusion(editlatency_h, eventdata);
-%                 UpdatePlotSpec();
                 createPlotHelper(get(addHistograms, 'Value') );
             
                 dat.exinfo = exinfo(incl_i);
@@ -491,7 +492,7 @@ fig2plot_check(10) = uicontrol(fig_h, ...
                 for i = 1:length(dat.x)
                     scatter(dat.x(i), dat.y(j, i), ...
                         markerAssignment(dat.exinfo(i).param1),...
-                        'MarkerFaceColor', markerFaceAssignment( dat.exinfo(i) ),...
+                        'MarkerFaceColor', markerFaceAssignment( dat.exinfo(i).param1 ),...
                         'MarkerEdgeColor', markeredge(i,:), ...
                         'ButtonDownFcn', {@DataPressed, exinfo(incl_i(i)), ...
                         dat.xlab, dat.ylab, fig2plot} );
@@ -524,11 +525,31 @@ fig2plot_check(10) = uicontrol(fig_h, ...
         %%% simple (logical) inclusion criteria
 %         UpdateHNfiles(strcmp(stimulicond(get(pop_Xspec, 'Value')), 'RC'), 1);
         
+        % monkeys
+        UpdateInclusionHelper(r2.Value, '[exinfo.ismango]');
+        UpdateInclusionHelper(r3.Value, '~[exinfo.ismango]');
         
-               
-        %%% simple numerical inclusion criteria
+        %%% data critera via popup popC_h (highest dose, etc..)
+        idx1 = getCritIdx(exinfo(incl_i), popC_h.String{popC_h.Value});
+        incl_i = incl_i(idx1);
+
+        idx2 = getElectrodeCrit(exinfo(incl_i), popEcrit_h.String{popEcrit_h.Value});
+        incl_i = incl_i(idx2);
+        
+        %%% global inclusion criteria
+        UpdateInclusionHelper(~strcmp(stimulicond(get(pop_Yspec, 'Value')), 'RC'),...
+            'cellfun(@max, {exinfo.ratemn}) > 10 ');
+        
+%         UpdateInclusionHelper(1,...
+%             'cellfun(@(x) x<150, {exinfo.resistance})');
+        
+        UpdateInclusionHelper(1,...
+            'cellfun(@(x) isnan(x) || x<150, {exinfo.resistance})');
+
+        %%% gui set numerical inclusion criteria
         UpdateInclusionHelper(1, ...
             ['[exinfo.r2reg] ' get(editr2_h, 'String')]);
+        
         datalatency = evalMU('latency base', 'latency drug', exinfo);
         if strcmp(stimulicond(get(pop_Xspec, 'Value')), 'RC')
             cond =  ['datalatency.x'  get(editlatency_h, 'String') ' & ' ...
@@ -538,15 +559,10 @@ fig2plot_check(10) = uicontrol(fig_h, ...
         
         UpdateInclusionHelper(1,...
             ['[exinfo.gaussr2] ' get(editr2gauss_h, 'String') ...
-            ' & [exinfo.gaussr2_drug] ' get(editr2gauss_h, 'String')]);
+            ' & [exinfo.gaussr2_drug] ' get(editr2gauss_h, 'String')])    
         
-        % monkeys
-        UpdateInclusionHelper(r2.Value, '[exinfo.ismango]');
-        UpdateInclusionHelper(r3.Value, '~[exinfo.ismango]');
+%         incl_i(incl_i==652)=[];
         
-        %%% data critera via popup popC_h
-        idx = getCritIdx(exinfo(incl_i), popC_h.String{popC_h.Value});
-        incl_i = incl_i(idx);
     end
 
     function UpdateInclusionHelper(val, cond)
@@ -562,34 +578,15 @@ fig2plot_check(10) = uicontrol(fig_h, ...
         end
     end
 
-%-------------------------------------------------------------------------
-%     function UpdatePlotSpec()
-%         editMarker(popM_h);
-%     end
-
-%     function editMarker(popM_h, eventdata)
-%         
-%         len = length(exinfo(incl_i));
-%         stimcond = {exinfo(incl_i).param1};
-%         
-%         marker = repmat({'^'}, len, 1);
-%         
-%         
-%         if get(popM_h, 'Value') == 2
-%             for kk = 1:len
-%                 marker{kk} = markerAssignment(stimcond{kk});
-%             end
-%         end
-%     end
-
 %--------------------------------------------------------------------------
     function UpdateAxes(fctX, fctY)
         
-        axrg = [0.125 8];
+        axrg = [0.0625 16];
         allax = findobj(gcf, 'Type', 'axes');
         
         % X AXES
-        if (~isempty(strfind(fctX, 'gain')) || ~isempty(strfind(fctX, 'fano')))
+        if (~isempty(strfind(fctX, 'gain')) || ~isempty(strfind(fctX, 'fano')) || ...
+                ~isempty(strfind(fctX, 'nonparam')))
             
             % log scaled axes
             if length(allax) > 1
@@ -600,7 +597,7 @@ fig2plot_check(10) = uicontrol(fig_h, ...
         end
         
         % Y AXES
-        if (~isempty(strfind(fctY, 'gain')) || ...
+        if (~isempty(strfind(fctY, 'gain')) || ~isempty(strfind(fctY, 'nonparam')) ||...
                 (~isempty(strfind(fctY, 'fano')) && isempty(strfind(fctY, 'diff'))))
             
             if length(allax) >1
@@ -631,16 +628,34 @@ end
     end
 
     
-function my_closereq(src,callbackdata)
-% Close request function 
-% to display a question dialog box 
-   selection = questdlg('Close This Figure?',...
-      'Close Request Function',...
-      'Yes','No','Yes'); 
-   switch selection, 
-      case 'Yes',
-         delete(gcf)
-      case 'No'
-      return 
-   end
+    function my_closereq(src,callbackdata)
+    % Close request function
+    % to display a question dialog box
+    selection = questdlg('Close This Figure?',...
+        'Close Request Function',...
+        'Yes','No','Yes');
+    switch selection,
+        case 'Yes',
+            delete(gcf)
+        case 'No'
+            return
+    end
+    end
+
+
+
+function idx = getElectrodeCrit(exinfo, crit)
+% returns the index for exinfo that fullfiles the electrode criteria crit in each
+% session
+switch crit
+    case 'all'
+        idx = 1:length(exinfo);
+    case 'broken only'
+        idx = find([exinfo.electrodebroken]);
+    case 'unbroken only'
+        idx = find(~[exinfo.electrodebroken]);
+    case 'neg volt'
+        idx = find([exinfo.volt]<0);
+end
+
 end
