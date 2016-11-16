@@ -1,10 +1,30 @@
-function h = rasterPlot( exinfo, ex, ex_drug)
-%UNTITLED7 Summary of this function goes here
-%   Detailed explanation goes here
+function rasterPlot( exinfo, ex, ex_drug )
+% classical raster plot for both conditions with stimulus indicating color 
+% and lines indicating trial that were first in the fixation period
+% 
+% saves the figure in exinfo.fig_raster
+% 
+% @CL 16.11.2016
+% 
 
+
+% --------------------------------------- plot
 h = figure('Name', exinfo.figname, 'UserData', exinfo, ...
     'Position', [680   156   560   822]);
+rasterPlotHelper(exinfo, ex, ex_drug)
 
+% --------------------------------------- save
+savefig(h, exinfo.fig_raster);
+close(h);
+end
+
+
+
+%%
+function rasterPlotHelper(exinfo, ex, ex_drug)
+% this is the meta function for the true plotting
+% it calls to plot the raster for each condition with plotCondition(..) 
+% and the stimulus annotation in the lower part of the figure
 
 if exinfo.isadapt
     time = 0:0.001:5;
@@ -12,84 +32,63 @@ else
     time = -0.05:0.001:0.45;
 end
 
-
 % baseline raster
 subplot(8,2,1:2:14);
-rasterPlotHelper(addWindow(exinfo, ex.Trials), ...
-    time, exinfo, exinfo.ratepar)
+plotCondition(addWindow(exinfo, ex.Trials), time, exinfo.param1, exinfo.ratepar)
 title('baseline');
-
 
 % drug raster
 subplot(8,2,2:2:14);
-rasterPlotHelper(addWindow(exinfo, ex_drug.Trials), ...
-    time, exinfo, exinfo.ratepar)
+plotCondition(addWindow(exinfo, ex_drug.Trials), time, exinfo.param1, exinfo.ratepar)
 title(exinfo.drugname);
 
-
-% parameter specification
+% stimulus parameter and corresponding color
 subplot(8,2, [15 16]);
-l = length(exinfo.ratepar);
-xlim([0, l+1]);
+l = length(exinfo.ratepar); 
+xlim([0, l+1]); 
 col = lines(l);
 for pos = 1:l
     plot([pos-0.5, pos+0.5], [0 0], 'Color', [col(pos, :) 0.5], 'LineWidth', 3);
     hold on;
-    text(pos-0.35, 0, sprintf('%1.2f ', exinfo.ratepar(pos)), ...
-        'FontSize', 9);
+    text(pos-0.35, 0, sprintf('%1.2f ', exinfo.ratepar(pos)), 'FontSize', 9);
 end
-text(0.5, 0.5, sprintf( [exinfo.param1 ', tf= %1.1f, grey=window 1'], exinfo.tf), ...
-    'FontSize', 9);
+text(0.5, 0.5, [exinfo.param1 ', grey=1st trial'], 'FontSize', 9);
 axis off;
-
-
-
-savefig(h, exinfo.fig_raster);
-close(h);
-
-
 end
 
 
 
-
-function rasterPlotHelper(Trials, time, exinfo, parvls)
+function plotCondition(Trials, time, param, parvls)
 %%% plot the raster matrix according to different stimuli
-% also indcate phase and window 
+% also indicate phase and window 
 
 row_i = 1;
 col = lines(length(parvls));
-for phase = 1:4
-   
-    plot([time(1) time(end)], [row_i row_i], 'Color', [0.2 0.2 0.2]);
-    
-    for par_i = 1:length(parvls)
-        trials = Trials( [Trials.(exinfo.param1)] == parvls(par_i) & ...
-                    [Trials.phase] == phase );
-        
-        row_i = getRasterPlotMatrix(trials, time, row_i, col(par_i, :));
-        row_i = row_i+0.3;
 
-    end
+% all the trials 
+for par_i = 1:length(parvls)
+    trials = Trials( [Trials.(param)] == parvls(par_i));
     
+    row_i = getRasterPlotMatrix(trials, time, row_i, col(par_i, :));
+    row_i = row_i+0.3;
 end
 
-
-xlim([-0.05 0.45]);
-ylim([1, row_i-0.3]);
+xlim([-0.05 0.45]); ylim([1, row_i-0.3]);
 plot([0 0], [1, row_i-0.3], 'Color', [0.5 0.5 0.5]);
-box off;
-set(gca, 'Clipping', 'off', 'TickDir', 'out')
 
-
+set(gca, 'Clipping', 'off', 'TickDir', 'out'); box off;
 end
 
 
 function [y_idx, raster] = getRasterPlotMatrix(Trials, time, y_idx, col)
+% converts the time stemps of spikes into a sequence of 0s and 1s, with 1s
+% indicating a spike event. Each row is one trial.
 
+% initiate raster
 raster = nan(length(time), length(Trials));
 
-%%% compute a raster matrix
+
+
 % each row is a trial, each column a time bin
 for t = 1:length(Trials)
     
@@ -101,12 +100,12 @@ for t = 1:length(Trials)
     
     % spikes in the time range
     spk =  Trials(t).Spikes(...
-        Trials(t).Spikes>=t_strt(1)+min(time) & ...
-        Trials(t).Spikes<=t_strt(end))-t_strt(1)  ;
+        Trials(t).Spikes>=t_strt(1)+min(time) &  Trials(t).Spikes<=t_strt(end));
+    spk = spk-t_strt(1); % align spikes to stimulus onset
     
-    % adding it to the raster matrix
+    % adding each spike event as '1' to the raster matrix
     idx = round(( spk + abs(time(1)) ) *1000);
-    idx(idx==0) = 1; % avoid bad indexing
+    idx(idx==0) = 1; % avoid an index of 0
     raster(idx, t) = 1;
     
     % plotting
