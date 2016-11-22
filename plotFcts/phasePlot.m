@@ -50,7 +50,7 @@ s(2) = subplot(4, 3, 9);
 plot(ax0(1).Children(1).XData, ax0(1).Children(1).YData, '--', 'Color', lines(1)); hold on;
 plot(ax0(1).Children(1).XData, ax0(1).Children(2).YData, '-', 'Color', lines(1)); 
 title(['Baseline: ' ax0(2).Title.String])
-legend( h0.Children(1).String)
+legend( 'f0', 'f1')
 
 
 % f1/f0 vs stimulus - Drug
@@ -58,7 +58,7 @@ s(3) = subplot(4, 3, 12);
 plot(ax2(1).Children(1).XData, ax2(1).Children(1).YData, '--', 'Color', getCol(exinfo)); hold on;
 plot(ax2(1).Children(1).XData, ax2(1).Children(2).YData, '-', 'Color', getCol(exinfo)); 
 title([exinfo.drugname ':' ax2(2).Title.String])
-legend( h2.Children(1).String)
+legend( 'f0', 'f1')
 
 set(s, 'XTick', ax0(2).XTick, 'XTickLabel', ax0(2).XTickLabel, ...
     'XLim', ax0(2).XLim); 

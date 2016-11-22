@@ -293,7 +293,7 @@ switch fctname
         
     case 'BRI ACF base'
         for i = 1:length(exinfo)
-            if ~isempty(exinfo(i).bridx)
+            if ~isempty(exinfo(i).bridx) && exinfo(i).bridx(1)<1000
                 val(i) = exinfo(i).bridx(1);
             else
                 val(i) = nan;
@@ -301,12 +301,19 @@ switch fctname
         end
     case  'BRI ACF drug'
         for i = 1:length(exinfo)
-            if ~isempty(exinfo(i).bridx)
+            if ~isempty(exinfo(i).bridx) && exinfo(i).bridx(2)<1000
                 val(i) = exinfo(i).bridx(2);
             else
                 val(i) = nan;
             end
         end
+        
+    case  'BRI ACF diff'
+        val = assignFct('BRI ACF base', exinfo) - ...
+            assignFct('BRI ACF drug', exinfo);
+        
+        lab = [lab ' (base-drug)'];
+        
     case 'BRI ISI base'
         for i = 1:length(exinfo)
             if ~isnan(exinfo(i).isi_frct)
@@ -323,6 +330,13 @@ switch fctname
                 val(i) = nan;
             end
         end
+        
+    case  'BRI ISI diff'
+        val = assignFct('BRI ISI base', exinfo) - ...
+            assignFct('BRI ISI drug', exinfo);
+        
+        lab = [lab ' (base-drug)'];
+        
         
     case 'SMI'
         val = (cellfun(@max, {exinfo.ratemn}) - cellfun(@max, {exinfo.ratemn_drug}))  ./ ...

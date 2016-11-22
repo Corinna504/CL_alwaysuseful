@@ -200,7 +200,7 @@ uicontrol('Style', 'edit', ...
             subplot(8,2,[4  6 8 10 12]);
                [cont, drug] = getConditions(drugname, mnspk, stim); 
             
-               max_ =max(max(vertcat(mnspk{:})));
+            max_ =max(max(vertcat(mnspk{:})));
             xlim_ = [-(max_/2) max_];
             c = lines(size(mnspk{1}, 1)); param = [];
             for i =1:size(mnspk{1}, 1)

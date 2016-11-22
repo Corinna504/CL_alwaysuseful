@@ -104,8 +104,8 @@ me = sort(me);
 vals = unique([ex.Trials.(type)]);
 
 mnspk = zeros(length(me), length(vals));
-sdspk = mnspk;
-ntrial= mnspk;
+semspk = mnspk;
+nrep= mnspk;    % number of stimulus repetitions
 
 
 % loop through ocularity and stimulus variation to derive spk rate
@@ -118,9 +118,9 @@ for i_me = 1:length(me)
         n = length(trials);
         
         mnspk(i_me, i_vals) = nanmean( [trials.spkRate] );
-        sdspk(i_me, i_vals) = nanstd( [trials.spkRate] )/sqrt(n);
+        semspk(i_me, i_vals) = nanstd( [trials.spkRate] )/sqrt(n);
         
-        ntrial(i_me, i_vals) = n;
+        nrep(i_me, i_vals) = n;
     end
 end
 
@@ -132,14 +132,18 @@ if p_flag
     col = lines(length(me));
     
     for i_me = 1:length(me)
-        errorbar(mnspk(i_me, :), sdspk(i_me, :), ...
+        errorbar(mnspk(i_me, vals<1000), semspk(i_me, vals<1000), ...
             'Color',col(i_me, :), 'LineWidth', 1.5, 'LineStyle', lstyle, ...
             'Displayname', num2str(me(i_me)));
         hold on;
-        for i_n = 1:length(ntrial)            
-            text(i_n, mnspk(i_me, i_n), num2str(ntrial(i_me, i_n)), ...
+        for i_n = 1:length(nrep)            
+            text(i_n, mnspk(i_me, i_n), num2str(nrep(i_me, i_n)), ...
                 'FontSize', 10);
         end
+    end
+    
+    if any(vals > 1000)
+        plot(get(gca, 'XLim'), [mnspk(vals > 1000) mnspk(vals > 1000)], '--');
     end
     
     if isfield(ex.Header, 'Headers')

@@ -65,7 +65,6 @@ for ind = 1:length(ex.Trials)
     highpassfilt = ex.Trials(ind).LFP - ...
         mean(ex.Trials(ind).LFP(ts>=-0.05 & ts<=0));
 
-
     %%% lowpass and notch filter
     lowpassfilt = filtfilt(b_lowp, a_lowp, highpassfilt);
     bandstop50 = filtfilt(b_notch, a_notch, lowpassfilt);

@@ -32,8 +32,8 @@ acf_norm2 = (acf2-ccf2) ./ sd;
 exinfo.isi_frct(1) = sum(isi0<0.005)/length(isi0); 
 exinfo.isi_frct(2) = sum(isi2<0.005)/length(isi2); 
 
-exinfo.bridx(1) = mean(acf_norm0(1:4));  % average < 5ms
-exinfo.bridx(2) = mean(acf_norm2(1:4)); 
+exinfo.bridx(1) = mean(acf_norm0(1:5));  % average < 5ms
+exinfo.bridx(2) = mean(acf_norm2(1:5)); 
 
 
 

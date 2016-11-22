@@ -14,16 +14,11 @@ elseif nargin == 4
 end
 
 if strcmp(ax_spec, 'log')
-    
     [~, binrng] = histcounts(log(val), 7);
     binrng = exp(binrng);
 else
-    
-%     rng = abs(min(val)) / floor(length(val)/8);
-%     [~, binrng] = histcounts(val, 8); hist
     binrng = 8;
 end
-
 
 
 h1 = histogram(cax, val(i_sub), binrng, 'EdgeColor', 'w', 'FaceColor', 'r');
@@ -62,10 +57,6 @@ std_b = nanstd(val(~i_sub));
 
 
 
-
-
-
-
 if strcmp(ax_spec, 'log')
     
     [~, p20r] = ttest(log(val(i_sub)), 0);   psignr = signrank(log(val(i_sub)));
@@ -88,7 +79,6 @@ else
     
     
 end
-
 
 
 max_y = max(get(cax, 'Ylim'));
