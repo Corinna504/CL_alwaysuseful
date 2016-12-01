@@ -1,4 +1,4 @@
-function x=  crossl 
+function crossl 
 
 hold on;
 ax = gca;
