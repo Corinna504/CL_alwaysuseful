@@ -14,10 +14,11 @@ if strcmp(exinfo.param1, 'or')
 %     end
     
 elseif  strcmp(exinfo.param1, 'sf')
+    subplot(2,1,1)
     fittedTC_sf(exinfo, exinfo.fitparam.others{1}, exinfo.fitparam_drug.others{1});
-    h(2) = figure('Name', exinfo.figname);
+    subplot(2,1,2)
     fittedTC_sf(exinfo, exinfo.fitparam.others{2}, exinfo.fitparam_drug.others{2});    
-    
+
 elseif strcmp(exinfo.param1, 'co')
     fittedTC_co(exinfo);
 elseif strcmp(exinfo.param1, 'sz')
@@ -223,6 +224,7 @@ end
 function fittedTC_sf(exinfo, ft, ft_drug)
 % plots fitted tuning curve for both conditions +/- sme
 
+
 c = getCol(exinfo);
 args = {'o', 'Color', c, 'MarkerSize', 5};
 fittedTC_sf_Helper(ft,  [args, 'MarkerFaceColor', c], {c}); ho;
@@ -235,10 +237,10 @@ xdata = [ft.val.uqang; ft_drug.val.uqang];
 xlim([min(xdata)-1, max(xdata)+2]);
 
 
-title( sprintf( ['B: pf=%1.0f, bw=%1.0f, amp=%1.1f, off=%1.1f \n' ...
-    exinfo.drugname ': pf=%1.0f, bw=%1.0f, amp=%1.1f, off=%1.1f \n'], ...
-    ft.mu, ft.sig, ft.a, ft.b, ...
-    ft_drug.mu, ft_drug.sig, ft_drug.a, ft_drug.b), 'FontSize', 8);
+title( sprintf( ['B: pf=%1.0f, bw=%1.0f, amp=%1.1f, off=%1.1f r2=%1.1f\n' ...
+    exinfo.drugname ': pf=%1.0f, bw=%1.0f, amp=%1.1f, off=%1.1f r2=%1.1f\n'], ...
+    ft.mu, ft.sig, ft.a, ft.b, ft.r2, ...
+    ft_drug.mu, ft_drug.sig, ft_drug.a, ft_drug.b, ft_drug.r2), 'FontSize', 8);
 
 end
 

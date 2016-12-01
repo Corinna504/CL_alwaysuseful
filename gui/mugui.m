@@ -506,42 +506,53 @@ fig2plot_check(10) = uicontrol(fig_h, ...
 
 %-------------------------------------------------------------------------
     function UpdateInclusion(check_incl, eventdata)
-        incl_i = 1:length(exinfo);
+    % This functions tries to exclude all data that are note relevant for the 
+    % plot. This includes general inclusion criteria such as the resistance
+    % and min firing rate. 
         
-       
-        % monkeys
+        
+        incl_i = 1:length(exinfo);  % in the beginning assume all data is included
+        
+        % stimulus conditions
+        stimy = pop_Yspec.String{pop_Yspec.Value};
+        stimx = pop_Xspec.String{pop_Xspec.Value};
+        
+        %%% global inclusion criteria
+        % the minimum firing rate for the preferred stimulus
+        UpdateInclusionHelper(~strcmp(stimy, 'RC'),...
+            'cellfun(@max, {exinfo.ratemn}) > 10 ');
+        
+        % the electrode resistance
+%         UpdateInclusionHelper(1,...
+%             'cellfun(@(x) x<150, {exinfo.resistance})');
+        UpdateInclusionHelper(1,...
+            'cellfun(@(x) isnan(x) || x<150, {exinfo.resistance})');
+        
+        
+        
+        %%% gui set inclusion criteria
+        % which monkey data should be shown
         UpdateInclusionHelper(r2.Value, '[exinfo.ismango]');
         UpdateInclusionHelper(r3.Value, '~[exinfo.ismango]');
         
         
-        % stimuli condition
-        stimy = pop_Yspec.String{pop_Yspec.Value};
-        stimx = pop_Xspec.String{pop_Xspec.Value};
+        % which stimuli condition should be shown
         UpdateInclusionHelper( strcmp(stimy, stimx) & ~strcmp(stimy, 'RC') & ~strcmp(stimy, 'all stimuli cond'), ...
             ['cellfun(@(x) strcmp(x, ''' stimx '''), {exinfo.param1})']);
-        
-        
-        %%% data critera via popup popC_h (highest dose, etc..)
+                
+        % which one of the experiments in one session should be shown
         idx1 = getCritIdx(exinfo(incl_i), popC_h.String{popC_h.Value});
         incl_i = incl_i(idx1);
 
+        % which electrode criteria is considered
         idx2 = getElectrodeCrit(exinfo(incl_i), popEcrit_h.String{popEcrit_h.Value});
         incl_i = incl_i(idx2);
         
-        %%% global inclusion criteria
-        UpdateInclusionHelper(~strcmp(stimy, 'RC'),...
-            'cellfun(@max, {exinfo.ratemn}) > 10 ');
-        
-        UpdateInclusionHelper(1,...
-            'cellfun(@(x) x<150, {exinfo.resistance})');
-        
-        UpdateInclusionHelper(1,...
-            'cellfun(@(x) isnan(x) || x<150, {exinfo.resistance})');
-
-        %%% gui set numerical inclusion criteria
+        % what is the regression fit threshold
         UpdateInclusionHelper(1, ...
             ['[exinfo.r2reg] ' get(editr2_h, 'String')]);
         
+        % what is the latency threshold
         datalatency = evalMU('latency base', 'latency drug', exinfo);
         if strcmp(stimulicond(get(pop_Xspec, 'Value')), 'RC')
             cond =  ['datalatency.x'  get(editlatency_h, 'String') ' & ' ...
@@ -549,12 +560,14 @@ fig2plot_check(10) = uicontrol(fig_h, ...
             eval(['incl_i = intersect( incl_i, find(' cond '));'] );
         end
         
+        % what is the tuning fit threshold
         UpdateInclusionHelper(1,...
             ['[exinfo.gaussr2] ' get(editr2gauss_h, 'String') ...
             ' & [exinfo.gaussr2_drug] ' get(editr2gauss_h, 'String')])    
         
+        
         % in case you want to exclude a single data point
-%         incl_i(incl_i==652)=[];
+%         incl_i(incl_i==899)=[];
         
     end
 

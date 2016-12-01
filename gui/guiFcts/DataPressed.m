@@ -25,7 +25,6 @@ if any(strcmp(fig2plot, 'Raster'))
     nfig = nfig+1;
 elseif any(strcmp(fig2plot, 'LFP'))
     nfig = nfig-1;
-    
 end
 
 
@@ -51,16 +50,13 @@ while j<=length(fig2plot)
                 exLFPin2 = loadCluster(strrep(datinfo(1).fname_drug, 'c1', 'lfp'));
             end
             
-            
             exSpkin.Trials = exSpkin.Trials( [exSpkin.Trials.me] == datinfo(1).ocul);
             exSpkin2.Trials = exSpkin2.Trials( [exSpkin2.Trials.me] == datinfo(1).ocul);
             
             exLFPin.Trials = exLFPin.Trials( [exLFPin.Trials.me] == datinfo(1).ocul);
             exLFPin2.Trials = exLFPin2.Trials( [exLFPin2.Trials.me] == datinfo(1).ocul);
-
             
-            LFPGui( exSpkin, exLFPin, exSpkin2, exLFPin2)
-            set(findobj('Type', 'figure'), 'Name', datinfo(1).figname)
+            hlfp = LFPGui( exSpkin, exLFPin, exSpkin2, exLFPin2);
             j = j+1;
             continue
             
@@ -135,15 +131,18 @@ while j<=length(fig2plot)
 %                 openfig([datinfo(1).fig_sdfs(1:end-4) '_mlfit_drug.fig']);
 %                 openfig([datinfo(1).fig_sdfs(1:end-4) '_mlfit_base.fig']);
                 
-            if isempty(strfind(datinfo(1).fname, 'CO'))
-                temp = openfig(datinfo(1).fig_sdfs, 'invisible');
-                ax = findobj(temp, 'Type', 'Axes');
-            else
-                temp = openfig(datinfo(1).fig_sdfs);
+            dir2 = 'C:\Users\Corinna\Documents\CODE\Sandbox\RC_orcomp_vs_blank\';
+            openfig( [dir2 datinfo(1).figname '.fig']);
+
+%             if isempty(strfind(datinfo(1).fname, 'CO'))
+%                 temp = openfig(datinfo(1).fig_sdfs, 'invisible');
+%                 ax = findobj(temp, 'Type', 'Axes');
+%             else
+%                 temp = openfig(datinfo(1).fig_sdfs);
                 j = j+1;
                 pos = pos+1;
                 continue
-            end
+%             end
     end
     
     

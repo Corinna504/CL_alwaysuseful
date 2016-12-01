@@ -37,6 +37,45 @@ err = [];
 switch fctname
     
     
+    case 'blank/or ratio base'
+        for i = 1:length(exinfo)
+            
+            if isempty(exinfo(i).respratio)
+                val(i) = nan;
+            else
+                val(i) = exinfo(i).respratio;
+            end
+        end
+        
+    case 'blank/or ratio drug'
+        for i = 1:length(exinfo)
+            
+            if isempty(exinfo(i).respratio_drug)
+                val(i) = nan;
+            else
+                val(i) = exinfo(i).respratio_drug;
+            end
+        end
+        
+    case 'blank/or ratio diff'
+        
+        val = assignFct('blank/or ratio base' , exinfo) - ...
+            assignFct('blank/or ratio drug' , exinfo);
+        lab = [fctname ' (base-drug)'];
+        
+    case 'eccentricity'
+        val = [exinfo.ecc];
+        
+    case 'RF ecc corr'
+        for i = 1:length(exinfo)
+            
+            if isempty(exinfo(i).RFw_corr)
+                val(i) = nan;
+            else
+                val(i) = exinfo(i).RFw_corr;
+            end
+        end
+        
     case 'RF width x'
         for i = 1:length(exinfo)
             
@@ -804,7 +843,11 @@ switch fctname
         
     case 'wave width'
         for i = 1:length(exinfo)
-            val(i) = exinfo(i).wdt(1);
+            if exinfo(i).wdt(1)>1
+                val(i) = exinfo(i).wdt(1);
+            else
+                val(i) = nan;
+            end
         end
         lab = 'wave width';
         
