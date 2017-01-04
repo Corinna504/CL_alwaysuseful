@@ -27,9 +27,9 @@ end
 
 try
     ax = gca;
-    ax.Children(1).Color = [0 0 0 0.4];
+    ax.Children(1).Color = [0 0 0 0.3];
     ax.Children(1).LineStyle = '-';
-    ax.Children(1).LineWidth = 2;
+    ax.Children(1).LineWidth = 0.5;
     uistack(ax.Children(1), 'bottom');
 catch
     warning('was not able to push unity line to bottom');
