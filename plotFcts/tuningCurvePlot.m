@@ -17,8 +17,14 @@ elseif  strcmp(exinfo.param1, 'sf')
     subplot(2,1,1)
     fittedTC_sf(exinfo, exinfo.fitparam.others{1}, exinfo.fitparam_drug.others{1});
     subplot(2,1,2)
+    % convert to log scaled mu
+    exinfo.fitparam.others{2}.mu = log(exinfo.fitparam.others{2}.mu);
+    exinfo.fitparam_drug.others{2}.mu = log(exinfo.fitparam_drug.others{2}.mu);
     fittedTC_sf(exinfo, exinfo.fitparam.others{2}, exinfo.fitparam_drug.others{2});    
+    exinfo.fitparam.others{2}.mu = log(exinfo.fitparam.others{2}.mu);
+    exinfo.fitparam_drug.others{2}.mu = log(exinfo.fitparam_drug.others{2}.mu);
 
+    
 elseif strcmp(exinfo.param1, 'co')
     fittedTC_co(exinfo);
 elseif strcmp(exinfo.param1, 'sz')
@@ -70,25 +76,16 @@ end
 function fittedTC_sz(exinfo)
 
 c = getCol(exinfo);
-val = exinfo.fitparam.val;
 
+val = exinfo.fitparam.val;
 errorbar( val.sz,val.mn, val.sem, 'o', 'Color', c, 'MarkerFaceColor', c); ho
 plot( val.x, val.y, 'Color', c);
-if ~isempty(exinfo.ratepar>1000)
-plot( get(gca, 'XLim'), [exinfo.ratemn(exinfo.ratepar>1000) exinfo.ratemn(exinfo.ratepar>1000)], ...
-    'Color', c);
-end
 
 val = exinfo.fitparam_drug.val;
 errorbar( val.sz,val.mn, val.sem, 'o', 'Color', c);
 plot( val.x, val.y, 'Color', c, 'LineStyle', '--');
-if ~isempty(exinfo.ratepar>1000)
-plot( get(gca, 'XLim'), [exinfo.ratemn_drug(exinfo.ratepar_drug>1000) ...
-    exinfo.ratemn_drug(exinfo.ratepar_drug>1000)], ...
-    'Color', c, 'LineStyle', '--');
-end
 
-
+plotSpontResp(exinfo, c);
 plot( ones(2,1)*exinfo.fitparam.mu, get(gca, 'YLim'), 'k');
 plot( ones(2,1)*exinfo.fitparam_drug.mu, get(gca, 'YLim'), 'k--');
 
@@ -183,13 +180,7 @@ else
     ylabel('spks/s (\pm sme)');
 end
 
-
-idx0 = exinfo.ratepar>1000;
-if any(idx0); errorbar(ft.mu+120, exinfo.ratemn(idx0), exinfo.ratesme(idx0), args{:}, 'MarkerFaceColor', c); end;
-
-idx2 = exinfo.ratepar_drug>1000;
-if any(idx2); errorbar(ft.mu+120, exinfo.ratemn_drug(idx2), exinfo.ratesme_drug(idx2),args{:}); end;
-
+plotSpontResp(exinfo, c)
 axis square; box off;
 axchild = get(gca, 'Children');
 
@@ -230,11 +221,16 @@ args = {'o', 'Color', c, 'MarkerSize', 5};
 fittedTC_sf_Helper(ft,  [args, 'MarkerFaceColor', c], {c}); ho;
 fittedTC_sf_Helper(ft_drug,  args, {c, 'LineStyle', '--'});
 
+plotSpontResp(exinfo, c)
 xlabel('spatial frequency');    ylabel('spks/s (\pm sme)');
 axis square; box off;
 
 xdata = [ft.val.uqang; ft_drug.val.uqang];
-xlim([min(xdata)-1, max(xdata)+2]);
+if any(xdata<0)
+    xlim([min(xdata)-1, max(xdata)+2]);
+else
+    xlim([0, max(xdata)+2]);
+end
 
 
 title( sprintf( ['B: pf=%1.0f, bw=%1.0f, amp=%1.1f, off=%1.1f r2=%1.1f\n' ...
@@ -247,11 +243,8 @@ end
 
 function fittedTC_sf_Helper(ft, errArgs, lineArgs)
 
-sf = ft.mu-100 :0.1: ft.mu+100;
-y = gaussian(ft.mu, ft.sig, ft.a, ft.b, sf) ;
-
 errorbar(ft.val.uqang, ft.val.mn, ft.val.sd, errArgs{:}); ho
-plot(sf, y, lineArgs{:}); ho
+plot(ft.x, ft.y, lineArgs{:}); ho
 
 end
 
@@ -267,10 +260,10 @@ par0 = exinfo.ratepar;          par1 = exinfo.ratepar_drug;
 errArgs = {'o', 'Color', c, 'MarkerSize', 5};
 
 
-idx = par0==0;
-errorbar(eps, mn0(idx), sme0(idx), errArgs{:}, 'MarkerFaceColor', c); hold on;
-idx1 = par1==0;
-errorbar(eps, mn1(idx1), sme1(idx1), errArgs{:});
+idx = par0==0 | par0>1 ;
+if any(idx); plot([eps 1], [mn0(idx) mn0(idx)], c); hold on; end;
+idx1 = par1==0 | par1>1;
+if any(idx); plot([eps 1], [mn1(idx1) mn1(idx1)], c, 'LineStyle', '--'); end;
 
 % plot errorbars
 fittedTC_co_Helper(exinfo.fitparam, {c})
@@ -310,4 +303,21 @@ function fittedTC_co_Helper(ft, lineArgs)
 
 plot(ft.x, ft.y, lineArgs{:}); ho
 
+end
+
+
+
+function plotSpontResp(exinfo, c)
+idx0 = exinfo.ratepar>1000;
+idx2 = exinfo.ratepar_drug>1000;
+
+if any(idx0); 
+    plot( get(gca, 'XLim'), [exinfo.ratemn(idx0) exinfo.ratemn(idx0)], ...
+    'Color', c);
+end
+
+if any(idx2); 
+    plot( get(gca, 'XLim'), [exinfo.ratemn_drug(idx2) exinfo.ratemn_drug(idx2)], ...
+    'Color', c, 'LineStyle', '--');
+end
 end
