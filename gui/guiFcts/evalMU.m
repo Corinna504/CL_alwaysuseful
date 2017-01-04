@@ -36,6 +36,21 @@ err = [];
 
 switch fctname
     
+    case 'isolation quality base'
+        for i = 1:length(exinfo)
+            val(i) = exinfo(i).spkqual_base;
+        end
+    
+    case 'isolation quality drug'
+        for i = 1:length(exinfo)
+            val(i) = exinfo(i).spkqual_drug;
+        end
+        
+    case 'isolation quality max'
+        for i = 1:length(exinfo)
+            val(i) = max([exinfo(i).spkqual_base, exinfo(i).spkqual_drug]);
+        end
+    
     
     case 'blank/or ratio base'
         for i = 1:length(exinfo)
@@ -141,7 +156,6 @@ switch fctname
         
         
     case 'nonparam area ratio'
-        
         val = [exinfo.nonparam_ratio];
         
     case 'MI'
@@ -252,7 +266,6 @@ switch fctname
         end
         
     case 'phase selectivity'
-        %         val = [exinfo.tf_f1f0];
         for i = 1:length(exinfo)
             if isnan(exinfo(i).tf_f1f0)
                 val(i) = exinfo(i).phasesel;
@@ -296,10 +309,27 @@ switch fctname
         lab = [lab ' (base-drug)'];
         
         
-    case 'co fit n'
+    case 'co fit n base'
         for i = 1:length(exinfo)
             val(i) = exinfo(i).fitparam.n;
+            if val(i)> 8
+                val(i) = 8;
+            end
         end
+        
+    case 'co fit n drug'
+        for i = 1:length(exinfo)
+            val(i) = exinfo(i).fitparam_drug.n;
+            if val(i)> 8
+                val(i) = 8;
+            end
+            
+        end
+        
+    case 'co fit n diff'
+        val = assignFct('co fit n base', exinfo) - ...
+            assignFct('co fit n drug', exinfo);
+        lab = [lab ' (base-drug)'];
         
     case 'co fit m'
         for i = 1:length(exinfo)
@@ -381,89 +411,9 @@ switch fctname
         val = (cellfun(@max, {exinfo.ratemn}) - cellfun(@max, {exinfo.ratemn_drug}))  ./ ...
             (cellfun(@max, {exinfo.ratemn}) + cellfun(@max, {exinfo.ratemn_drug}));
         
-        
-    case 'Osz alpha (8-10) base'
-        for i  =1:length(exinfo)
-            if exinfo(i).powstim_mn_drug==0
-                val(i) = nan;
-            else
-                val(i) = mean(exinfo(i).powstim_mn(exinfo(i).pfi, 9:11));
-            end
-        end
-        
-    case 'Osz alpha (8-10) drug'
-        for i  =1:length(exinfo)
-            if exinfo(i).powstim_mn_drug==0
-                val(i) = nan;
-            else
-                val(i) = mean(exinfo(i).powstim_mn_drug(exinfo(i).pfi_drug, 9:11));
-            end
-        end
-        
-    case 'Osz beta (10-30) base'
-        for i  =1:length(exinfo)
-            if exinfo(i).powstim_mn_drug==0
-                val(i) = nan;
-            else
-                val(i) = mean(exinfo(i).powstim_mn(exinfo(i).pfi, 11:31));
-            end
-        end
-        
-    case 'Osz beta (10-30) drug'
-        for i  =1:length(exinfo)
-            if exinfo(i).powstim_mn_drug==0
-                val(i) = nan;
-            else
-                val(i) = mean(exinfo(i).powstim_mn_drug(exinfo(i).pfi_drug, 11:31));
-            end
-        end
-        
-    case 'Osz gamma (30-80) base'
-        for i  =1:length(exinfo)
-            if exinfo(i).powstim_mn_drug==0
-                val(i) = nan;
-            else
-                val(i) = mean(exinfo(i).powstim_mn(exinfo(i).pfi, 31:81));
-            end
-        end
-        
-    case 'Osz gamma (30-80) drug'
-        for i  =1:length(exinfo)
-            if exinfo(i).powstim_mn_drug==0
-                val(i) = nan;
-            else
-                val(i) = mean(exinfo(i).powstim_mn_drug(exinfo(i).pfi_drug, 31:81));
-            end
-        end
-        
-        
-    case 'Osz alpha diff'
-        val = assignFct('Osz alpha (8-10) base', exinfo) - ...
-            assignFct('Osz alpha (8-10) drug', exinfo);
-        lab = [fctname ' (base-drug)'];
-        
-    case 'Osz beta diff'
-        val = assignFct('Osz beta (10-30) base', exinfo) - ...
-            assignFct('Osz beta (10-30) drug', exinfo);
-        lab = [fctname ' (base-drug)'];
-        
-    case 'Osz gamma diff'
-        val = assignFct('Osz gamma (30-80) base', exinfo) - ...
-            assignFct('Osz gamma (30-80) drug', exinfo);
-        lab = [fctname ' (base-drug)'];
-        
-        
     case 'electrode depth'
         
         val = [exinfo.ed];
-        
-    case 'change in mean resp'
-        
-        for i=1:length(exinfo)
-            val(i) = mean(exinfo(i).ratemn) - mean(exinfo(i).ratemn_drug);
-        end
-        
-        lab = [fctname ' (base-drug)'];
         
     case 'smallest response'
         
@@ -668,6 +618,7 @@ switch fctname
         
     case 'noise correlation diff'
         val = [exinfo.rsc] - [exinfo.rsc_drug];
+        val = abs(val);
         lab = 'noise correlation diff (base-drug)';
         
     case  'signal correlation'
@@ -693,8 +644,7 @@ switch fctname
             'UniformOutput', 0);
         val = cell2mat(val);
         lab = 'mean spike rate drug';
-        
-        
+                
     case 'norm mean spike rate base'
         
         val = cellfun(@mean, {exinfo.ratemn},...
@@ -707,9 +657,7 @@ switch fctname
             'UniformOutput', 0);
         val = cell2mat(val);
         lab = 'mean spike rate drug';
-        
-        
-        
+                
     case 'mean spike rate diff'
         val =  cellfun(@mean, {exinfo.ratemn},...
             'UniformOutput', 0);
@@ -807,7 +755,7 @@ switch fctname
         
     case 'fano factor base'
         for i = 1:length(exinfo)
-            val(i) = nanmean([exinfo(i).ff.classic]);
+            val(i) = nanmean([exinfo(i).ff.assic]);
         end
         lab = 'fano factor';
         
@@ -825,13 +773,13 @@ switch fctname
         
     case 'fano factor fit base'
         for i = 1:length(exinfo)
-            val(i) = [exinfo(i).ff.fit]
+            val(i) = [exinfo(i).ff.fit];
         end;
         lab = 'fano factor fit';
         
     case 'fano factor fit drug'
         for i = 1:length(exinfo)
-            val(i) = [exinfo(i).ff_drug.fit]
+            val(i) = [exinfo(i).ff_drug.fit];
         end;
         lab = 'fano factor fit drug';
         
@@ -912,7 +860,7 @@ switch fctname
         lab = 'spike count variance';
         info = [' p-values:' num2str(p) ' '] ;
         
-    case 'cl gauss fit mu base'
+    case 'gauss fit mu base'
         for i =1:length(exinfo)
             if ~isempty ( exinfo(i).fitparam )
                 val(i)  = exinfo(i).fitparam.mu;
@@ -920,7 +868,7 @@ switch fctname
         end
         lab = fctname;
         
-    case 'cl gauss fit mu drug'
+    case 'gauss fit mu drug'
         for i =1:length(exinfo)
             if ~isempty ( exinfo(i).fitparam_drug )
                 val(i)  = exinfo(i).fitparam_drug.mu;
@@ -928,7 +876,7 @@ switch fctname
         end
         lab = fctname;
         
-    case 'cl gauss fit mu diff'
+    case 'gauss fit mu diff'
         for i =1:length(exinfo)
             if ~isempty ( exinfo(i).fitparam )
                 val(i)  = exinfo(i).fitparam.mu - exinfo(i).fitparam_drug.mu;
@@ -937,7 +885,7 @@ switch fctname
         val(val>90) = 180-val(val>90);
         lab = [fctname '(base-drug)'];
         
-    case 'cl gauss fit sig base'
+    case 'gauss fit sig base'
         for i =1:length(exinfo)
             if ~isempty ( exinfo(i).fitparam )
                 val(i)  = [exinfo(i).fitparam.sig];
@@ -945,7 +893,7 @@ switch fctname
         end
         lab = fctname;
         
-    case 'cl gauss fit sig drug'
+    case 'gauss fit sig drug'
         for i =1:length(exinfo)
             if ~isempty ( exinfo(i).fitparam_drug )
                 val(i)  = [exinfo(i).fitparam_drug.sig];
@@ -953,187 +901,14 @@ switch fctname
         end
         lab = fctname;
         
-    case 'cl gauss fit sig diff'
+    case 'gauss fit sig diff'
         for i =1:length(exinfo)
             if ~isempty ( exinfo(i).fitparam )
                 val(i)  = [exinfo(i).fitparam.sig] - [exinfo(i).fitparam_drug.sig];
             end
         end
         lab = [fctname '(base-drug)'];
-        
-    case 'cl gauss fit a base'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam )
-                val(i)  = [exinfo(i).fitparam.a];
-            end
-        end
-        lab = fctname;
-        
-    case 'cl gauss fit a drug'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam_drug )
-                val(i)  = [exinfo(i).fitparam_drug.a];
-            end
-        end
-        lab = fctname;
-        
-    case 'cl gauss fit a diff'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam_drug )
-                val(i)  = [exinfo(i).fitparam.a] - [exinfo(i).fitparam_drug.a];
-            end
-        end
-        lab = [fctname '(base-drug)'];
-        
-    case 'cl gauss fit off base'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam )
-                val(i)  = [exinfo(i).fitparam.b];
-            end
-        end
-        lab = fctname;
-        
-    case 'cl gauss fit off drug'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam_drug )
-                val(i)  = [exinfo(i).fitparam_drug.b];
-            end
-        end
-        lab = fctname;
-        
-    case 'cl gauss fit off diff'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam_drug )
-                val(i)  = [exinfo(i).fitparam.b] - [exinfo(i).fitparam_drug.b];
-            end
-        end
-        lab = [fctname '(base-drug)'];
-        
-    case 'cl gauss fit r2 base'
-        val = [exinfo.gaussr2];
-        lab = fctname;
-        
-    case 'cl gauss fit r2 drug'
-        val = [exinfo.gaussr2_drug];
-        lab = fctname;
-        
-        
-    case 'cl gauss fit r2 diff'
-        val = [exinfo.gaussr2]-[exinfo.gaussr2_drug];
-        lab = [fctname '(base-drug)'];
-        
-        
-        
-        
-    case 'hn gauss fit mu base'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam )
-                val(i)  = exinfo(i).fitparam.HN.mean;
-            end
-        end
-        lab = fctname;
-        
-    case 'hn gauss fit mu drug'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam_drug )
-                val(i)  = exinfo(i).fitparam_drug.HN.mean;
-            end
-        end
-        lab = fctname;
-        
-    case 'hn gauss fit mu diff'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam )
-                val(i)  = exinfo(i).fitparam.HN.mean - exinfo(i).fitparam_drug.HN.mean;
-            end
-        end
-        val(val>90) = 180-val(val>90);
-        lab = [fctname '(base-drug)'];
-        
-    case 'hn gauss fit sig base'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam )
-                val(i)  = [exinfo(i).fitparam.HN.sd];
-            end
-        end
-        lab = fctname;
-        
-    case 'hn gauss fit sig drug'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam_drug )
-                val(i)  = [exinfo(i).fitparam_drug.HN.sd];
-            end
-        end
-        lab = fctname;
-        
-    case 'hn gauss fit sig diff'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam )
-                val(i)  = [exinfo(i).fitparam.HN.sd] - [exinfo(i).fitparam_drug.HN.sd];
-            end
-        end
-        lab = [fctname '(base-drug)'];
-        
-    case 'hn gauss fit a base'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam )
-                val(i)  = [exinfo(i).fitparam.HN.amp];
-            end
-        end
-        lab = fctname;
-        
-    case 'hn gauss fit a drug'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam_drug )
-                val(i)  = [exinfo(i).fitparam_drug.HN.amp];
-            end
-        end
-        lab = fctname;
-        
-    case 'hn gauss fit a diff'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam_drug )
-                val(i)  = [exinfo(i).fitparam.HN.amp] - [exinfo(i).fitparam_drug.HN.amp];
-            end
-        end
-        lab = [fctname '(base-drug)'];
-        
-    case 'hn gauss fit off base'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam )
-                val(i)  = [exinfo(i).fitparam.HN.base];
-            end
-        end
-        lab = fctname;
-        
-    case 'hn gauss fit off drug'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam_drug )
-                val(i)  = [exinfo(i).fitparam_drug.HN.base];
-            end
-        end
-        lab = fctname;
-        
-    case 'hn gauss fit off diff'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam_drug )
-                val(i)  = [exinfo(i).fitparam.HN.base] - [exinfo(i).fitparam_drug.HN.base];
-            end
-        end
-        lab = [fctname '(base-drug)'];
-        %
-        %     case 'hn gauss fit r2 base'
-        %         val = [exinfo.gaussr2];
-        %         lab = fctname;
-        %
-        %     case 'hn gauss fit r2 drug'
-        %         val = [exinfo.gaussr2_drug];
-        %         lab = fctname;
-        %
-        %
-        %     case 'hn gauss fit r2 diff'
-        %         val = [exinfo.gaussr2]-[exinfo.gaussr2_drug];
-        %         lab = [fctname '(base-drug)'];
+   
 end
 end
 
