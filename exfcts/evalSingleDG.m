@@ -7,9 +7,24 @@ ex = loadCluster( fname ); % load raw data
 ex.Trials = ex.Trials([ex.Trials.me] == exinfo.ocul);
 
 
+%% Anova for selectivity
+
+if strcmp(exinfo.param1, 'co')
+    idx = [ex.Trials.(exinfo.param1)] ~= ex.exp.e1.blank | ...
+            [ex.Trials.(exinfo.param1)] ~= 0;
+else
+    idx = [ex.Trials.(exinfo.param1)] ~= ex.exp.e1.blank;
+end
+
+p_anova = anova1([ex.Trials(idx).spkRate], [ex.Trials(idx).(exinfo.param1)],'off');
+
+argout =  {'p_anova', p_anova};
+
+return
 %% Spiking
 %%% z normed spike rates entered in ex.Trials
 [ex, spkstats] = znormex(ex, exinfo, rate_flag);
+
 
 %%% Fano Factors
 [ ff.classic, ff.fit, ff.mitchel, ff.church ] = ...
@@ -31,20 +46,29 @@ exc0.Trials = exc0.Trials([exc0.Trials.me] == exinfo.ocul);
 %% Fitting
 if strcmp(exinfo.param1, 'or')
     fitparam = fitgaussOR(spkstats);
+    
 elseif strcmp(exinfo.param1, 'co')
+    
     fitparam = fitCO([spkstats.mn], [spkstats.(exinfo.param1)]);
 
     if strfind( fname , exinfo.drugname )
         fitparam.sub = fitCO_drug([spkstats.mn], [spkstats.(exinfo.param1)], exinfo.fitparam);
     end
+    
 elseif strcmp(exinfo.param1, 'sz')
     fitparam = fitSZ([spkstats.mn], [spkstats.sd], [spkstats.(exinfo.param1)]);
+    
 elseif strcmp(exinfo.param1, 'sf')
     fitparam_lin = fitgaussSF([spkstats.mn], [spkstats.sd], [spkstats.(exinfo.param1)]);
-    fitparam_log = fitgaussSF([spkstats.mn], [spkstats.sd], log([spkstats.(exinfo.param1)]));
-    fitparam = fitparam_log;
+    if fitparam_lin.mu<0;        fitparam_lin.mu = 0;    end
     
+    fitparam_log = fitgaussSF([spkstats.mn], [spkstats.sd], log([spkstats.(exinfo.param1)]));
+    fitparam_log.mu = exp(fitparam_log.mu);
+    fitparam_log.sig = exp(fitparam_log.sig);
+    
+    % first entry linear fit, second entry log scaled fit
     fitparam.others = {fitparam_lin; fitparam_log};
+    
 else
     fitparam = [];
 end
@@ -53,15 +77,6 @@ end
 minspk = min([spkstats.mn]);
 maxspk = max([spkstats.mn]);
 tcdiff = (maxspk - minspk) / mean([maxspk, minspk]);
-
-%% Electrode Information
-if isfield(ex.Trials(1), 'ed')
-    ed = ex.Trials(1).ed;
-else
-    ed = -1;
-end
-eX = -10^3;
-eY = -10^3;
 
 
 %% Phase selectivity
@@ -74,8 +89,9 @@ argout =  {'fitparam', fitparam, ...
     'ratePAR', [spkstats.(exinfo.param1)]', 'rateSME', [spkstats.sd]', ...
     'rsc', rsc, 'prsc', prsc, ...
     'rsig', rsig, 'prsig', prsig, ...
-    'ff', ff, 'tcdiff', tcdiff, ...
-    'ed', ed, 'eX', eX, 'eY', eY, 'phasesel', phasesel};
+    'ff', ff, 'tcdiff', tcdiff, ... 
+    'nrep', [spkstats.nrep]', ...
+    'phasesel', phasesel, 'p_anova', p_anova};
 end
 
 
@@ -99,13 +115,16 @@ fitparam.val = val;
 
 end
 
-function fitparam = fitgaussSF(spkmn, spksd, stimval)
+function ft = fitgaussSF(spkmn, spksd, stimval)
 
 % CL fit
-[fitparam, gaussr2, val] = fitgauss( spkmn, spksd, stimval );
+[ft, gaussr2, val] = fitgauss( spkmn, spksd, stimval );
 
-fitparam.r2 = gaussr2;
-fitparam.val = val;
+ft.r2 = gaussr2;
+ft.val = val;
+
+ft.x = ft.mu-100 :0.1: ft.mu+100;
+ft.y = gaussian(ft.mu, ft.sig, ft.a, ft.b, ft.x) ;
 
 end
 
@@ -132,9 +151,11 @@ for par = parvls
     
     % z-scored spikes for this stimulus
     ind = par == [ ex.Trials.(param1) ];
+    spkstats(j).nrep = sum(ind);
+    spkstats(j).(param1) = par;
+
     if norm_flag
         z = zscore( [ ex.Trials(ind).spkRate ] );
-        spkstats(j).(param1) = par;
         spkstats(j).mn  = mean([ex.Trials(ind).spkRate]);
         spkstats(j).var = var([ex.Trials(ind).spkRate]);
         spkstats(j).sd = std([ex.Trials(ind).spkRate]) / sqrt( sum(ind) );
@@ -162,6 +183,7 @@ for par = parvls
     ex.rastercum{j,1} = nan(length(ct), length(time));
     
     
+    % convert the spike times into a matrix raster with bits
     for k = 1:length(idxct)
         
         t_strt = ct(k).Start - ct(k).TrialStart;
