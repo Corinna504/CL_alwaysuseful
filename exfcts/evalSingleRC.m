@@ -19,23 +19,22 @@ else
 end
 
 close all
-
 res = getLat2D(res, exinfo);
 
-
+nrep = res.sdfs.n;
+if ~isempty(res.netSpikesPerFrameBlank)
+    nrep = [nrep; res.sdfs.extras{1}.n];
+end
 
 %% tc height diff
 minspk = min(spkstats.mn);
 maxspk = max(spkstats.mn);
 tcdiff = (maxspk - minspk) ./ mean([maxspk, minspk]);
 
-%% Electrode Information
-if isfield(ex.Trials(1), 'ed')
-    ed = ex.Trials(1).ed;
-else
-    ed = -1;
-end
-eX = -10^3;eY = -10^3;
+
+%% Anova
+bootsample = reshape(spkstats.bootstrap,[1,size(spkstats.bootstrap, 1)*size(spkstats.bootstrap, 3)]);
+p_anova = anova1(bootsample, repmat(spkstats.or(1:8), 1000, 1), 'off');
 
 
 %% assign output arguments
@@ -43,7 +42,7 @@ argout =  {'lat', res.latFP, 'lat2Hmax', res.lat, 'fitparam', fitparam, ...
     'rateMN', spkstats.mn, 'ratePAR', spkstats.or, 'rateSME', spkstats.sem, ...
     'tcdiff', tcdiff, 'resvars', res.vars2, 'sdfs', res.sdfs,...
     'resdur', res.dur,  'times', res.times, ...
-    'ed', ed, 'eX', eX, 'eY', eY};
+    'nrep', nrep, 'p_anova', p_anova};
 end
 
 
