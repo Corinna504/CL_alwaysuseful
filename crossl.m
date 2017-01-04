@@ -29,7 +29,7 @@ try
     for i = 1:2
         x(i).Color = [0 0 0 0.3];
         x(i).LineStyle = '-';
-        x(i).LineWidth = 2;
+        x(i).LineWidth = 0.5;
     end
     uistack(ax.Children(1:2), 'bottom');
 catch
