@@ -9,7 +9,7 @@ session = unique([exinfo.id]);
 for i = 1:length(session)
 
     wY = nan; wX = nan;
-    fprintf('working on sessison : %1.1f \n', session(i));
+%     fprintf('working on sessison : %1.1f \n', session(i));
     
     %find all entries belonging to this session
     idx = find([exinfo.id]==session(i));
@@ -26,9 +26,7 @@ for i = 1:length(session)
     % XPos
     fnamesX = fnames( cellfun(@(x) ~isempty(strfind(x, 'XPos')), fnames) );
     fnamesX = fnamesX( cellfun(@(x) ~isempty(strfind(x, 'c1') & strfind(x, 'sortLH')), fnamesX) );
-    if isempty(fnamesX)
-        disp(['XPos ' fdir ' is missing'])
-    else
+    if ~isempty(fnamesX)
         for j =1:length(fnamesX)
             load(fullfile(fdir, fnamesX{j}), 'ex');
             wX(j) = getMarginalDist(ex.Trials, 'x0');
@@ -39,7 +37,6 @@ for i = 1:length(session)
     fnamesY = fnames( cellfun(@(x) ~isempty(strfind(x, 'YPos')), fnames) );
     fnamesY = fnamesY( cellfun(@(x) ~isempty(strfind(x, 'c1') & strfind(x, 'sortLH')), fnamesY) );
     if isempty(fnamesY)
-        disp(['YPos ' fdir ' is missing'])
         continue;
     else
         for j =1:length(fnamesY)
@@ -67,7 +64,7 @@ end
 exinfo = setRFcorrected(exinfo, rf, ecc);
 end
 
-
+%%
 function exinfo = setRFcorrected(exinfo, rf, ecc)
 
 ecc= ecc(~isnan(rf))'; rf = rf(~isnan(rf))';
@@ -89,6 +86,7 @@ end
 
 end
 
+%%
 function w = getMarginalDist(trials, posname)
 % marginal distribution of spike rate to different bar position 
 
@@ -116,6 +114,7 @@ end
 
 % substract spontaneous firing rate
 meanspk = meanspk - mean(meanspk(pos>1000));
+meanspk(meanspk < 0) = 0;
 meanspk = meanspk/max(meanspk); 
 
 % area / height of the gaussian like curve
@@ -123,13 +122,14 @@ A = sum(meanspk); h = max(meanspk);
 w = A / h;
 w = w* mean(diff(pos(pos<1000))); % normalize to the given unit
 
-if w <0; w=0; end
+
 
 % for debugging
 % plot(pos(pos<1000), meanspk(pos<1000), 'Displayname', posname); hold on
 % text(pos(3), meanspk(3), num2str(w));
 end
 
+%%
 function nr = foldernr(session)
 % prefixes zeros to the session number to get the correct foldername
 
