@@ -38,8 +38,6 @@ exinfo.gslope = gslope(1);
 exinfo.yoff = yoff(1);
 exinfo.r2reg = r2(1);
 
-
-exinfo.gslope_rel = gslope(2);
 exinfo.yoff_rel = yoff(2);
 exinfo.r2reg_rel = r2(2);
 
@@ -76,7 +74,26 @@ if isfield(exinfo.fitparam, 'others') && isfield(exinfo.fitparam.others, 'OR')
     plotCOTC(exinfo);
    
     
+elseif strcmp(exinfo.param1, 'sf')
+    
+    % first entry linear fit, second entry log scaled fit
+    others_base = exinfo.fitparam.others;
+    others_drug= exinfo.fitparam_drug.others;
+    if others_base{1}.r2 > others_base{2}.r2
+        exinfo.fitparam = others_base{1};
+        exinfo.fitparam_drug = others_drug{1};
+        exinfo.fitparam.type = 'linear';
+    else
+        exinfo.fitparam = exinfo.fitparam.others{2};
+        exinfo.fitparam_drug = exinfo.fitparam_drug.others{2};
+        exinfo.fitparam.type = 'log';
+    end
+    exinfo.fitparam_drug.others = others_drug;
+    exinfo.fitparam.others = others_base;
+    
 end
+
+
 
 
 %% wave form
