@@ -3,7 +3,7 @@ function PosterProps(ax, xlim_, ylim_, varargin)
 %
 %
 % @author Corinna Lorenz
-% @date 8.3.2015 
+% @date 8.3.2015
 % PosterProps(ax, xlim, ylim)
 %
 % PosterProps takes the axis and x and y limits and adapts the style. In
@@ -28,41 +28,38 @@ function PosterProps(ax, xlim_, ylim_, varargin)
 % - 'untity' adds a grey unity line and puts it in the background
 %     PosterProps(ax, xlim, ylim, 'unity')
 % - 'nounity' deletes preexisting, dashed lines counteracting with 'unity'
-% 
-% 
-% 
-% 
-% Other setttings that can not be altered: 
+% - 'save' saves the figure as .svg under the given name
+%
+% %
+% Other setttings that can not be altered:
 % - LineWidth is set to 2.
 % - Figure position is set. If you need to change it, change it outside,
 % after you call PosterProps
-% 
-% 
+%
+%
 % NOTE: This function was written under use of Matlab R2015a. There have
 % been major changes in the plotting functions between 2014 to 2015,
-% especially with the transparancy. It would recommend to use R2015a or
+% especially with the transparancy. I would recommend to use R2015a or
 % later versions to work with PosterProps (also because I think plots look
-% nicer with new versionse, otherwise try to make a copy and adapt it to
+% nicer with new versions, otherwise try to make a copy and adapt it to
 % older versions.
-% 
+%
 % NOTE2: Put the unity function in the same folder to guarantee smooth
 % collaborations.
 
 
 
-
-set(gcf, 'Position', [492   269   550   500]);
-axis square 
+% set(gcf, 'Position', [492   269   550   500]);
 box off
 
+fname = '';
 
 fsz = 25;
 sz = 200;
-greyf = 0.8;
 transpy = 0.5;
 unity_flag = false;
 cross_flag = false;
-delete_unity = false;
+square_flag = false;
 j=1;
 while j <= length(varargin)
     switch varargin{j}
@@ -79,46 +76,58 @@ while j <= length(varargin)
         case 'alpha'
             transpy = varargin{j+1};
             j=j+1;
-        case 'nounity'
-            delete_unity = true;
+        case 'square'
+            square_flag= true;
+        case 'alpha'
+            transpy = varargin{j+1};
+            j=j+1;
+        case 'save'
+            fname = varargin{j+1};
+            j=j+1;
+        otherwise
+            j=j+1;
     end
     j = j+1;
 end
-       
 
 
-set(ax, 'xlim', [xlim_(1) xlim_(2)], ...
-        'ylim', [ylim_(1) ylim_(2)], ...
-        'XTick', [xlim_(1) xlim_(2)], ...
-        'YTick', [ylim_(1) ylim_(2)], ...
-        'TickDir', 'out', ...
-        'LineWidth', 0.5, ...
-        'XTickLabel', {num2str(xlim_(1)), num2str(xlim_(2)) }, ...
-        'YTickLabel', {num2str(ylim_(1)), num2str(ylim_(2)) }, ...
-        'Position', [0.2 0.2 0.6 0.6], 'FontSize', fsz);
-%         'Position', [0.2 0.2 0.6 0.6], 'FontSize', fsz, 'FontWeight', 'bold');
+set(ax, 'xlim', [xlim_(1) xlim_(end)], ...
+    'ylim', [ylim_(1) ylim_(end)], ...
+    'XTick', xlim_, 'YTick', ylim_, ...
+    'TickDir', 'out', ...
+    'LineWidth', 0.5, ...
+    'XTickLabel', cellfun(@num2str, num2cell(xlim_'),'UniformOutput', 0), ...
+    'YTickLabel', cellfun(@num2str, num2cell(ylim_'),'UniformOutput', 0), ...
+    'FontSize', fsz);
+%     'Position', [0.2 0.2 0.6 0.6],
 
+% format scatter plot
 set(findobj(ax, 'Type', 'Scatter'), 'SizeData', sz, 'MarkerFaceAlpha', transpy, ...
-    'MarkerEdgeAlpha', transpy);
-set(findobj(ax, 'Type', 'Line', 'LineStyle', 'o'), 'MarkerSize',15, ...
+    'MarkerEdgeAlpha', transpy); %, 'MarkerEdgeColor', 'w');
+
+% format line plot with specified data
+set(findobj(ax, 'Type', 'Line', 'LineStyle', 'o'), 'MarkerSize',sz, ...
     'MarkerFaceAlpha', transpy, 'MarkerEdgeAlpha', transpy);
-set(findobj(ax,'Type', 'Errorbar'), 'MarkerSize', 10);
+
+% format error bar
+set(findobj(ax,'Type', 'Errorbar'), 'MarkerSize', sz);
+
+% format dashed lines
+set(findobj(ax,'Type', 'Line', 'LineStyle', '--'), 'LineStyle', ':');
 
 
-if unity_flag 
-    u=unity;
-    u.Color = ones(1,3)*greyf;
-end
-if cross_flag
-    c = crossl;
-    set(c, 'Color', ones(1,3)*greyf);
-end
-   
+% add unity or cross. note that both are not compatible with each other 
+if unity_flag; delete(findobj(ax, 'type','Line')); unity; end
+if cross_flag; delete(findobj(ax, 'type','Line')); crossl;end
+if square_flag; axis square; end
 
-ax.XLabel.String = '';
+
+ax.XLabel.String = ''; 
 ax.YLabel.String = '';
-ax.Layer = 'top';
-ax.LineWidth = 1;
+ax.Layer = 'bottom';
 
+% print to svg file if wanted
+if ~isempty( fname )
+    print(gcf, fname, '-dsvg');
 end
 
