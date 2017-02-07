@@ -1,4 +1,4 @@
-function [ ff1, ff1_fit, mitchel, church ] = FanoFactors( ex, Mn, Vars, param1 )
+function [ ff, ff_fit, mitchel, church ] = FanoFactors( ex, Mn, Vars, param1 )
 % all kind of fano factor calculations are performed
 % - casual mn/vars
 % - power law fit
@@ -7,14 +7,16 @@ function [ ff1, ff1_fit, mitchel, church ] = FanoFactors( ex, Mn, Vars, param1 )
 
 
 %------------------------------------------------------ Fano Factor
-ff1 = ( Mn ./ Vars );
-% ff1 = nanmean(ff1);
+ff.ff = ( Vars ./ Mn );
+ff.spkcnt_mn = Mn;
+ff.spkcnt_var  = Vars;
+
 
 [FitPa, ~,~,~,~] = FitPower( Mn , Vars);
-ff1_fit = FitPa.exponent;
+ff_fit = FitPa.exponent;
 
 %------------------------------------------------------- Mitchel FF
-[mitchel.mn, mitchel.sem, mitchel.bindat] = Mitcheletal(ex.Trials, param1);
+[mitchel.mn, mitchel.var] = Mitcheletal(ex.Trials, param1);
 
 %------------------------------------------------------- Churchl FF
 church = Churchlandetal( ex.Trials );
