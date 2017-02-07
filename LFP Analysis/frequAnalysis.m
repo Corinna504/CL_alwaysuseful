@@ -16,14 +16,18 @@ function ex = frequAnalysis( ex, varargin )
 
 % notch filter variables
 Fs = 1000;              % sampling frequency
-notchf = [50 50]/(Fs/2);     % notch filter frequency
-notchord = 2;           % filter order
+notchf = [49.5 50.5]/(Fs/2);     % notch filter frequency1
+notchord = 1;           % filter order
 
-lowpf = 150/(Fs/2);     % lowpass filter cutoff frequency
+lowpf = 120/(Fs/2);     % lowpass filter cutoff frequency
 lowpord = 3;            % filter order
 
 % power spectrum in Chalk et al. time halfbandwidth was 3 and k was 5
 nw = 2;         % time half bandwidth product
+
+
+% time relative to stimulus onset to filter and interpolate LFP
+t_off = -0.2;
 
 
 % parse input
@@ -51,8 +55,6 @@ clearvars k;
 [b_notch,a_notch] = butter(notchord, notchf, 'stop' );
 [b_notch2,a_notch2] = butter(4, notchf.*2, 'stop' );
 % lowpass filter
-% [b_lowp, a_lowp] = butter(lowpord,[ 0.0014, lowpf], 'bandpass');
-% [b_lowp, a_lowp] = butter(lowpord, 0.001, 'high');
 [b_lowp, a_lowp] = butter(lowpord, lowpf);
 
 % perform functions on each trial lfp
@@ -63,7 +65,7 @@ for ind = 1:length(ex.Trials)
     
     ts = ex.Trials(ind).LFP_ts - t_strt(1);
     highpassfilt = ex.Trials(ind).LFP - ...
-        mean(ex.Trials(ind).LFP(ts>=-0.05 & ts<=0));
+        mean(ex.Trials(ind).LFP(ts>=t_off & ts<=0));
 
     %%% lowpass and notch filter
     lowpassfilt = filtfilt(b_lowp, a_lowp, highpassfilt);
@@ -71,17 +73,35 @@ for ind = 1:length(ex.Trials)
     ex.Trials(ind).LFP_filt = filtfilt(b_notch2, a_notch2, bandstop50);
     
     %%% interpolate the time of stimulus presentation
-    time = t_strt(1)-0.05:1/Fs:t_strt(1)+0.45;
+    
+    time = t_strt(1)+t_off:1/Fs:t_strt(1)+isRC(ex);
     interstim = interp1(ex.Trials(ind).LFP_ts, ex.Trials(ind).LFP_filt, time);
     
     %%% mutli taper approach
     % power spectrum density returned by pmtm is normalized per unit frequency
     [ex.Trials(ind).POW, ex.Trials(ind).FREQ] = ...
-        pmtm(interstim(time>=0), nw, 2^nextpow2(sum(time>=0)), Fs);
+        pmtm(interstim(time-t_strt(1)>=0), nw, 2^nextpow2(sum(time-t_strt(1)>=0)), Fs);
     
     ex.Trials(ind).LFP_interp = interstim;
     ex.Trials(ind).LFP_interp_time = time-t_strt(1);
 end
 
+ex.time = time-t_strt(1);
 end
 
+
+
+
+
+function stimdur = isRC(ex)
+
+
+fname = getFname(ex);
+
+if isempty(strfind(fname, 'RC'))
+    stimdur = 0.5;
+else
+    stimdur = 2;
+end
+
+end

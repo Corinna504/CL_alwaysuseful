@@ -1,4 +1,4 @@
-function LFPGui( exSpkin, exLFPin, exSpkin2, exLFPin2)
+function [fig_h, fig_spect] = LFPGui( exSpkin, exLFPin, exSpkin2, exLFPin2)
 % gui showing different LFP related plots:
 % raw lfp vs. filtered time series
 % raw lfp vs. filtered power
@@ -10,18 +10,27 @@ function LFPGui( exSpkin, exLFPin, exSpkin2, exLFPin2)
 %%
 
 tag_number = randi(1000,1);
+
 fig_h = figure('Position', [57 188 1100 442]);
 
-idx = [exSpkin.Trials.Reward]==1 & ~ cellfun(@isempty, {exLFPin.Trials.LFP});
+fig_spect = findobj('tag', ['spectogram' num2str(tag_number)]);
+if isempty(fig_spect)
+    fig_spect = figure('tag', ['spectogram' num2str(tag_number)], 'Position', [101   279   989   701]);
+else
+    figure(fig_spect, 'Position', [101   279   989   701]);
+end
+            
+
+idx = ~ cellfun(@isempty, {exLFPin.Trials.LFP});
 exLFPin.Trials = exLFPin.Trials(idx);
 exSpkin.Trials = exSpkin.Trials(idx);
 
-idx2 = [exSpkin2.Trials.Reward]==1 & ~ cellfun(@isempty, {exLFPin2.Trials.LFP});
+idx2 = ~ cellfun(@isempty, {exLFPin2.Trials.LFP});
 exLFPin2.Trials = exLFPin2.Trials(idx2);
 exSpkin2.Trials = exSpkin2.Trials(idx2);
 
 
-params.Fs = 1000; params.trialave = 1;
+params.Fs = 1000; params.trialave = 1; 
 
 %% specifications
 bg = uibuttongroup(fig_h, 'Title','Filter and Multitaper', ...
@@ -61,7 +70,7 @@ uicontrol(bg, 'Style', 'text', 'String','Frequency Range', ...
     'Position', [5 25 100 15], 'HorizontalAlignment', 'left');
 freqrange_lb_h = uicontrol(bg, 'Style','edit', 'String', '1', ...
     'Position', [105 25 30 15]);
-freqrange_ub_h = uicontrol(bg, 'Style','edit', 'String', '80', ...
+freqrange_ub_h = uicontrol(bg, 'Style','edit', 'String', '100', ...
     'Position', [140 25 30 15]);
 
 
@@ -70,12 +79,15 @@ uicontrol(bg, 'Style', 'text', 'String','Specgram Window', ...
     'Position', [5 5 100 15], 'HorizontalAlignment', 'left');
 winlength_h = uicontrol(bg, 'Style','edit', 'String', '0.1', ...
     'Position', [105 5 30 15]);
-winstep_h = uicontrol(bg, 'Style','edit', 'String', '0.03', ...
+winstep_h = uicontrol(bg, 'Style','edit', 'String', '0.005', ...
     'Position', [140 5 30 15]);
 
 
 %% update button
-[stimparam, vals] = getStimParam(exSpkin);
+[stimparam, valsB] = getStimParam(exSpkin);
+[~, valsD] = getStimParam(exSpkin2);
+vals = intersect(valsD, valsB); % find the common stimuli 
+
 stimcond_h = uicontrol(fig_h, 'Style', 'popupmenu', 'String', {'all'; num2str(vals')},...
     'Position', [120 120 100 30]);
 
@@ -123,10 +135,14 @@ UpdateAxes([], [])
 %%
     function UpdateAxes(src, evt)
         
+        
         params.tapers = [str2double(nw_h.String), str2double(nw_h.String)*2-1];
         params.fpass =  [str2double(freqrange_lb_h.String), str2double(freqrange_ub_h.String)];
         win = [str2double(winlength_h.String), str2double(winstep_h.String)];
-
+        CallSpectogramPlot;
+        
+%         delete(fig_h);
+%         return
         %------------------------------- baseline condition
         exspk = exSpkin;
         exlfp = exLFPin;
@@ -181,7 +197,7 @@ UpdateAxes([], [])
         axes(ax_spktrigavg_t2); hold off; 
         spktriglfp( exspk_drug, exlfp_drug, 'plot', true, 'rawflag', true);
         sta_drug = spktriglfp( exspk_drug, exlfp_drug, 'plot', true); ylim auto
-       ax_spktrigavg_t2.Children(1).LineStyle = '--';
+        ax_spktrigavg_t2.Children(1).LineStyle = '--';
         
         % Spike Field Coherence
         axes(ax_spkfieldcoh2); hold off; 
@@ -245,41 +261,41 @@ UpdateAxes([], [])
         title('blue: raw     filtered:red'); ylim auto
         
         %----------------------------- stimulus averaged values
-        x = vals;
         
-        x(x>1000) = max(x(x<1000))+mean(diff(x(x<1000)));
         % stimulus vs lfp signal
         axes(ax_stimulus_lfp_t);
-        plot(x, nanmean(lfpave_base, 2), '.-k', ...
-            x, nanmean(lfpave_drug, 2), '.-b');
+        plot(valsB, nanmean(lfpave_base, 2), '.-k', ...
+            valsD, nanmean(lfpave_drug, 2), '.-b');
         xlabel('stimulus'); 
         ylabel('averaged signal');
         
         % stimulus vs lfp pow
         axes(ax_stimulus_lfp_f);
-        plot(x, nanmean(powave_base, 2), '.-k', ...
-            x, nanmean(powave_drug, 2), '.-b');
+        plot(valsB, nanmean(powave_base, 2), '.-k', ...
+            valsD, nanmean(powave_drug, 2), '.-b');
         xlabel('stimulus'); 
         ylabel('averaged signal');
 
         axes(ax_stimulus_coh);
-        plot(x, nanmean(coh_base, 2), '.-k', ...
-            x, nanmean(coh_drug, 2), '.-b');
+        plot(valsB, nanmean(coh_base, 2), '.-k', ...
+            valsD, nanmean(coh_drug, 2), '.-b');
         
         legend('baseline', 'drug', 'Location', 'EastOutside');
 
         %----------------------------- 
         set(findobj('Type', 'Axes'), 'FontSize', 8);
 
+        
+        
+    end
 
+
+    function CallSpectogramPlot
+        
         %----------------------------- LFP spectogram
-        h = findobj('tag', ['spectogram' num2str(tag_number)]);
-        if isempty(h)
-            figure('tag', ['spectogram' num2str(tag_number)]);
-        else
-            figure(h);
-        end
-            
+        win = [str2double(winlength_h.String), str2double(winstep_h.String)];
+
+        figure(fig_spect);
         
         exlfp = exLFPin;
         exlfp = frequAnalysis(exlfp, ...
@@ -296,47 +312,41 @@ UpdateAxes([], [])
             'lowpord', str2double(lowpassorder_h.String), ...
             'nw', str2double(nw_h.String));
         
+                   
+       % other stimuli
         for i = 1:length(vals)
-            ex_temp.Trials = exlfp.Trials([exlfp.Trials.(stimparam)]==vals(i));
-            ex_temp_drug.Trials = exlfp_drug.Trials([exlfp_drug.Trials.(stimparam)]==vals(i));
-            
+          
             % baseline
             s(1,i) = subplot(3, length(vals), i);
-            [S,t,f] = lfpspecgram(ex_temp, win, params);
-            colorbar('southoutside');
+            [S,t,f] = lfpspecgram(exlfp, win, params, i);
 
-            
+               
             % drug
             s(2,i) = subplot(3, length(vals), i+length(vals));
-            [S_drug,t,f] = lfpspecgram(ex_temp_drug, win, params);
-            caxis([min(min(log([S, S_drug]))) max(max(log([S, S_drug])))]);
-            colorbar('southoutside');
-
+            [S_drug,t,f] = lfpspecgram(exlfp_drug, win, params, i);
+        
             % time spectrum
             s(3,i) = subplot(3, length(vals), i+length(vals)*2);
-            S_diff(:,:,i) = log(S)-log(S_drug);
-%             S_diff(:,:,i) = S-S_drug;
-            imagesc( t+ex_temp.Trials(1).LFP_interp_time(1), f, S_diff(:,:,i)');             
-            colorbar('southoutside'); xlabel('Frequency'); ylabel('time [s]');
+            S_diff(:,:,i) = S-S_drug; 
+            plot_matrix(S_diff(:,:,i), t+exlfp.Trials(1).LFP_interp_time(1), f);   
+            ylabel('Frequency'); xlabel('time [s]');
             
         end
         
-        s(1,1).YLabel.String = [ 'Baseline ' s(1,1).YLabel.String];
-        s(2,1).YLabel.String = [ 'Drug ' s(2,1).YLabel.String];
+        s(1,1).YLabel.String = char('Baseline stimulus triggered', 'Spectogram');
+        s(2,1).YLabel.String = char('Drug stimulus triggered', 'Spectogram');
         s(3,1).Title.String = 'log(Base pow)-log(Drug pow)';
         
         set(findobj('Type', 'Axes'), 'FontSize', 8);
         
         for i = 1:length(vals)    
-            caxis(s(3,i), [min(min(min(S_diff))) max(max(max(S_diff)))]);
+%             caxis(s(3,i), [min(min(min(S_diff))) max(max(max(S_diff)))]);
         end
 
         axes('Position', [0.05 0.05 0.1 0.01]); 
-        text(0, 0, 'Color/Frequency Power is on log scale');
+        text(0, 0, 'Color/Frequency Power is in dB');
         axis off;
-
     end
-
 
 
 end

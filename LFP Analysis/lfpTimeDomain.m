@@ -4,7 +4,8 @@ function lfp_avg = lfpTimeDomain(exlfp)
 [ stimparam, vals] = getStimParam( exlfp );
 col = lines(length(vals));
 
-time = -0.05:1/1000:0.45;
+
+time = exlfp.time;
 %%%
 for i = 1:length(vals)
     
@@ -13,15 +14,17 @@ for i = 1:length(vals)
     %%% averaged trials
     lfp_avg(i,:) = nanmean(vertcat(trials.LFP_interp), 1);
         
-    plot(time, lfp_avg(i,:), 'Color', col(i, :),...
-        'ButtonDownFcn',  ...
-        {@PlotSingleTrials, trials, vals(i), col(i,:)}); hold on
+    plot(time, lfp_avg(i,:), 'Color', col(i, :), 'DisplayName', num2str(vals(i))); hold on;
+%     ,...
+%         'ButtonDownFcn',  ...
+%         {@PlotSingleTrials, trials, vals(i), col(i,:)}); hold on
 end
 
 % legend(num2str(vals'), 'Location', 'SouthEast');
 set(gca, 'XLim', [time(1) time(end)]);
 xlabel('time [s]'); ylabel('avg LFP');
-crossl;
+legend('show', 'Location', 'EastOutside');
+crossl; 
 end
 
 
