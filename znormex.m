@@ -28,14 +28,16 @@ for par = parvls
     % mean spike rates
     spkrate(j).mn  = mean([ex.Trials(ind).spkRate]);
     spkrate(j).var = var([ex.Trials(ind).spkRate]);
-    spkrate(j).sd = std([ex.Trials(ind).spkRate]) / sqrt( sum(ind) );
+    spkrate(j).sd = std([ex.Trials(ind).spkRate]);
+    spkrate(j).sem = spkrate(j).sd / sqrt( spkrate(j).nrep );
     
+  
     % mean spike count
     spkcount(j).(param1) = par;
     spkcount(j).mn  = mean([ex.Trials(ind).spkCount]);
     spkcount(j).var = var([ex.Trials(ind).spkCount]);
     
-
+       
     % z normed spike counts
     z = zscore( [ ex.Trials(ind).spkCount ] );
     z = num2cell(z);
@@ -78,3 +80,20 @@ end
 ex.raster_pval = parvls;
 
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
