@@ -20,6 +20,9 @@ end
 
 load(fname);
 
+% add blank
+addBlank;
+
 
 % collapse orientations to [0 180]
 if strcmp(ex.exp.e1.type, 'or')
@@ -27,7 +30,9 @@ if strcmp(ex.exp.e1.type, 'or')
     idx = [ex.Trials.or]<=360;
     [ex.Trials(idx).or] = deal(trials{idx});
 elseif strcmp(ex.exp.e1.type, 'co')
-    co = [ex.Trials.co]'; co(co>1000)=0; 
+
+    co = [ex.Trials.co]';  % take contrast values and replace 0 contrast with blank value
+    co(co==0)= ex.exp.e1.blank;  
     co = num2cell(co);
     [ex.Trials.co] = deal(co{:});
 end
@@ -37,8 +42,6 @@ if isempty(strfind(fname, 'c0')) && isempty(strfind(fname, 'lfp'))
 end
 
 
-% add blank
-addBlank;
 
 
 if onlyrewarded_flag
