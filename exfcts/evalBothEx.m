@@ -30,6 +30,18 @@ exinfo.upfi_drug = find(exinfo.ratepar_drug == exinfo.ratepar( exinfo.upfi ));
 % end
 
 
+%% non-parametric change, i.e. relative change in the integrated area under the tc curve
+s1 = exinfo.ratepar;
+s2 = exinfo.ratepar_drug;
+if exinfo.isRC
+    exinfo.nonparam_ratio = mean(exinfo.ratemn_drug (ismember(s2, s1))) /  ...
+        mean(exinfo.ratemn (ismember(s1, s2)));
+    
+else
+    exinfo.nonparam_ratio = sum(exinfo.ratemn_drug (ismember(s2, s1))) /  ...
+        sum(exinfo.ratemn (ismember(s1, s2)));
+end
+
 
 %% gain change
 [gslope, yoff, r2] = type2reg(exinfo, p_flag);
@@ -74,12 +86,12 @@ if isfield(exinfo.fitparam, 'others') && isfield(exinfo.fitparam.others, 'OR')
     plotCOTC(exinfo);
    
     
-elseif strcmp(exinfo.param1, 'sf')
-    
+elseif strcmp(exinfo.param1, 'sf')      %%% spatial freuqency
+
     % first entry linear fit, second entry log scaled fit
     others_base = exinfo.fitparam.others;
     others_drug= exinfo.fitparam_drug.others;
-    if others_base{1}.r2 > others_base{2}.r2
+    if others_base{1}.r2 > others_base{2}.r2 && others_base{1}.mu > 0
         exinfo.fitparam = others_base{1};
         exinfo.fitparam_drug = others_drug{1};
         exinfo.fitparam.type = 'linear';
@@ -128,10 +140,8 @@ if strcmp(exinfo.param1, 'or');
         if abs(exinfo.fitparam.mu - exinfo.fitparam_drug.mu) > 150
             if exinfo.fitparam.mu < exinfo.fitparam_drug.mu
                 exinfo.fitparam.mu = exinfo.fitparam.mu +180;
-                exinfo.fitparam.val.uqang = exinfo.fitparam.val.uqang +180;
             elseif exinfo.fitparam_drug.mu < exinfo.fitparam.mu
                 exinfo.fitparam_drug.mu = exinfo.fitparam_drug.mu +180;
-                exinfo.fitparam_drug.val.uqang = exinfo.fitparam_drug.val.uqang +180;
             end
         end
     end
@@ -186,7 +196,7 @@ function  plotCOTC(exinfo)
     eqax; crossl; unity; hold on
     xlabel('Baseline'); ylabel(exinfo.drugname);
     
-    title(sprintf('contrast: gain %1.2f, offset: %1.2f, r2 %1.2f', ...
+    title(sprintf('contrast: gain %1.2f, offset: %1.2f, r2 %1.3f', ...
         exinfo.fitparam.others.CO.gslope,...
         exinfo.fitparam.others.CO.yoff,...
         exinfo.fitparam.others.CO.r2reg));
