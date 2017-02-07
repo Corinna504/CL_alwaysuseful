@@ -7,8 +7,8 @@ h = figure('Name', exinfo.figname, 'UserData', exinfo, ...
 
 col= getCol(exinfo);
 
-[parB, latB, pvalB, sB] = plotHelper(exinfo, exB, 0, 'baseline');
-[parD, latD, pvalD, sD] = plotHelper(exinfo, exD, 3, exinfo.drugname);
+[parB, latB, pvalB, sB, ntrialsB] = plotHelper(exinfo, exB, 0, 'baseline');
+[parD, latD, pvalD, sD, ntrialsD] = plotHelper(exinfo, exD, 3, exinfo.drugname);
 
 sB(1).Position(1) = 0.08;
 sB(1).Position(2) = sB(1).Position(2)+0.05;
@@ -31,10 +31,8 @@ legend('baseline', exinfo.drugname, 'Location','northoutside','Orientation','hor
 xlim([min([parB parD]), max([parB parD])]);
 
 
-idx = exinfo.ratepar<1000;
-text(parB, latB, ntrialwstar(exB.trials_n(idx), pvalB), 'FontSize', 11);
-idx = exinfo.ratepar_drug<1000;
-text(parD, latD, ntrialwstar(exD.trials_n(idx), pvalD), 'FontSize', 11);
+text(parB, latB, ntrialwstar(ntrialsB, pvalB), 'FontSize', 11);
+text(parD, latD, ntrialwstar(ntrialsD, pvalD), 'FontSize', 11);
 
 if strcmp(exinfo.param1, 'co') || strcmp(exinfo.param1, 'sf')
     set(s, 'XScale', 'log');
@@ -56,7 +54,7 @@ end
 
 
 %%
-function [parvls, lat, pval, s] = plotHelper(exinfo, ex, off, titletxt)
+function [parvls, lat, pval, s, ntrials] = plotHelper(exinfo, ex, off, titletxt)
 
 s(1) = subplot(2, 3, 1+off); % all
 
@@ -82,6 +80,7 @@ for pari = 1:length(parvls)
     % plotting
     plot(psth_all, 'Color', col(pari, :), 'LineWidth', 1.5); hold on
     
+    ntrials(pari) = sum(ind);
 end
 
 box off;
@@ -134,7 +133,11 @@ c = cell(length(n), 1);
 for i  =1:length(n)
     
     c{i} = num2str(n(i));
-    if p(i) <0.5
+    if p(i) <0.001
+        c{i} = [c{i} '***'];
+    elseif p(i) <0.01
+        c{i} = [c{i} '**'];
+    elseif p(i) <0.5
         c{i} = [c{i} '*'];
     end
 end
