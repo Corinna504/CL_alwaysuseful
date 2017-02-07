@@ -35,7 +35,7 @@ end
 
 %% load general information (fignames, ex foldernames, etc.)
 if isempty(exinfo)
-    exinfo = loadGeneralInfo();
+    exinfo = loadGeneralInfo(varargin{:});
 end
 
 
@@ -135,6 +135,12 @@ while j<length(varargin)
             eval([ 'info.ratepar' apx ' = varargin{j+1};']);
         case 'rateSME'
             eval([ 'info.ratesme' apx ' = varargin{j+1};']);
+        case 'rateSD'
+            eval([ 'info.ratesd' apx ' = varargin{j+1};']);
+        case 'rawspkrates'
+            eval([ 'info.rawspkrates' apx ' = varargin{j+1};']);
+        case 'rate_resmpl'
+            eval([ 'info.rate_resmpl' apx ' = varargin{j+1};']);
         case 'ff'
             eval([ 'info.ff' apx ' = varargin{j+1};']);
         case 'tcdiff'
@@ -149,6 +155,7 @@ while j<length(varargin)
             eval([ 'info.prsig' apx ' = varargin{j+1};']);
         case 'resvars'
             eval([ 'info.resvars' apx ' = varargin{j+1};']);
+            
         case 'sdfs'
             eval([ 'info.sdfs' apx ' = varargin{j+1};']);
         case 'times'

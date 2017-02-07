@@ -30,7 +30,8 @@ for par = parvls
     spkrate(j).var = var([ex.Trials(ind).spkRate]);
     spkrate(j).sd = std([ex.Trials(ind).spkRate]);
     spkrate(j).sem = spkrate(j).sd / sqrt( spkrate(j).nrep );
-    
+    spkrate(j).raw = [ex.Trials(ind).spkRate];
+    spkrate(j).resamples = resample2([ex.Trials(ind).spkRate]);
   
     % mean spike count
     spkcount(j).(param1) = par;
@@ -87,8 +88,20 @@ end
 
 
 
+function res = resample2(A)
+% resample from A
 
+n = length(A); 
+nsmpl = 1000; % number 
 
+res = nan(n, nsmpl); %initial variable to prevent overhead
+idx = randi(imax, 1000, n); % combination of indices corresponding to A's data
+
+for i = 1:nsmpl
+    res(:, nsmpl) = A(idx(i, :)); %assigning the randomized resamples
+end
+
+end
 
 
 
