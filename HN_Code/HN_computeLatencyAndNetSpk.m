@@ -19,40 +19,26 @@ end
 
 
 if isempty(res) 
-%     res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot');
-    if isfield(ex, 'Headers')
-        fname = ex.Headers(1).fileName;
-    elseif isfield(ex.Header, 'fileName')
-        fname = ex.Header.fileName;
-    else 
-        fname = '';
-    end
-    
-%     if isempty(strfind(fname, 'CO'))
+    %     if isempty(strfind(fname, 'CO'))
         res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot');
 %     else
 %         res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot', 'exp2', 'co_seq');
 %     end
+
+% if isfield(ex.stim.vals, 'RCperiod')
+%     res = filterS(res, 100/ex.stim.vals.RCperiod);
+% else
+%     res = filterS(res, 100);
+% end
+
 end
    
 if isfield(res, 'vars')
     if lat_flag
-%     res =  HN_newLatency(res);  % changed cl  11/11/15
+%     res =  HN_newLatency(res);  
      res =  CL_newLatency(res);  % changed @CL 22.01.2016 
     end
-    
-    
-%     % compute latency old, replaced by newLatency (s.o.)
-%     vars = sqrt(res.vars);
-%     vars = vars-mean(vars(1:20));
-%     idx = find((vars)>=max((vars))/2);
-% 
-%     lat = idx(1);
-%     res.latencyToHalfMax = res.delays(lat);
-
-
-
-%     if isfield(res, 'latencyToHalfMax')
+  
         
 % set to new function to compute 2D stimuli
 if size(res.sdfs.n, 1) > 1 && size(res.sdfs.n, 2) > 1
@@ -60,7 +46,6 @@ if size(res.sdfs.n, 1) > 1 && size(res.sdfs.n, 2) > 1
 else
     res = getNetSpks1D(res, ex);
 end
-%     end 
 end
 
 
@@ -199,3 +184,27 @@ res.or = x(1:length(nspk)-length(res.sdfs.extras));
 
 end
 
+
+
+
+function res = filterS(res, filt_freq)
+% filtering 100Hz
+
+% lowpass filter variables
+Fs = 10000;              % sampling frequency
+highp_frequ = [filt_freq-10 filt_freq+10]/(Fs/2);     % filter frequency
+highp_order = 2;           % filter order
+[b, a] = butter(highp_order, highp_frequ, 'stop');
+
+for i = 1:length(res.sdfs.s)
+    res.sdfs.s{i} = filtfilt(b, a, res.sdfs.s{i});
+end
+
+if ~isempty(res.sdfs.extras)
+    res.sdfs.extras{1}.sdf = ....
+        filtfilt(b, a, res.sdfs.extras{1}.sdf);
+end
+
+
+end
+        
