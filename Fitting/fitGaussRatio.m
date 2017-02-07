@@ -27,38 +27,38 @@ function [ks, kc, ws, wc, fval, r2] = fitGaussRatio(sz, r)
 %
 
 
-opt = optimset('MaxFunEvals',2000,'maxiter',2000);
+opt = optimset('MaxFunEvals',2000,'maxiter',2000, 'Display', 'off');
 
 % the starting width of the center gaussian is the radius of the stimulus
 % that elicited the first peak response in the raw tuning curve
-[~, idx] = findpeaks(r, 'MinPeakHeight', max(r)*0.7);
+idx = find( r>max(r)*0.7, 1, 'first');
 if ~isempty(idx)
-    wc = sz(idx(1));
+    wc = sz(idx);
 else
-    wc = sz(end);
+    wc = sz(1);
 end
 
-x0 = [wc, wc+1, 10, 0.0001; ...
-    wc, wc+3, 10, 0.0001; ...
+
+x0 = [wc, wc+0.3, 10, 0.0001; ...
     wc, wc+1, 1, 0.0001; ...
-    wc, wc+3, 1, 0.0001; ...
+    wc, wc+0.3, 1, 0.0001; ...
     wc, wc+1, 10, 0.01; ...
     wc, wc+1, 1, 0.01; ...
     wc, wc+1, 20, 0.01; ...
-    wc, wc+3, 20, 0.01; ...
-    wc+5, wc+6, 1, 0.01; ...
-    wc+5, wc+6, 10, 0.01; ...
-    wc+5, wc+6, 10, 0.0001; ...
-    wc, wc+3, 1, 0.01];
+    wc, wc+0.3, 20, 0.01; ...
+    wc, wc+0.3, 1, 0.01];
 
 
 parfor i = 1:size(x0,1)
-    fprintf('fit #%1.0f \n', i)
     [p(i,:), fval(i)] = fminsearch(@cf, x0(i,:), opt, sz, r);
 end
 
 [~, winneri] = min(fval);
 pfin = p(winneri, :); fval = fval(winneri);
+
+fprintf('sz fit winner #%1.0f \n', winneri)
+
+
 %assign parameters
 wc = pfin(1,1); ws = pfin(1,2);
 kc = pfin(1,3); ks = pfin(1,4)^2;
@@ -74,7 +74,7 @@ r2 = 1- ((sum((r_pred-r).^2)  / sum( (r-mean(r)).^2 ) ));
 end
 
 
-%% COST FUNCTIONS
+%% COST FUNCTION
 function cost = cf(p, sz, r)
 % cost function for all parameters
 % note, the fit is restricted to wc<ws, i.e. the center is smaller than
