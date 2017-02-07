@@ -2,7 +2,7 @@ function [ex, argout] = evalSingleDG( exinfo, fname )
 % batch file that calls all functions to evaluated drifiting grating trials
 
 
-rate_flag = true;
+
 ex = loadCluster( fname ); % load raw data
 ex.Trials = ex.Trials([ex.Trials.me] == exinfo.ocul);
 
@@ -10,25 +10,45 @@ ex.Trials = ex.Trials([ex.Trials.me] == exinfo.ocul);
 %% Anova for selectivity
 
 if strcmp(exinfo.param1, 'co')
-    idx = [ex.Trials.(exinfo.param1)] ~= ex.exp.e1.blank | ...
+    idx_nonblank = [ex.Trials.(exinfo.param1)] ~= ex.exp.e1.blank & ...
             [ex.Trials.(exinfo.param1)] ~= 0;
 else
-    idx = [ex.Trials.(exinfo.param1)] ~= ex.exp.e1.blank;
+    idx_nonblank = [ex.Trials.(exinfo.param1)] < ex.exp.e1.blank;
 end
 
-p_anova = anova1([ex.Trials(idx).spkRate], [ex.Trials(idx).(exinfo.param1)],'off');
+p_anova = anova1([ex.Trials(idx_nonblank).spkRate], ...
+    [ex.Trials(idx_nonblank).(exinfo.param1)],'off');
 
-argout =  {'p_anova', p_anova};
-
-return
 %% Spiking
+
 %%% z normed spike rates entered in ex.Trials
-[ex, spkstats] = znormex(ex, exinfo, rate_flag);
 
 
 %%% Fano Factors
+% results for the second half
+ex.Trials = ex.Trials(ceil(length([ex.Trials])/2):end);
+[ex, spkrate, spkcount] = znormex(ex, exinfo);
+
+[ ff.classic_2ndhalf, ff.fit_2ndhalf, ff.mitchel_2ndhalf, ff.church_2ndhalf ] = ...
+    FanoFactors( ex, [spkcount.mn], [spkcount.var], exinfo.param1);
+
+%%% Fano Factors 
+% results for all data
+ex = loadCluster( fname ); % load raw data
+ex.Trials = ex.Trials([ex.Trials.me] == exinfo.ocul);
+[ex, spkrate, spkcount] = znormex(ex, exinfo);
+
+
 [ ff.classic, ff.fit, ff.mitchel, ff.church ] = ...
-    FanoFactors( ex, [spkstats.mn], [spkstats.var], exinfo.param1);
+    FanoFactors( ex, [spkcount.mn], [spkcount.var], exinfo.param1);
+
+
+
+
+%% assign output arguments
+argout =  { 'ff', ff};
+return 
+%%
 
 %%% Cluster Analysis
 fnamec0 = strrep(fname, exinfo.cluster, 'c0'); % load cluster 0
@@ -40,31 +60,36 @@ exc0.Trials = exc0.Trials([exc0.Trials.me] == exinfo.ocul);
 [rsc, prsc] = corr([ex.Trials.zspkrate]', [exc0.Trials.zspkrate]', 'rows', 'complete');
 
 %%% Signale Correlation
-[rsig, prsig] = corr([spkstats.mn]', [spkstatsc0.mn]', 'rows', 'complete');
+[rsig, prsig] = corr([spkrate.mn]', [spkstatsc0.mn]', 'rows', 'complete');
 
 
 %% Fitting
 if strcmp(exinfo.param1, 'or')
-    fitparam = fitgaussOR(spkstats);
+    fitparam = fitOR( [spkrate.mn], [spkrate.sd], [spkrate.or] );
     
 elseif strcmp(exinfo.param1, 'co')
     
-    fitparam = fitCO([spkstats.mn], [spkstats.(exinfo.param1)]);
+    fitparam = fitCO([spkrate.mn], [spkrate.(exinfo.param1)]);
 
+    % check for underspampling
+    i_cosmc50 = [ex.Trials.(exinfo.param1)]<=fitparam.c50 & idx_nonblank;
+    fitparam.undersmpl(1) = anova1([ex.Trials(i_cosmc50).spkRate], [ex.Trials(i_cosmc50).(exinfo.param1)],'off');
+    
+    i_cohic50 = [ex.Trials.(exinfo.param1)]>fitparam.c50 & idx_nonblank;
+    fitparam.undersmpl(2) = anova1([ex.Trials(i_cohic50).spkRate], [ex.Trials(i_cohic50).(exinfo.param1)],'off');
+
+    
     if strfind( fname , exinfo.drugname )
-        fitparam.sub = fitCO_drug([spkstats.mn], [spkstats.(exinfo.param1)], exinfo.fitparam);
+        fitparam.sub = fitCO_drug([spkrate.mn], [spkrate.(exinfo.param1)], exinfo.fitparam);
     end
     
 elseif strcmp(exinfo.param1, 'sz')
-    fitparam = fitSZ([spkstats.mn], [spkstats.sd], [spkstats.(exinfo.param1)]);
+    fitparam = fitSZ([spkrate.mn], [spkrate.sd], [spkrate.(exinfo.param1)]);
     
 elseif strcmp(exinfo.param1, 'sf')
-    fitparam_lin = fitgaussSF([spkstats.mn], [spkstats.sd], [spkstats.(exinfo.param1)]);
-    if fitparam_lin.mu<0;        fitparam_lin.mu = 0;    end
-    
-    fitparam_log = fitgaussSF([spkstats.mn], [spkstats.sd], log([spkstats.(exinfo.param1)]));
-    fitparam_log.mu = exp(fitparam_log.mu);
-    fitparam_log.sig = exp(fitparam_log.sig);
+    fitparam_lin = fitSF([spkrate.mn], [spkrate.sd], [spkrate.(exinfo.param1)], false);
+    fitparam_log = fitSF([spkrate.mn], [spkrate.sd], [spkrate.(exinfo.param1)], true);
+  
     
     % first entry linear fit, second entry log scaled fit
     fitparam.others = {fitparam_lin; fitparam_log};
@@ -74,8 +99,8 @@ else
 end
 
 %% tc height diff
-minspk = min([spkstats.mn]);
-maxspk = max([spkstats.mn]);
+minspk = min([spkrate.mn]);
+maxspk = max([spkrate.mn]);
 tcdiff = (maxspk - minspk) / mean([maxspk, minspk]);
 
 
@@ -85,129 +110,14 @@ phasesel = getPhaseSelectivity(ex, 'stim', exinfo.param1);
 
 %% assign output arguments
 argout =  {'fitparam', fitparam, ...
-    'rateMN', [spkstats.mn]', 'rateVARS', [spkstats.var]', ...
-    'ratePAR', [spkstats.(exinfo.param1)]', 'rateSME', [spkstats.sd]', ...
+    'rateMN', [spkrate.mn]', 'rateVARS', [spkrate.var]', ...
+    'ratePAR', [spkrate.(exinfo.param1)]', 'rateSME', [spkrate.sd]', ...
     'rsc', rsc, 'prsc', prsc, ...
     'rsig', rsig, 'prsig', prsig, ...
     'ff', ff, 'tcdiff', tcdiff, ... 
-    'nrep', [spkstats.nrep]', ...
+    'nrep', [spkrate.nrep]', ...
     'phasesel', phasesel, 'p_anova', p_anova};
 end
 
 
-
-%%
-function fitparam = fitgaussOR(spkstats)
-
-% CL fit
-[fitparam, ~, val]      = fitgauss( [spkstats.mn], [spkstats.sd], [spkstats.or] );
-
-% HN fit
-[fitHN,~,~,~,~,~]         = FitGauss_HN(val.uqang, val.mn, 'lin');
-[fitHN.mean, val.uqang]   = unwrapdeg(fitHN.mean, val.uqang);
-
-% CL fit with HN parameters
-[fitparam, gaussr2, val] = fitgauss( [spkstats.mn], [spkstats.sd], [spkstats.or], fitHN, val);
-
-fitparam.r2 = gaussr2;
-fitparam.HN = fitHN;
-fitparam.val = val;
-
-end
-
-function ft = fitgaussSF(spkmn, spksd, stimval)
-
-% CL fit
-[ft, gaussr2, val] = fitgauss( spkmn, spksd, stimval );
-
-ft.r2 = gaussr2;
-ft.val = val;
-
-ft.x = ft.mu-100 :0.1: ft.mu+100;
-ft.y = gaussian(ft.mu, ft.sig, ft.a, ft.b, ft.x) ;
-
-end
-
-function [ex, spkstats] = znormex(ex, exinfo, norm_flag)
-%znormex
-% converts spike rates to z-normed data for each condition pair
-% norm_flag determines if to use spike rate (norm_falg = 1) or spike count
-% (norm_flag = 0)
-
-
-param1 = exinfo.param1;
-parvls = unique( [ ex.Trials.(param1) ] );
-
-j = 1;
-
-if exinfo.isadapt
-    time = 0:0.001:5;
-else
-    time = 0.001:0.001:0.45;
-end
-
-
-for par = parvls
-    
-    % z-scored spikes for this stimulus
-    ind = par == [ ex.Trials.(param1) ];
-    spkstats(j).nrep = sum(ind);
-    spkstats(j).(param1) = par;
-
-    if norm_flag
-        z = zscore( [ ex.Trials(ind).spkRate ] );
-        spkstats(j).mn  = mean([ex.Trials(ind).spkRate]);
-        spkstats(j).var = var([ex.Trials(ind).spkRate]);
-        spkstats(j).sd = std([ex.Trials(ind).spkRate]) / sqrt( sum(ind) );
-    else
-        z = zscore( [ ex.Trials(ind).spkCount ] );
-        spkstats(j).(param1) = par;
-        spkstats(j).mn  = mean([ex.Trials(ind).spkCount]);
-        spkstats(j).var = var([ex.Trials(ind).spkCount]);
-        spkstats(j).sd = std([ex.Trials(ind).spkCount])/ sqrt( sum(ind) );
-    end
-    
-    if ~any(z)
-        z = nan(length(z), 1);
-    end
-    z = num2cell(z);
-    [ex.Trials(ind).zspkrate] = deal(z{:});
-    
-    % raster - contains 0 for times without spike and 1 for times of spikes
-    % is reduced for times between -0.5s and 0.5s around stimulus onset
-    idxct = find(ind);
-    ct = ex.Trials(idxct);    % current trials
-    
-    ex.trials_n(j) = sum(ind);
-    ex.raster{j,1} = zeros(length(ct), length(time));
-    ex.rastercum{j,1} = nan(length(ct), length(time));
-    
-    
-    % convert the spike times into a matrix raster with bits
-    for k = 1:length(idxct)
-        
-        t_strt = ct(k).Start - ct(k).TrialStart;
-        if exinfo.isadapt
-            t_strt = t_strt(t_strt<=5);
-        end
-        
-        idx = round((ct(k).Spikes(...
-            ct(k).Spikes>=t_strt(1) & ct(k).Spikes<=t_strt(end))-t_strt(1)) ...
-            *1000);
-        
-        idx(idx==0) = 1; % avoid bad indexing
-        
-        ex.raster{j}(k, idx) = 1;
-        ex.rastercum{j}(k, idx) = k;
-        
-    end
-    
-    j = j+1;
-    
-end
-
-
-ex.raster_pval = parvls;
-
-end
 
