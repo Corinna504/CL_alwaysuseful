@@ -1,11 +1,12 @@
 function spkavelfp = spktriglfp( exSpk, exLFP, varargin)
+% spike triggered average lfp signal 
 %
 
 p_flag = true;
 time = 0.08;
 rawflag = false;
-
-k = 1;
+linestyle = '-';
+k = 1; dname = 'filt';
 while k<=length(varargin)
     switch varargin{k}
         case 'time'
@@ -14,18 +15,22 @@ while k<=length(varargin)
             p_flag = varargin{k+1};
         case 'rawflag'
             rawflag = varargin{k+1};
+            linestyle = ':';
+            dname = 'raw';
+
     end
     k=k+1;
 end
 
+% find spikes and estimate the lfp +/- time t around it
 spklfp = []; nspk = 0;
 for t = 1:length(exSpk.Trials)
     spk = getSpks(exSpk.Trials(t), rawflag);
     spklfp = [spklfp; getLFP(exLFP.Trials(t), spk, time, rawflag)];
     nspk = nspk+length(spk);
 end
-spkavelfp = nanmean(spklfp);
-stdspklfp = nanstd(spklfp) ./ sqrt(size(spklfp, 2));
+spkavelfp = nanmean(spklfp, 1);
+stdspklfp = nanstd(spklfp, 0, 1) ./ sqrt(size(spklfp, 2));
 
 %%% plot results
 if p_flag
@@ -34,13 +39,14 @@ if p_flag
     a1.FaceColor = [0.5 0.5 0.5]; a1.FaceAlpha = 0.4;
     a1.EdgeColor = 'w'; a1.EdgeAlpha = 0; hold on;
     
-    plot(-time:0.001:time, spkavelfp, 'Color',  lines(1),...
-        'ButtonDownFcn', {@PlotSingleTrials, time, spklfp, spk, exLFP.Trials(t)});
+    plot(-time:0.001:time, spkavelfp, 'Color',  lines(1), ...
+     'LineWidth', 2, 'LineStyle', linestyle, 'displayname', dname);
+    %,...
+     %   'ButtonDownFcn', {@PlotSingleTrials, time, spklfp, spk, exLFP.Trials(t)});
     xlabel('time rel to spk [s]');
     ylabel('avg LFP');
     xlim([-time time]);
     title(sprintf('#spk: %1.0f', nspk));
-    crossl
 end
 
 end
@@ -49,7 +55,7 @@ end
 %%
 
 function spklfp = getLFP(trials, spk, time, rawflag)
-% lfp at spike +/- time
+% lfp at spk +/- time
 
 if ~rawflag
     spk = spk (spk>time & spk<=0.45-time); % turn off for debugging
@@ -66,8 +72,15 @@ for i = 1:length(spk)
     tstrt = tspk-(time*1000);
     tend = tstrt+size(spklfp,2)-1;
     
+    % assign the spk centered LFP to the final matrix
     if rawflag
-        spklfp(i,:) = trials.LFP(tstrt-1:tend-1);   %#debugging    
+        l = length(trials.LFP);
+        if tend-1<=l
+            spklfp(i,:) = trials.LFP(tstrt-1:tend-1);
+        else
+            spklfp(i,1:l-tstrt+1) = trials.LFP(tstrt-1:l-1);   
+            spklfp(i,l-tstrt+2:end) = nan;
+        end
     else
         spklfp(i,:) = trials.LFP_interp(tstrt:tend);
     end
@@ -86,7 +99,6 @@ if rawflag
     spk = trials.Spikes( trials.Spikes >= t_strt(1) & ...
         trials.Spikes <= t_end);
     spk = round(spk*1000)/1000;
-    spk = spk (spk> t_strt(1)+0.06 & spk<=t_end-0.06);
 else
     spk = trials.Spikes( trials.Spikes >= t_strt(1) & ...
         trials.Spikes <= t_end) - t_strt(1);
