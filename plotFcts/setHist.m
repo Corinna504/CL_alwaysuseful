@@ -1,11 +1,14 @@
 function setHist(ax, lim_, varargin)
 % set the histogram for paper plotting
 
+
+global uni_k uni_r;
+
 ylim_h = 50;
 arrowpos = [0 0];
 fsz = 8; msz = 2; txtsz = 5; 
-transpy = 0.6;
-j=1;
+transpy = 0.8;
+j=1; rot = 0;
 while j <= length(varargin)
     switch varargin{j}
         case 'ylim_h'
@@ -19,9 +22,11 @@ while j <= length(varargin)
         case 'sz'
             sz = varargin{j+1};
         case 'alpha'
-            transpy = varargin{j+1};
+%             transpy = varargin{j+1};
         case 'msz'
             msz = varargin{j+1};
+        case 'rot'
+            rot = varargin{j+1};
     end
     j = j+2;
 end
@@ -35,13 +40,15 @@ ax.FontSize = fsz;
 delete(ax.Children(1));
 delete(ax.Children(2));
 ax.Children(1).XData = arrowpos(1);
-ax.Children(1).YData = ax.YTick;
-ax.Children(1).Color = 'r';
-ax.Children(1).MarkerFaceColor = 'r';
+ax.Children(1).YData = ax.YTick+(ax.YTick*0.1) ;
+ax.Children(1).Color = uni_r;
+ax.Children(1).MarkerFaceColor = uni_r;
 ax.Children(1).MarkerSize = msz;
 
 ax.Children(2).XData = arrowpos(2);
-ax.Children(2).YData = ax.YTick;
+ax.Children(2).YData = ax.YTick+(ax.YTick*0.1) ;
+ax.Children(2).Color = uni_k;
+ax.Children(2).MarkerFaceColor = uni_k;
 ax.Children(2).MarkerSize = msz;
 ax.Title.String = '';
 
@@ -61,14 +68,16 @@ end
 
 % set transparancy
 ax.Children(3).FaceAlpha = transpy; ax.Children(4).FaceAlpha = transpy;
-
+ax.Children(3).FaceColor = uni_k; ax.Children(4).FaceColor = uni_r;
+ax.Children(3).EdgeAlpha = 0.2; ax.Children(4).EdgeAlpha = 0.2;
+ax.Children(3).EdgeColor = 'w'; ax.Children(4).EdgeColor = 'w';
 
 % add statistic mean/geometric mean/median as text
-text(ax, arrowpos(1)-(ax.XLim(2)*0.01), ax.YTick+(ax.YTick*0.1), num2str(arrowpos(1)), ...
-    'FontSize', txtsz);
-text(ax, arrowpos(2)+(ax.XLim(2)*0.1), ax.YTick+(ax.YTick*0.1), num2str(arrowpos(2)),...
-    'FontSize', txtsz);
+text(ax, arrowpos(1)-(ax.XLim(2)*0.01), ax.YTick+(ax.YTick*0.4), num2str(arrowpos(1)), ...
+    'Color', uni_r, 'FontSize', txtsz, 'Rotation', rot, 'HorizontalAlignment', 'center');
+text(ax, arrowpos(2)+(ax.XLim(2)*0.01), ax.YTick+(ax.YTick*0.4), num2str(arrowpos(2)),...
+    'Color', uni_k, 'FontSize', txtsz, 'Rotation', rot, 'HorizontalAlignment', 'center');
 
-ax.LineWidth = 0.5;
+ax.Clipping = 'off';
 % axis off;
 end

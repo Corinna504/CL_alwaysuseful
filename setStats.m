@@ -1,4 +1,4 @@
-function s = setStats( h )
+function s = setStats( h, inclusioncrit)
 % adds a string to the figure handle h's UserData with all statistical tests and their
 % results for the attached data set. The % string can be called via h.UserData.Stats
 % 
@@ -9,35 +9,56 @@ function s = setStats( h )
 
 dat = h.UserData;
 idx = [dat.expInfo.is5HT];
-xlab=dat.xlab; ylab =dat.ylab;
 
 %%% all
-s = getStatsHelper(dat.x, dat.y, idx, xlab, ylab);
+s = getStatsHelper(dat.x, dat.y, idx);
 
 %%% mango
 idx2 =[dat.expInfo.ismango];
-s_ma = getStatsHelper(dat.x(idx2), dat.y(idx2), idx(idx2), xlab, ylab);
+s_ma = getStatsHelper(dat.x(idx2), dat.y(idx2), idx(idx2));
 
 %%% kaki
 idx2 =~[dat.expInfo.ismango];
-s_ka = getStatsHelper(dat.x(idx2), dat.y(idx2), idx(idx2), xlab, ylab);
+s_ka = getStatsHelper(dat.x(idx2), dat.y(idx2), idx(idx2));
 
 
-% save in User Data
-dat.Stats = sprintf(['ALL \n' s '\n\n' 'MANGO \n' s_ma 'KAKI \n' s_ka]);
+
+% concatenate and save in UserData
+dat.Stats = sprintf(['X = ' dat.xlab ' \nY = ' dat.ylab '\n\n' inclusioncrit '\n\nALL' s...
+    '\n----------\n\n' 'MANGO' s_ma ...
+    '\n----------\n\n' 'KAKI' s_ka]);
 set(h, 'UserData', dat);
+
+
 end
 
 
-function s = getStatsHelper(x, y, idx, xlab, ylab)
+function s = getStatsHelper(X, Y, idx)
 % calls the statistics for a particular data set
-s_5HT = getStatsPairedSample(x(idx), y(idx), '5HT');
-s_NaCl = getStatsPairedSample(x(~idx), y(~idx), 'NaCl');
+s_5HT = getStatsPairedSample(X(idx), Y(idx));
+s_5HT_corr = getCorr(X(idx)', Y(idx)');
+s_NaCl = getStatsPairedSample(X(~idx), Y(~idx));
+s_NaCl_corr = getCorr(X(~idx)', Y(~idx)');
 
-s_x = getStatsTwoSample(x(idx), x(~idx));
-s_y = getStatsTwoSample(y(idx), y(~idx));
+s_x = getStatsTwoSample(X(idx), X(~idx));
+s_y = getStatsTwoSample(Y(idx), Y(~idx));
 
-s = [s_5HT s_NaCl, xlab ' ' s_x  ylab ' ' s_y];
+
+s = ['\n----5HT\n' s_5HT s_5HT_corr...
+    '\n----NaCl\n' s_NaCl s_NaCl_corr...
+    '\n----5HT vs. NaCl\n x: ' s_x  ' y: ' s_y];
+end
+
+
+function s = getCorr(x, y)
+
+[rho_p, p_p] = corr(x, y, 'type', 'Pearson');
+[rho_sp, p_sp] = corr(x, y, 'type', 'Spearman');
+
+
+s = sprintf('correlation Pearson: rho=%1.2f  p=%1.4f, \t Spearman: rho=%1.2f  p=%1.4f \n', ...
+    rho_p, p_p, rho_sp, p_sp);
+
 end
 
 
@@ -46,24 +67,25 @@ function s = getStatsTwoSample(sero, nat)
 [~, ptt] = ttest2(sero, nat);
 pwil = ranksum(sero, nat);
 
-s = sprintf('2-sample ttest p=%1.2f, wilcoxon p=%1.2f \n\n', ptt, pwil);
+s = sprintf('2-sample ttest p=%1.4f, \t wilcoxon p=%1.4f \n', ptt, pwil);
 end
 
 
-
-function s = getStatsPairedSample(B, D, drugname)
+function s = getStatsPairedSample(X, Y)
 % paired comparison
-s_base  = getDistParam(B);
-s_drug = getDistParam(D);
+s_base  = getDistParam(X);
+s_drug = getDistParam(Y);
 
-[~, ptt] = ttest(B, D);   psr = signrank(B, D);
+% check for normal distribution
+h = kstest(X-Y);
+[~, ptt] = ttest(X, Y);   psr = signrank(X, Y);
 
 
-s = sprintf(['Baseline' s_base drugname s_drug ...
-    'paired t-test p=%1.2f, paired signrank p=%1.2f \n\n\n' ], ptt, psr);
+s = sprintf(['X' s_base 'Y' s_drug ...
+    'normal dist X-Y h=%1.0f, paired t-test p=%1.4f, \t paired signrank p=%1.4f \n\n' ], ...
+    h, ptt, psr);
 
 end
-
 
 
 
@@ -72,14 +94,17 @@ function s = getDistParam(A)
 n = length(A);
 
 % distribution values
-med_ = nanmedian(A);
-quar_ =  quantile(A, [.25 .75]);
+quar_ =  quantile(A, [.25 0.5 .75]);
 
 mn_ = nanmean(A);
 std_ = nanstd(A);
 
-geomn_ = geomean(A);
-    
+if any(A<0)
+    geomn_ = -inf;
+else
+    geomn_ = geomean(A);
+end
+
 % check for normal distribution
 [~,psphericity] = kstest(A);
 
@@ -88,8 +113,11 @@ geomn_ = geomean(A);
 psignr = signrank(A);
 
 
-s = sprintf(['(N = %1.0f), median: %1.2f, quartile: %1.2f %1.2f, mean: %1.2f +- %1.2f SD, GM: %1.2f \n\n' ...
-    'test for normal dist p= %1.2f, t-test vs. 0 p = %1.2f, signrank test vs 0: %1.2f \n\n'], ...
-    n, med_,quar_, mn_, std_, geomn_, psphericity, pttest, psignr);
+s = sprintf(['(N = %1.0f) \n' ...
+    'median: %1.2f quartile(25, 75): %1.2f %1.2f, \t mean: %1.2f +- %1.2f SD, \t GM: %1.2f \n' ...
+    'test for normal dist p=%1.2f, \t t-test vs. 0 p = %1.2f, \t signrank test vs 0: %1.2f \n\n'], ...
+    n, quar_(2), quar_([1 3]), mn_, std_, geomn_, psphericity, pttest, psignr);
 
 end
+
+

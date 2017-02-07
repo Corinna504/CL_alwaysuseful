@@ -28,20 +28,27 @@ end
 
 
 % fit and plot according to axis scale
-if strcmp(get(gca, 'XScale'), 'log')
-    hold on
-%     mdl =fitlm(log(xdat), ydat);
-%     plot(get(gca, 'xlim'), log(get(gca, 'xlim')).*mdl.Coefficients.Estimate(2) + ...
-%         mdl.Coefficients.Estimate(1), 'b--', 'LineWidth', 2); hold on;
+if strcmp(get(gca, 'XScale'), 'log') && strcmp(get(gca, 'YScale'), 'log')
+    
+    
+    [beta0, beta1] = fit_bothsubj2error(log(xdat), log(ydat), var(log(ydat))/var(log(xdat))); ho;
+    plot(get(gca, 'xlim'), exp(log(get(gca, 'xlim')).*beta1 +beta0), 'k--', 'LineWidth', 0.5);
+    
+elseif ~strcmp(get(gca, 'XScale'), 'log') && strcmp(get(gca, 'YScale'), 'log')
+    
+    [beta0, beta1] = fit_bothsubj2error(xdat, log(ydat), var(log(ydat))/var(xdat)); ho;
+    plot(get(gca, 'xlim'), exp(get(gca, 'xlim').*beta1 +beta0), 'k--', 'LineWidth', 0.5);
 
+elseif strcmp(get(gca, 'XScale'), 'log') && ~strcmp(get(gca, 'YScale'), 'log')
+    hold on
     
     [beta0, beta1] = fit_bothsubj2error(log(xdat), ydat, var(ydat)/var(log(xdat))); ho;
-    plot(get(gca, 'xlim'), log(get(gca, 'xlim')).*beta1 +beta0, 'k--', 'LineWidth', 2);
+    plot(get(gca, 'xlim'), log(get(gca, 'xlim')).*beta1 +beta0, 'k--', 'LineWidth', 0.5);
    
 else
     nani=isnan(xdat)|isnan(ydat); 
     [beta0, beta1] = fit_bothsubj2error(xdat(~nani), ydat(~nani), var(ydat(~nani))/var(xdat(~nani))); ho; 
-    plot(get(gca, 'xlim'), get(gca, 'xlim').*beta1 +beta0, 'k--', 'LineWidth', 2)
+    plot(get(gca, 'xlim'), get(gca, 'xlim').*beta1 +beta0, 'k--', 'LineWidth', 0.5)
 end
 
 

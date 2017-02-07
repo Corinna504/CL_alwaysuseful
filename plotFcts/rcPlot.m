@@ -15,8 +15,8 @@ savefig(h, exinfo.fig_sdfs);
 close(h);
 end
 
+%%
 function rcplot_helper(exinfo)
-
 
 c = hsv(length(exinfo.sdfs.s));
 g = [0.9 0.9 0.9];
@@ -43,10 +43,10 @@ fill([exinfo.times(201)/10,  exinfo.times(201)/10, ...
 % annotations
 legend(leg, 'Location', 'EastOutside');
 s = horzcat(exinfo.sdfs.s{:}); meanfr = mean(mean(s(201:400),2));
-title(sprintf('base lat: %1.1f, dur: %1.1f, \n average sd: %1.2f, mean fr: %1.2f',...
-    exinfo.lat, exinfo.dur, mean(sqrt(exinfo.resvars(201:400))), meanfr));
+title(sprintf('base lat: %1.1f (hmax %1.1f), dur: %1.1f, \n average sd: %1.2f, mean fr: %1.2f',...
+    exinfo.lat, exinfo.lat2Hmax, exinfo.dur, mean(sqrt(exinfo.resvars(201:400))), meanfr));
 xlim([0 160]); grid on;
-xlabel('time'); ylabel('spk/s');
+ylabel('spk/s');
 
 
 %------------------------------------------- drug
@@ -74,10 +74,10 @@ s_drug = horzcat(exinfo.sdfs_drug.s{:});
 meanfr_drug = mean(mean(s_drug(201:400),2));
 
 % annotations
-title(sprintf('drug lat: %1.1f, dur: %1.1f, \n average sd: %1.2f, meanfr: %1.2f',...
-    exinfo.lat_drug, exinfo.dur_drug, mean(sqrt(exinfo.resvars_drug(201:400))), ...
+title(sprintf('drug lat: %1.1f (hmax %1.1f), dur: %1.1f, \n average sd: %1.2f, meanfr: %1.2f',...
+    exinfo.lat_drug, exinfo.lat2Hmax_drug, exinfo.dur_drug, mean(sqrt(exinfo.resvars_drug(201:400))), ...
     meanfr_drug));
-xlim([0 160]); grid on; xlabel('time');
+xlim([0 160]); grid on;
 
 
 %--------------------------------- equalize y axis and plot latency line
@@ -86,12 +86,15 @@ set(baseplot, 'ylim', ylim_); % equalize y axis
 set(drugplot, 'ylim', ylim_); % equalize y axis
 
 lat = exinfo.lat; lat_drug = exinfo.lat_drug;
+lathmax = exinfo.lat2Hmax; lathmax_drug = exinfo.lat2Hmax_drug;
 dur = exinfo.dur; dur_drug = exinfo.dur_drug;
 
 plot(baseplot, [lat lat], ylim_, 'k');
+plot(baseplot, [lathmax lathmax], ylim_, 'k--');
 plot(baseplot, [lat+dur, lat+dur], ylim_, 'k');
 
 plot(drugplot, [lat_drug lat_drug], ylim_, 'k');
+plot(drugplot, [lathmax_drug lathmax_drug], ylim_, 'k--');
 plot(drugplot, [lat_drug+dur_drug, lat_drug+dur_drug], ylim_, 'k');
 
 
