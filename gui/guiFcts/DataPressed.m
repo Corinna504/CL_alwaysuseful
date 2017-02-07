@@ -14,16 +14,25 @@ else
 end
 
 
-disp(datinfo(1).fname_drug);
+% disp(datinfo(1).fname_drug);
+% fprintf('Anova Baseline p=%1.3f, Drug: p=%1.3f \n', datinfo(1).p_anova, datinfo(1).p_anova_drug);
+% if strcmp(datinfo(1).param1, 'co')
+%     fprintf('Add Anova Baseline data<=c50 p=%1.3f, data>c50: p=%1.3f \n', datinfo(1).fitparam.undersmpl(1), datinfo(1).fitparam.undersmpl(2));
+%     fprintf('Add Anova Drug data<=c50 p=%1.3f, data>c50: p=%1.3f \n', datinfo(1).fitparam_drug.undersmpl(1), datinfo(1).fitparam.undersmpl(2));
+% end
 
 
 j = 1;
 pos = 1;
 nfig = length(fig2plot);
 
+if any(strcmp(fig2plot, 'LFP Gui'))
+    nfig = nfig-1;
+end
 if any(strcmp(fig2plot, 'Raster'))
-    nfig = nfig+1;
-elseif any(strcmp(fig2plot, 'LFP'))
+    nfig = nfig-1;
+end
+if any(strcmp(fig2plot, 'Variability'))
     nfig = nfig-1;
 end
 
@@ -38,7 +47,7 @@ while j<=length(fig2plot)
     
     switch fig2plot{j}
        
-        case 'LFP'
+        case 'LFP Gui'
             
             exSpkin = loadCluster(datinfo(1).fname);
             exSpkin2 = loadCluster(datinfo(1).fname_drug);
@@ -61,24 +70,16 @@ while j<=length(fig2plot)
             continue
             
         case 'Variability'
-            temp = figure;
-            scatter(datinfo.ratemn, datinfo.ratevars, 'r', 'filled'); hold on;
-            scatter(datinfo.ratemn_drug, datinfo.ratevars_drug, 'r');
-            title('base: filled, 5HT/NaCl: empty');
-            set(gca, 'XLim', [0 max( [ datinfo.ratevars datinfo.ratevars_drug] )],...
-                'YLim', [0 max( [ datinfo.ratevars datinfo.ratevars_drug] )]);
-            set(gca, 'XScale', 'log', 'YScale', 'log');
-            eqax; unity;
-            axis square
+            h_var = openfig(datinfo(1).fig_varxtime);
+            set(h_var, 'UserData', datinfo(1));
+            j = j+1;
+            pos = pos+1;
+            continue
+            
             
         case 'Tuning Curve'
-%             if datinfo(1).isRC && ~isempty(strfind(datinfo(1).fname, 'CO'))
-%                 openfig(datinfo(1).fig_tc);
-%                 j = j+1;
-%                 continue
-%             else
-                temp = openfig(datinfo(1).fig_tc, 'invisible');
-%             end            
+            temp = openfig(datinfo(1).fig_tc, 'invisible');
+            
         case 'Wave Form'
             temp = openfig(datinfo(1).fig_waveform, 'invisible');
             
@@ -88,23 +89,18 @@ while j<=length(fig2plot)
         case 'ISI'
             temp = openfig(datinfo(1).fig_bri, 'invisible');
             
-        case 'Raster'
-            temp = openfig(datinfo(1).fig_raster, 'invisible');
+        case 'LFP spk avg'
+            temp = openfig(datinfo(1).fig_lfpAvgSpk, 'invisible');
             
-            ax = findobj(temp, 'Type', 'axes');
-            newax = copyobj(ax, h);
-            close(temp);
-            
-            newax(1).Position = [0.1+(0.9/nfig)*(pos-1)  ...
-                0.95 (0.9/nfig-0.05)*2 0.05];
-            
-            newax(3).Position = [0.1+(0.9/nfig)*(pos-1)  ...
-                0.1 0.9/nfig-0.05 0.8];
-            
+        case 'LFP t & pow'
+            openfig(datinfo(1).fig_lfpPow);
+            j = j+1;
             pos = pos+1;
-            newax(2).Position = [0.1+(0.9/nfig)*(pos-1)  ...
-                0.1 0.9/nfig-0.05 0.8];
+            continue
             
+        case 'Raster'
+            h_raster = openfig(datinfo(1).fig_raster);
+            set(h_raster, 'UserData', datinfo(1));
             j = j+1;
             pos = pos+1;
             continue
@@ -131,18 +127,13 @@ while j<=length(fig2plot)
 %                 openfig([datinfo(1).fig_sdfs(1:end-4) '_mlfit_drug.fig']);
 %                 openfig([datinfo(1).fig_sdfs(1:end-4) '_mlfit_base.fig']);
                 
-            dir2 = 'C:\Users\Corinna\Documents\CODE\Sandbox\RC_orcomp_vs_blank\';
-            openfig( [dir2 datinfo(1).figname '.fig']);
-
-%             if isempty(strfind(datinfo(1).fname, 'CO'))
-%                 temp = openfig(datinfo(1).fig_sdfs, 'invisible');
-%                 ax = findobj(temp, 'Type', 'Axes');
-%             else
-%                 temp = openfig(datinfo(1).fig_sdfs);
-                j = j+1;
-                pos = pos+1;
-                continue
-%             end
+%             dir2 = 'C:\Users\Corinna\Documents\CODE\Sandbox\RC_orcomp_vs_blank\';
+%             openfig( [dir2 datinfo(1).figname '.fig']);
+            try
+                openfig(datinfo(1).fig_latjackknife);
+            end
+            temp = openfig(datinfo(1).fig_sdfs, 'invisible');
+           
     end
     
     

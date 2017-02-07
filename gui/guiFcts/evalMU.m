@@ -28,7 +28,7 @@ end
 
 function [val, err, lab, info] = assignFct(fctname, exinfo)
 
-lat_std_t = 201:400;
+lat_std_t = 200:400;
 
 lab = fctname;
 info = [];
@@ -36,39 +36,58 @@ err = [];
 
 switch fctname
     
-    case 'isolation quality base'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).spkqual_base;
-        end
     
+    case 'delta n to 1st 5HT app'
+        % number of drug experiments between 1st application of drug and this
+        val = [exinfo.dn];
+        val(val==inf) = nan;
+        
+    case 'delta t to 1st 5HT app'
+        val = [exinfo.dt];
+        val(val==inf) = nan;
+    
+        lab = [fctname ' (sec)'];
+
+    case 't of 5HT app before'
+        val = [exinfo.dt_cum];
+        val(val==inf) = nan;
+    
+        lab = [fctname ' (sec)'];
+
+        
+    case 'isolation quality base'
+        for bin = 1:length(exinfo)
+            val(bin) = exinfo(bin).spkqual_base;
+        end
+        
     case 'isolation quality drug'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).spkqual_drug;
+        for bin = 1:length(exinfo)
+            val(bin) = exinfo(bin).spkqual_drug;
         end
         
     case 'isolation quality max'
-        for i = 1:length(exinfo)
-            val(i) = max([exinfo(i).spkqual_base, exinfo(i).spkqual_drug]);
+        for bin = 1:length(exinfo)
+            val(bin) = max([exinfo(bin).spkqual_base, exinfo(bin).spkqual_drug]);
         end
-    
-    
+        
+        
     case 'blank/or ratio base'
-        for i = 1:length(exinfo)
+        for bin = 1:length(exinfo)
             
-            if isempty(exinfo(i).respratio)
-                val(i) = nan;
+            if isempty(exinfo(bin).respratio)
+                val(bin) = nan;
             else
-                val(i) = exinfo(i).respratio;
+                val(bin) = exinfo(bin).respratio;
             end
         end
         
     case 'blank/or ratio drug'
-        for i = 1:length(exinfo)
+        for bin = 1:length(exinfo)
             
-            if isempty(exinfo(i).respratio_drug)
-                val(i) = nan;
+            if isempty(exinfo(bin).respratio_drug)
+                val(bin) = nan;
             else
-                val(i) = exinfo(i).respratio_drug;
+                val(bin) = exinfo(bin).respratio_drug;
             end
         end
         
@@ -82,70 +101,62 @@ switch fctname
         val = [exinfo.ecc];
         
     case 'RF ecc corr'
-        for i = 1:length(exinfo)
+        for bin = 1:length(exinfo)
             
-            if isempty(exinfo(i).RFw_corr)
-                val(i) = nan;
+            if isempty(exinfo(bin).RFw_corr)
+                val(bin) = nan;
             else
-                val(i) = exinfo(i).RFw_corr;
+                val(bin) = exinfo(bin).RFw_corr;
             end
         end
         
     case 'RF width x'
-        for i = 1:length(exinfo)
+        for bin = 1:length(exinfo)
             
-            if isempty(exinfo(i).RFwx)
-                val(i) = nan;
+            if isempty(exinfo(bin).RFwx)
+                val(bin) = nan;
             else
-                val(i) = exinfo(i).RFwx;
+                val(bin) = exinfo(bin).RFwx;
             end
         end
     case 'RF width y'
-        for i = 1:length(exinfo)
-            if isempty(exinfo(i).RFwy)
-                val(i) = nan;
+        for bin = 1:length(exinfo)
+            if isempty(exinfo(bin).RFwy)
+                val(bin) = nan;
             else
-                val(i) = exinfo(i).RFwy;
+                val(bin) = exinfo(bin).RFwy;
             end
         end
         
     case 'RF width mean'
         
-        for i = 1:length(exinfo)
-            if isempty(exinfo(i).RFw)
-                val(i) = nan;
+        for bin = 1:length(exinfo)
+            if isempty(exinfo(bin).RFw)
+                val(bin) = nan;
             else
-                val(i) = exinfo(i).RFw;
+                val(bin) = exinfo(bin).RFw;
             end
         end
         
         
     case 'pref size base'
         
-        for i = 1:length(exinfo)
-            if strcmp(exinfo(i).param1, 'sz')
-                if  max(exinfo(i).fitparam.val.mn) == exinfo(i).fitparam.val.mn(end)
-                    val(i) = exinfo(i).fitparam.val.mn(end);
-                else
-                    val(i) = exinfo(i).fitparam.mu;
-                end
+        for bin = 1:length(exinfo)
+            if strcmp(exinfo(bin).param1, 'sz')
+                val(bin) = exinfo(bin).fitparam.mu;
             else
-                val(i) = nan;
+                val(bin) = nan;
             end
         end
         
         
     case 'pref size drug'
         
-        for i = 1:length(exinfo)
-            if strcmp(exinfo(i).param1, 'sz')
-                if  max(exinfo(i).fitparam_drug.val.mn) == exinfo(i).fitparam_drug.val.mn(end)
-                    val(i) = exinfo(i).fitparam_drug.val.mn(end);
-                else
-                    val(i) = exinfo(i).fitparam_drug.mu;
-                end
+        for bin = 1:length(exinfo)
+            if strcmp(exinfo(bin).param1, 'sz')
+                val(bin) = exinfo(bin).fitparam_drug.mu;
             else
-                val(i) = nan;
+                val(bin) = nan;
             end
         end
         
@@ -162,14 +173,14 @@ switch fctname
         val = [exinfo.MI];
         
     case 'pf stim raw base'
-        for i =1:length(exinfo)
-            [~, idx] = max( exinfo(i).ratemn );
-            val(i) = exinfo(i).ratepar(idx);
+        for bin =1:length(exinfo)
+            [~, bin_i] = max( exinfo(bin).ratemn );
+            val(bin) = exinfo(bin).ratepar(bin_i);
         end
     case 'pf stim raw drug'
-        for i =1:length(exinfo)
-            [~, idx] = max( exinfo(i).ratemn_drug );
-            val(i) = exinfo(i).ratepar_drug(idx);
+        for bin =1:length(exinfo)
+            [~, bin_i] = max( exinfo(bin).ratemn_drug );
+            val(bin) = exinfo(bin).ratepar_drug(bin_i);
         end
     case 'pf stim raw diff'
         val = assignFct('pf stim raw base' , exinfo) - ...
@@ -177,21 +188,21 @@ switch fctname
         lab = [fctname ' (base-drug)'];
         
     case 'SI base'
-        for i =1:length(exinfo)
-            if isfield(exinfo(i).fitparam, 'SI')
-                val(i) = exinfo(i).fitparam.SI;
+        for bin =1:length(exinfo)
+            if isfield(exinfo(bin).fitparam, 'SI')
+                val(bin) = exinfo(bin).fitparam.SI;
             else
-                val(i) = nan;
+                val(bin) = nan;
             end
         end
         
         
     case 'SI drug'
-        for i =1:length(exinfo)
-            if isfield(exinfo(i).fitparam_drug, 'SI')
-                val(i) = exinfo(i).fitparam_drug.SI;
+        for bin =1:length(exinfo)
+            if isfield(exinfo(bin).fitparam_drug, 'SI')
+                val(bin) = exinfo(bin).fitparam_drug.SI;
             else
-                val(i) = nan;
+                val(bin) = nan;
             end
         end
         
@@ -202,8 +213,8 @@ switch fctname
         lab = [fctname ' (base-drug)'];
         
     case 'volt'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).volt;
+        for bin = 1:length(exinfo)
+            val(bin) = exinfo(bin).volt;
         end
         
     case 'gain 2D'
@@ -223,20 +234,20 @@ switch fctname
         val = [exinfo.dose];
         
     case  'r2 ag'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam_drug.sub.r2_ag;
+        for bin = 1:length(exinfo)
+            val(bin) = exinfo(bin).fitparam_drug.sub.r2_ag;
         end
         val(val<0) = 0;
         
     case 'r2 cg'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam_drug.sub.r2_cg;
+        for bin = 1:length(exinfo)
+            val(bin) = exinfo(bin).fitparam_drug.sub.r2_cg;
         end
         val(val<0) = 0;
         
     case 'r2 rg'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam_drug.sub.r2_rg;
+        for bin = 1:length(exinfo)
+            val(bin) = exinfo(bin).fitparam_drug.sub.r2_rg;
         end
         val(val<0) = 0;
         
@@ -251,80 +262,63 @@ switch fctname
             assignFct('r2 cg' , exinfo);
         
     case 'a ag'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam_drug.a_ag;
+        for bin = 1:length(exinfo)
+            val(bin) = exinfo(bin).fitparam_drug.a_ag;
         end
         
     case 'a cg'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam_drug.a_cg;
+        for bin = 1:length(exinfo)
+            val(bin) = exinfo(bin).fitparam_drug.a_cg;
         end
         
     case 'a rg'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam_drug.a_rg;
+        for bin = 1:length(exinfo)
+            val(bin) = exinfo(bin).fitparam_drug.a_rg;
         end
         
     case 'phase selectivity'
-        for i = 1:length(exinfo)
-            if isnan(exinfo(i).tf_f1f0)
-                val(i) = exinfo(i).phasesel;
+        for bin = 1:length(exinfo)
+            if isnan(exinfo(bin).tf_f1f0)
+                val(bin) = exinfo(bin).phasesel;
             else
-                val(i) = exinfo(i).tf_f1f0;
+                val(bin) = exinfo(bin).tf_f1f0;
             end
         end
         
-    case 'c50 base'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam.c50;
+    case 'rmax base'
+        for bin = 1:length(exinfo)
+            val(bin) = exinfo(bin).fitparam.rmax;
         end
         
-        val(val>1.1) = 1.1;
-    case 'c50 drug'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam_drug.c50;
+    case 'rmax drug'
+        for bin = 1:length(exinfo)
+            val(bin) = exinfo(bin).fitparam_drug.rmax;
         end
-        val(val>1.1) = 1.1;
+        
+    case 'rmax diff'
+        for bin = 1:length(exinfo)
+            val(bin) = exinfo(bin).fitparam.rmax - exinfo(bin).fitparam_drug.rmax;
+        end
+        lab = [lab ' (base-drug)'];
+    
+    case 'c50 base'
+        val = cellfun(@(x) x.c50, {exinfo.fitparam})*100;
+%         val(val>1.1) = 1.1;
+    case 'c50 drug'
+        val = cellfun(@(x) x.c50, {exinfo.fitparam_drug})*100;
+%         val(val>1.1) = 1.1;
         
     case 'c50 diff'
         val = assignFct('c50 base', exinfo) - ...
             assignFct('c50 drug', exinfo);
-        
-        lab = [lab ' (base-drug)'];
-        
-    case 'rmax base'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam.rmax;
-        end
-        
-    case 'rmax drug'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam_drug.rmax;
-        end
-        
-    case 'rmax diff'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam.rmax - exinfo(i).fitparam_drug.rmax;
-        end
         lab = [lab ' (base-drug)'];
         
         
     case 'co fit n base'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam.n;
-            if val(i)> 8
-                val(i) = 8;
-            end
-        end
+        val = cellfun(@(x) x.n, {exinfo.fitparam});
         
     case 'co fit n drug'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam_drug.n;
-            if val(i)> 8
-                val(i) = 8;
-            end
-            
-        end
+        val = cellfun(@(x) x.n, {exinfo.fitparam_drug});
         
     case 'co fit n diff'
         val = assignFct('co fit n base', exinfo) - ...
@@ -332,8 +326,8 @@ switch fctname
         lab = [lab ' (base-drug)'];
         
     case 'co fit m'
-        for i = 1:length(exinfo)
-            val(i) = exinfo(i).fitparam.m;
+        for bin = 1:length(exinfo)
+            val(bin) = exinfo(bin).fitparam.m;
         end
     case 'blank diff'
         val = assignFct('blank base', exinfo) - ...
@@ -341,39 +335,39 @@ switch fctname
         lab = [lab ' (base-drug)'];
         
     case 'blank base'
-        for i = 1:length(exinfo)
-            if any(exinfo(i).ratepar > 1000) && any(exinfo(i).ratepar_drug > 1000)
-                val(i) = exinfo(i).ratemn(exinfo(i).ratepar > 1000);
+        for bin = 1:length(exinfo)
+            if any(exinfo(bin).ratepar > 1000) && any(exinfo(bin).ratepar_drug > 1000)
+                val(bin) = exinfo(bin).ratemn(exinfo(bin).ratepar > 1000);
             else
-                val(i) = nan;
+                val(bin) = nan;
             end
         end
         
     case 'blank drug'
-        for i = 1:length(exinfo)
-            if any(exinfo(i).ratepar > 1000) && any(exinfo(i).ratepar_drug > 1000)
-                val(i) = exinfo(i).ratemn_drug(exinfo(i).ratepar_drug > 1000);
+        for bin = 1:length(exinfo)
+            if any(exinfo(bin).ratepar > 1000) && any(exinfo(bin).ratepar_drug > 1000)
+                val(bin) = exinfo(bin).ratemn_drug(exinfo(bin).ratepar_drug > 1000);
             else
-                val(i) = nan;
+                val(bin) = nan;
             end
             %                 val(i) = exinfo(i).ratemn_drug(exinfo(i).upfi);
             
         end
         
     case 'BRI ACF base'
-        for i = 1:length(exinfo)
-            if ~isempty(exinfo(i).bridx) && exinfo(i).bridx(1)<1000
-                val(i) = exinfo(i).bridx(1);
+        for bin = 1:length(exinfo)
+            if ~isempty(exinfo(bin).bridx) && exinfo(bin).bridx(1)<1000
+                val(bin) = exinfo(bin).bridx(1);
             else
-                val(i) = nan;
+                val(bin) = nan;
             end
         end
     case  'BRI ACF drug'
-        for i = 1:length(exinfo)
-            if ~isempty(exinfo(i).bridx) && exinfo(i).bridx(2)<1000
-                val(i) = exinfo(i).bridx(2);
+        for bin = 1:length(exinfo)
+            if ~isempty(exinfo(bin).bridx) && exinfo(bin).bridx(2)<1000
+                val(bin) = exinfo(bin).bridx(2);
             else
-                val(i) = nan;
+                val(bin) = nan;
             end
         end
         
@@ -384,19 +378,19 @@ switch fctname
         lab = [lab ' (base-drug)'];
         
     case 'BRI ISI base'
-        for i = 1:length(exinfo)
-            if ~isnan(exinfo(i).isi_frct)
-                val(i) = exinfo(i).isi_frct(1);
+        for bin = 1:length(exinfo)
+            if ~isnan(exinfo(bin).isi_frct)
+                val(bin) = exinfo(bin).isi_frct(1);
             else
-                val(i) = nan;
+                val(bin) = nan;
             end
         end
     case 'BRI ISI drug'
-        for i = 1:length(exinfo)
-            if ~isnan(exinfo(i).isi_frct)
-                val(i) = exinfo(i).isi_frct(2);
+        for bin = 1:length(exinfo)
+            if ~isnan(exinfo(bin).isi_frct)
+                val(bin) = exinfo(bin).isi_frct(2);
             else
-                val(i) = nan;
+                val(bin) = nan;
             end
         end
         
@@ -417,8 +411,8 @@ switch fctname
         
     case 'smallest response'
         
-        for i=1:length(exinfo)
-            val(i) = min(exinfo(i).ratemn);
+        for bin=1:length(exinfo)
+            val(bin) = min(exinfo(bin).ratemn);
         end
         
         lab = fctname;
@@ -426,8 +420,8 @@ switch fctname
         
     case 'smallest response drug'
         
-        for i=1:length(exinfo)
-            val(i) = min(exinfo(i).ratemn_drug);
+        for bin=1:length(exinfo)
+            val(bin) = min(exinfo(bin).ratemn_drug);
         end
         
         lab = fctname;
@@ -441,14 +435,14 @@ switch fctname
         lab = fctname;
         
     case 'response duration'
-        for i = 1:length(exinfo)
-            val(i) =  exinfo(i).dur;
+        for bin = 1:length(exinfo)
+            val(bin) =  exinfo(bin).dur;
         end
         lab = fctname;
         
     case 'response duration drug'
-        for i = 1:length(exinfo)
-            val(i) =  exinfo(i).dur_drug;
+        for bin = 1:length(exinfo)
+            val(bin) =  exinfo(bin).dur_drug;
         end
         lab = fctname;
         
@@ -460,14 +454,22 @@ switch fctname
         
         
     case 'latnoise'
-        for i = 1:length(exinfo)
-            val(i) = mean(sqrt(exinfo(i).resvars(lat_std_t)));
+        for bin = 1:length(exinfo)
+            if exinfo(bin).isRC
+                val(bin) = exinfo(bin).noise;
+            else
+                val(bin) = nan;
+            end
         end
         lab = fctname;
         
     case 'latnoise drug'
-        for i = 1:length(exinfo)
-            val(i) = mean(sqrt(exinfo(i).resvars_drug(lat_std_t)));
+        for bin = 1:length(exinfo)
+            if exinfo(bin).isRC
+                val(bin) = exinfo(bin).noise_drug;
+            else
+                val(bin) = nan;
+            end
         end
         lab = fctname;
         
@@ -512,34 +514,34 @@ switch fctname
         lab = fctname;
         
     case 'latency base'
-        for i = 1:length(exinfo)
-            if size(exinfo(i).lat,1)>1
-                if isempty(exinfo(i).pfi)
-                    val(i) = exinfo(i).lat(2,end);
+        for bin = 1:length(exinfo)
+            if size(exinfo(bin).lat,1)>1
+                if isempty(exinfo(bin).pfi)
+                    val(bin) = exinfo(bin).lat(2,end);
                 else
                     try
-                        val(i) = exinfo(i).lat(2,exinfo(i).pfi);
+                        val(bin) = exinfo(bin).lat(2,exinfo(bin).pfi);
                     catch
                         c
                     end
                 end
             else
-                val(i) = exinfo(i).lat;
+                val(bin) = exinfo(bin).lat;
             end
         end
         val(isnan(val)) = -10;
         lab = fctname;
         
     case 'latency drug'
-        for i = 1:length(exinfo)
-            if size(exinfo(i).lat,1)>1
-                if isempty(exinfo(i).pfi)
-                    val(i) = exinfo(i).lat_drug(2,end);
+        for bin = 1:length(exinfo)
+            if size(exinfo(bin).lat,1)>1
+                if isempty(exinfo(bin).pfi)
+                    val(bin) = exinfo(bin).lat_drug(2,end);
                 else
-                    val(i) = exinfo(i).lat_drug(2,exinfo(i).pfi_drug);
+                    val(bin) = exinfo(bin).lat_drug(2,exinfo(bin).pfi_drug);
                 end
             else
-                val(i) = exinfo(i).lat_drug;
+                val(bin) = exinfo(bin).lat_drug;
             end
         end
         val(isnan(val)) = -10;
@@ -564,15 +566,11 @@ switch fctname
         lab = 'latency fp diff (drug-base)';
         
     case 'latency base corrected'
-        val = [exinfo.lat2Hmax] - [exinfo.reg_slope].*assignFct('latnoise', exinfo);
-        %         val = [exinfo.lat];
+        val = [exinfo.lat_c];
         lab = fctname;
         
     case 'latency drug corrected'
-        val = [exinfo.lat2Hmax_drug] - [exinfo.reg_slope].*assignFct('latnoise drug', exinfo);
-        %         val = [exinfo.lat_drug] - ...
-        %             ([exinfo.reg_slope].*assignFct('latnoise drug', exinfo) -...
-        %             [exinfo.reg_slope].*assignFct('latnoise', exinfo) );
+        val = [exinfo.lat_drug_c];
         lab = fctname;
         
     case 'latency diff corrected'
@@ -585,14 +583,11 @@ switch fctname
         lab = fctname;
         
     case 'predicted latency'
-        %         val = [exinfo.reg_off] + [exinfo.reg_slope] .* assignFct('latnoise', exinfo);
-        val = [exinfo.lat];
+        val = [exinfo.reg_off] + [exinfo.reg_slope] .* assignFct('latnoise', exinfo);
         lab = fctname;
         
     case 'predicted latency drug'
-        %         val = [exinfo.reg_off] + [exinfo.reg_slope] .* assignFct('latnoise drug', exinfo);
-        val = [exinfo.lat] + ([exinfo.reg_slope].*assignFct('latnoise drug', exinfo) -...
-            [exinfo.reg_slope].*assignFct('latnoise', exinfo) );
+        val = [exinfo.reg_off] + [exinfo.reg_slope].*assignFct('latnoise drug', exinfo);
         lab = fctname;
         
     case 'predicted latency diff'
@@ -601,11 +596,11 @@ switch fctname
         lab = [fctname ' (drug - base)'];
         
     case 'predicted - true latency'
-        val = assignFct('predicted latency', exinfo) - [exinfo.lat];
+        val = assignFct('predicted latency', exinfo) - [exinfo.lat2Hmax];
         lab = fctname;
         
     case 'predicted - true latency drug'
-        val = assignFct('predicted latency drug', exinfo) - [exinfo.lat_drug];
+        val = assignFct('predicted latency drug', exinfo) - [exinfo.lat2Hmax_drug];
         lab = fctname;
         
     case 'noise correlation'
@@ -617,8 +612,8 @@ switch fctname
         lab = 'noise correlation drug';
         
     case 'noise correlation diff'
-        val = [exinfo.rsc] - [exinfo.rsc_drug];
-        val = abs(val);
+        val = [exinfo.rsc_drug]-[exinfo.rsc];
+        val = (val);
         lab = 'noise correlation diff (base-drug)';
         
     case  'signal correlation'
@@ -644,7 +639,7 @@ switch fctname
             'UniformOutput', 0);
         val = cell2mat(val);
         lab = 'mean spike rate drug';
-                
+        
     case 'norm mean spike rate base'
         
         val = cellfun(@mean, {exinfo.ratemn},...
@@ -657,7 +652,7 @@ switch fctname
             'UniformOutput', 0);
         val = cell2mat(val);
         lab = 'mean spike rate drug';
-                
+        
     case 'mean spike rate diff'
         val =  cellfun(@mean, {exinfo.ratemn},...
             'UniformOutput', 0);
@@ -753,51 +748,60 @@ switch fctname
     case 'gain change (rel)'
         val = [exinfo.gslope_rel];
         
-    case 'fano factor base'
-        for i = 1:length(exinfo)
-            val(i) = nanmean([exinfo(i).ff.assic]);
+    case 'fano factor 2nd half base'
+        for bin = 1:length(exinfo)
+            val(bin) = nanmean([exinfo(bin).ff.classic_2ndhalf.ff]);
         end
-        lab = 'fano factor';
+        
+    case 'fano factor 2nd half drug'
+        for bin = 1:length(exinfo)
+            val(bin) = nanmean([exinfo(bin).ff_drug.classic_2ndhalf.ff]);
+        end
+        
+    case 'fano factor 2nd half diff'
+        val = assignFct('fano factor 2nd half base', exinfo) -...
+            assignFct('fano factor 2nd half drug', exinfo);
+        
+        lab = 'fano factor diff (base-drug) ';
+        
+    case 'fano factor base'
+        for bin = 1:length(exinfo)
+            val(bin) = nanmean([exinfo(bin).ff.classic.ff]);
+        end
         
     case 'fano factor drug'
-        for i = 1:length(exinfo)
-            val(i) = nanmean([exinfo(i).ff_drug.classic]);
+        for bin = 1:length(exinfo)
+            val(bin) = nanmean([exinfo(bin).ff_drug.classic.ff]);
         end
-        lab = 'fano factor drug';
         
     case 'fano factor diff'
-        for i = 1:length(exinfo)
-            val(i) = [exinfo(i).ff.classic] - [exinfo(i).ff_drug.classic];
-        end
-        lab = 'fano factor diff';
+         val = assignFct('fano factor base', exinfo) -...
+            assignFct('fano factor drug', exinfo);
+        lab = 'fano factor diff (base-drug) ';
         
     case 'fano factor fit base'
-        for i = 1:length(exinfo)
-            val(i) = [exinfo(i).ff.fit];
+        for bin = 1:length(exinfo)
+            val(bin) = [exinfo(bin).ff.fit];
         end;
-        lab = 'fano factor fit';
         
     case 'fano factor fit drug'
-        for i = 1:length(exinfo)
-            val(i) = [exinfo(i).ff_drug.fit];
+        for bin = 1:length(exinfo)
+            val(bin) = [exinfo(bin).ff_drug.classic];
         end;
-        lab = 'fano factor fit drug';
         
     case 'fano factor fit diff'
-        for i = 1:length(exinfo)
-            val(i) = [exinfo(i).ff.fit] - [exinfo(i).ff_drug.fit];
+        for bin = 1:length(exinfo)
+            val(bin) = [exinfo(bin).ff.fit] - [exinfo(bin).ff_drug.fit];
         end
-        lab = 'fano factor fit diff';
         
     case 'wave width'
-        for i = 1:length(exinfo)
-            if exinfo(i).wdt(1)>1
-                val(i) = exinfo(i).wdt(1);
+        for bin = 1:length(exinfo)
+            if exinfo(bin).wdt(1)>1
+                val(bin) = exinfo(bin).wdt(1);
             else
-                val(i) = nan;
+                val(bin) = nan;
             end
         end
-        lab = 'wave width';
         
     case 'pupil size'
         
@@ -815,100 +819,115 @@ switch fctname
         val = [exinfo.tcdiff] - [exinfo.tcdiff_drug];
         lab = 'tuning curve difference diff';
     case 'fano factor mitchel bins'
-        binrg = log([0.1 0.1778 0.31 0.5623 1 1.7783 3.10 5.6234 10 20]);
-        val = exp( binrg(1)+mean(diff(binrg))/2 : mean(diff(binrg)) : binrg(9)+0.2+mean(diff(binrg))/2);
+        val = [0.05 0.1 0.1778 0.31 0.5623 1 1.7783 3.10 5.6234 10 20 40];
+%         val = exp( binrng(1)+mean(diff(binrng))/2 : mean(diff(binrng)) : binrng(9)+0.2+mean(diff(binrng))/2);
         lab = 'mean spike count (per 100ms)';
         
     case 'fano factor mitchel variance'
         
-        kk = 1;
-        for i = 1:length(exinfo)
-            if exinfo(i).is5HT
-                val_{kk,1}  = [exinfo(i).ff.mitchel.mn];
-                val_{kk,2}  = [exinfo(i).ff_drug.mitchel.mn];
-                
-                %                 err_{kk,1} = [exinfo(i).ff.mitchel.sem];
-                %                 err_{kk,2} = [exinfo(i).ff_drug.mitchel.sem];
-                
-                kk = kk+1;
-            end
+%         funname = 'mitchel_2ndhalf';
+        funname = 'mitchel';
+        
+        exinfo = exinfo([exinfo.is5HT]);
+        
+        binrng = [0.05 0.1 0.1778 0.31 0.5623 1 1.7783 3.10 5.6234 10 20 40];
+        err = zeros( length(binrng), 2 );
+        val = zeros( length(binrng), 2 );
+        
+        %%% baseline
+        val_base_var    = cellfun(@(x) x.(funname).var, {exinfo.ff}, 'UniformOutput', 0);
+        val_base_var    = horzcat(val_base_var{:});
+        val_base_mn     = cellfun(@(x) x.(funname).mn, {exinfo.ff}, 'UniformOutput', 0);
+        val_base_mn     = horzcat(val_base_mn{:});
+        
+        [~, bin_i] = histc(val_base_mn, binrng); % bin according to mean values
+        for bin = 1:max(bin_i) % average variance across all data with similar mean values
+            % there are also units with 0 spike counts. They are ignored
+            % for the fano factor analysis here, therefore the bin starts
+            % with 1 instead of 0
+            base{bin} = val_base_var(bin_i==bin);
+            val(bin, 1) = nanmean( base{bin} );
+            n_base(bin) = sum( bin_i==bin );
+            err(bin, 1) = 2 * ( nanstd( base{bin} ) ./ sqrt(n_base(bin)) ); %sem
         end
         
         
-        val = [ nanmean(horzcat(val_{:,1}), 2), nanmean(horzcat(val_{:,2}), 2)];
+        %%% drug
+        val_drug_var    = cellfun(@(x) x.(funname).var, {exinfo.ff_drug}, 'UniformOutput', 0);
+        val_drug_var    = horzcat(val_drug_var{:});
+        val_drug_mn     = cellfun(@(x) x.(funname).mn, {exinfo.ff_drug}, 'UniformOutput', 0);
+        val_drug_mn     = horzcat(val_drug_mn{:});
+
         
-        %         err = [ nanmean(horzcat(err_{:,1}), 2), nanmean(horzcat(err_{:,2}), 2)];
-        err(:, 1) = nanstd( horzcat(val_{:, 1}), 0, 2 ) ./ ...
-            sqrt(sum( isnan(horzcat(val_{:, 1})), 2 ));
-        err(:, 2) = nanstd( horzcat(val_{:, 2}), 0, 2 ) ./ ...
-            sqrt(sum( isnan(horzcat(val_{:, 2})), 2 ));
-        
-        
-        kk = 1;
-        for i = 1:length(exinfo)
-            if exinfo(i).is5HT
-                cmp(kk, :) =  [exinfo(i).ff.mitchel.mn];
-                cmp_drug(kk,:) = [exinfo(i).ff_drug.mitchel.mn];
-                kk=kk+1;
-            end
+        [~, bin_i] = histc(val_drug_mn, binrng);% bin according to mean values
+        for bin = 1:max(bin_i)  % average variance across all data with similar mean values
+            
+            drug{bin} = val_drug_var(bin_i==bin);
+            val(bin, 2) = nanmean( drug{bin} );
+            n_drug(bin) = sum( bin_i==bin );
+            err(bin, 2) = 2 * ( nanstd( drug{bin} ) ./ sqrt(n_drug(bin)) );
         end
         
-        for i=1:9
-            p(i) = ranksum(cmp(:,i), cmp_drug(:,i));
+        
+        % compare the distribution
+        for bin = 1:max(bin_i)
+            p(bin) = ranksum(base{bin}, drug{bin});
         end
         
         lab = 'spike count variance';
-        info = [' p-values:' num2str(p) ' '] ;
+        info = ['p-values: ' sprintf('%1.2f  \t', p) sprintf('\n')...
+            'n Base = ' sprintf('%1.0f   \t', n_base) sprintf('\n')...
+            '  n 5HT = ' sprintf('%1.0f   \t', n_drug)];
         
     case 'gauss fit mu base'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam )
-                val(i)  = exinfo(i).fitparam.mu;
+        for bin =1:length(exinfo)
+            if ~isempty ( exinfo(bin).fitparam )
+                val(bin)  = exinfo(bin).fitparam.mu;
             end
         end
         lab = fctname;
         
     case 'gauss fit mu drug'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam_drug )
-                val(i)  = exinfo(i).fitparam_drug.mu;
+        for bin =1:length(exinfo)
+            if ~isempty ( exinfo(bin).fitparam_drug )
+                val(bin)  = exinfo(bin).fitparam_drug.mu;
             end
         end
         lab = fctname;
         
     case 'gauss fit mu diff'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam )
-                val(i)  = exinfo(i).fitparam.mu - exinfo(i).fitparam_drug.mu;
+        for bin =1:length(exinfo)
+            if ~isempty ( exinfo(bin).fitparam )
+                val(bin)  = exinfo(bin).fitparam.mu - exinfo(bin).fitparam_drug.mu;
             end
         end
         val(val>90) = 180-val(val>90);
         lab = [fctname '(base-drug)'];
         
     case 'gauss fit sig base'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam )
-                val(i)  = [exinfo(i).fitparam.sig];
+        for bin =1:length(exinfo)
+            if ~isempty ( exinfo(bin).fitparam )
+                val(bin)  = exinfo(bin).fitparam.sig;
             end
         end
         lab = fctname;
         
     case 'gauss fit sig drug'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam_drug )
-                val(i)  = [exinfo(i).fitparam_drug.sig];
+        for bin =1:length(exinfo)
+            if ~isempty ( exinfo(bin).fitparam_drug )
+                val(bin)  = exinfo(bin).fitparam_drug.sig;
             end
         end
         lab = fctname;
         
     case 'gauss fit sig diff'
-        for i =1:length(exinfo)
-            if ~isempty ( exinfo(i).fitparam )
-                val(i)  = [exinfo(i).fitparam.sig] - [exinfo(i).fitparam_drug.sig];
+        for bin =1:length(exinfo)
+            if ~isempty ( exinfo(bin).fitparam )
+                val(bin)  = [exinfo(bin).fitparam.sig] - [exinfo(bin).fitparam_drug.sig];
             end
         end
         lab = [fctname '(base-drug)'];
-   
+        
 end
 end
 
