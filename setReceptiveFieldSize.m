@@ -28,7 +28,7 @@ for i = 1:length(session)
     fnamesX = fnamesX( cellfun(@(x) ~isempty(strfind(x, 'c1') & strfind(x, 'sortLH')), fnamesX) );
     if ~isempty(fnamesX)
         for j =1:length(fnamesX)
-            load(fullfile(fdir, fnamesX{j}), 'ex');
+            ex = loadCluster(fullfile(fdir, fnamesX{j}));
             wX(j) = getMarginalDist(ex.Trials, 'x0');
         end
     end
@@ -40,7 +40,7 @@ for i = 1:length(session)
         continue;
     else
         for j =1:length(fnamesY)
-            load(fullfile(fdir, fnamesY{j}), 'ex');
+            ex = loadCluster(fullfile(fdir, fnamesY{j}));
             wY(j) = getMarginalDist(ex.Trials, 'y0');
         end
     end
@@ -66,6 +66,8 @@ end
 
 %%
 function exinfo = setRFcorrected(exinfo, rf, ecc)
+% computes the eccentricity independent receptive field width via linear
+% regression 
 
 ecc= ecc(~isnan(rf))'; rf = rf(~isnan(rf))';
 tbl = table(ecc, rf);
@@ -91,42 +93,42 @@ function w = getMarginalDist(trials, posname)
 % marginal distribution of spike rate to different bar position 
 
 trials = trials([trials.Reward]==1);
+trials = trials([trials.(posname)]< 1000);
+
 
 % bar positions
 pos = unique([trials.(posname)]);
 
 for i = 1:length(pos)
-    
     tp = trials([trials.(posname)] == pos(i));
-    for j = 1:length(tp)
-        
-        t_strt = tp(j).Start - tp(j).TrialStart;
-        t_strt = [t_strt t_strt(end)+mean(diff(t_strt))];
-        
-        spk = tp(j).Spikes >= t_strt(1) & tp(j).Spikes <= t_strt(end);
-        
-        spkrate(j) = sum(spk) / (t_strt(end)-t_strt(1));
-        
-    end
-    
-    meanspk(i) = mean(spkrate);
+    meanspk(i) = nanmean([tp.spkRate]);
+    sdnspk(i) = nanstd([tp.spkRate]);    
+    nrep(i) = length(tp);
 end
 
-% substract spontaneous firing rate
-meanspk = meanspk - mean(meanspk(pos>1000));
-meanspk(meanspk < 0) = 0;
-meanspk = meanspk/max(meanspk); 
 
-% area / height of the gaussian like curve
-A = sum(meanspk); h = max(meanspk);
-w = A / h;
-w = w* mean(diff(pos(pos<1000))); % normalize to the given unit
-
-
-
-% for debugging
-% plot(pos(pos<1000), meanspk(pos<1000), 'Displayname', posname); hold on
-% text(pos(3), meanspk(3), num2str(w));
+% if the mapping is not causing a selective response return with nan
+if anova1([trials.spkRate], [trials.(posname)], 'off') > 0.08 
+    % for debugging:
+%         figure; errorbar(pos, meanspk, sdnspk);
+%         text(pos, meanspk, num2str(nrep'));
+    w = nan;
+else
+    
+    % substract spontaneous firing rate
+    meanspk = meanspk - min(meanspk);
+    meanspk = meanspk/max(meanspk);
+    
+    % area / height of the gaussian like curve
+    A = sum(meanspk); h = max(meanspk);
+    w = A / h;
+    w = w* mean(diff(pos(pos<1000))); % normalize to the given unit
+    
+    
+    % for debugging
+%     figure;    plot(pos, meanspk, 'Displayname', posname); hold on
+%     text(pos(3), meanspk(3), num2str(w));
+end
 end
 
 %%
