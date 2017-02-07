@@ -433,7 +433,7 @@ end
     else frameperiod = 1/Expt.setup.refreshRate*10000;
     end
     if ~isfield(Expt,'Stimvals')
-        fprintf('2')
+%         fprintf('2')
         for n = 1:length(Expt.Trials)  
             % why do we need this?--- old code
  %           if length(eval(['Expt.Trials(n).' type ]))>length(Expt.Trials(n).Start);
@@ -588,7 +588,7 @@ else
 end
 
 
-fprintf(' start: %1.2f \n',Expt.Trials(2).Start(1))
+% fprintf(' start: %1.2f \n',Expt.Trials(2).Start(1))
 %
 %
 % check Stimulus durations and make sure that they are all the same.
