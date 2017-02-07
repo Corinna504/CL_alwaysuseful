@@ -17,6 +17,8 @@ for i = 1:length(exinfo)
         exinfo(i).gaussr2 = 0;
     end
        
+    
+    
     if ~isempty(exinfo(i).fitparam_drug)
         if isfield(exinfo(i).fitparam_drug, 'OR') && isfield(exinfo(i).fitparam_drug, 'r2')
             maxi = find( max(exinfo(i).sdfs_drug.y(1,:)) == max(exinfo(i).sdfs_drug.y(1,:)), 1, 'first');
@@ -30,6 +32,19 @@ for i = 1:length(exinfo)
         exinfo(i).gaussr2_drug = 0;
     end
     
+    
+    if isnan(exinfo(i).gaussr2)
+        exinfo(i).gaussr2 = 0;
+    end
+    
+    if isnan(exinfo(i).gaussr2_drug)
+        exinfo(i).gaussr2_drug = 0;
+    end
+    
+    
+    
+    
+    
     if isempty( exinfo(i).lat )
         exinfo(i).lat = -10;
     end
@@ -38,16 +53,7 @@ for i = 1:length(exinfo)
         exinfo(i).lat_drug = -10;
     end
     
-%     if expInfo(i).id == 176 && expInfo(i).isRC
-%         expInfo(i).lat = -1;
-%         expInfo(i).lat_drug = -1;
-%     end
-%     
-%     if expInfo(i).id == 182 && expInfo(i).isRC
-%         expInfo(i).lat = -1;
-%         expInfo(i).lat_drug = -1;
-%     end
-    
+
 end
 
 
