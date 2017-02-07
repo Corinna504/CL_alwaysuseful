@@ -5,9 +5,7 @@ function [ex, argout] = evalSingleRC( exinfo, fname )
 
 %% Mean and Variance
 ex_ = load( fname ); ex =ex_.ex;
-% ex.Trials = ex.Trials(1:ceil(length(ex.Trials)/2));   % to test for
-% changes in latency over time
-% ex.Trials = ex.Trials(floor(length(ex.Trials)/2):end);
+
 
 [ res, spkstats, fitparam ] = RCsubspace(ex);
 if isempty(strfind(fname, '5HT')) && isempty(strfind(fname, 'NaCl'))
@@ -112,9 +110,13 @@ if max(sdf)>mean(noise)*3.5
     % first time of half max of response
     idx = find( sdf2 >= (max(sdf2)/2), 1, 'first');  
     lat2hmax = times(idx)/10;
-    
+
+    try
     [latfp, ~, pPoisson] = friedmanpriebe(round(sdf(200:end)), ...
         'minTheta', 250);
+    catch
+        latfp = -10;
+    end
     latfp = latfp/10;
 end
 
