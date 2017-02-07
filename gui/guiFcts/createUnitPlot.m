@@ -3,19 +3,11 @@ function dat = createUnitPlot(expInfo, fctX, fctY, spec, fig2plot, hist_flag)
 
 
 % get Data per Unit
-[ix, iy] = getUnitComp(spec, expInfo);
+exinfo_res = getUnitComp(spec, expInfo);
 
 
-% if the 
-if all(ix==iy)
-    val = evalMU(fctX, fctY, expInfo(ix&iy));
-    dat.x = val.x;
-    dat.y = val.y;
-else
-    val = evalMU(fctX, fctY, expInfo(ix|iy));
-    dat.x = val.x(ix);
-    dat.y = val.y(iy);
-end
+val = evalMU(fctX, fctY, exinfo_res);
+dat.x = val.x;  dat.y = val.y;
 dat.xlab = [val.xlab ' '  spec.stimx ' ' spec.eyex];
 dat.ylab = [val.ylab ' ' spec.stimy ' ' spec.eyey];
 dat.expInfo = val.exinfo;
