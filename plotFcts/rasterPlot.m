@@ -5,7 +5,8 @@ function rasterPlot( exinfo, ex, ex_drug )
 % saves the figure in exinfo.fig_raster
 % 
 % @CL 16.11.2016
-% 
+% added the development of spike rate over time as additional axes
+% @CL 06.02.2017
 
 
 % --------------------------------------- plot
@@ -32,18 +33,39 @@ else
     time = -0.05:0.001:0.45;
 end
 
+% 1. plot baseline condition
+ntrials = length([ex.Trials])+1;
+
 % baseline raster
-subplot(8,2,1:2:14);
+ax_rast = subplot(9,7,[(8:7:63), (9:7:63)]);
 plotCondition(addWindow(exinfo, ex.Trials), time, exinfo.param1, exinfo.ratepar)
-title('baseline');
+title('baseline'); ylim([1 ntrials]); ax_rast.View =[0 -90];
 
+% baseline rate development
+ax = subplot(9,7,(10:7:63));
+plotRateHelper(ex);
+ax.View = [90 90];  ax.XTick = []; 
+ylabel('spk/s');    xlim([1 ntrials]);
+box off
+
+
+% 2. plot drug condition
+ntrials = length([ex_drug.Trials])+1;
 % drug raster
-subplot(8,2,2:2:14);
+ax_rast = subplot(9,7,[(12:7:63), (13:7:63)]);
 plotCondition(addWindow(exinfo, ex_drug.Trials), time, exinfo.param1, exinfo.ratepar)
-title(exinfo.drugname);
+title(exinfo.drugname); ylim([1 ntrials]);ax_rast.View =[0 -90];
 
-% stimulus parameter and corresponding color
-subplot(8,2, [15 16]);
+% drug  rate development
+ax = subplot(9,7,(14:7:63));
+plotRateHelper(ex_drug);
+ax.View = [90 90];  ax.XTick = [];      
+ylabel('spk/s');    xlim([1 ntrials]);
+box off
+
+
+% 3. plot stimulus parameter and corresponding color
+subplot(9,7,1:7);
 l = length(exinfo.ratepar); 
 xlim([0, l+1]); 
 col = lines(l);
@@ -70,11 +92,12 @@ for par_i = 1:length(parvls)
     trials = Trials( [Trials.(param)] == parvls(par_i));
     
     row_i = getRasterPlotMatrix(trials, time, row_i, col(par_i, :));
-    row_i = row_i+0.3;
+    plot(time([1, end]), [row_i, row_i], 'Color', [.5 .5 .5]);
+    
 end
 
-xlim([-0.05 0.45]); ylim([1, row_i-0.3]);
-plot([0 0], [1, row_i-0.3], 'Color', [0.5 0.5 0.5]);
+xlim([-0.05 0.45]);
+plot([0 0], [1, row_i], 'Color', [0.5 0.5 0.5]);
 
 set(gca, 'Clipping', 'off', 'TickDir', 'out'); box off;
 end
@@ -86,8 +109,6 @@ function [y_idx, raster] = getRasterPlotMatrix(Trials, time, y_idx, col)
 
 % initiate raster
 raster = nan(length(time), length(Trials));
-
-
 
 % each row is a trial, each column a time bin
 for t = 1:length(Trials)
@@ -123,4 +144,30 @@ for t = 1:length(Trials)
 
 end
 
+end
+
+
+
+function plotRateHelper(ex)
+
+x = 1.5;
+y = [ex.Trials.spkRate];
+
+% plot each stimulus response individually with stimulus specific color
+% plot trials with equal stimulus in the same color
+[ stimparam, vals] = getStimParam( ex );
+nvals = length(vals);
+col = lines(nvals);
+
+for i = 1:nvals
+    ind = [ex.Trials.(stimparam)] == vals(i);
+    col_i = col(i,:);
+    plot(x:x+sum(ind)-1, y(ind), '-', 'Color', col_i); hold on;
+    scatter(x:x+sum(ind)-1, y(ind), 15, col_i, 'filled'); hold on;
+   
+    x=x+sum(ind);
+    plot([x x]-0.5, [0, 150], 'Color', [.5 .5 .5]);
+end
+
+ylim([0 max(y)]);
 end
