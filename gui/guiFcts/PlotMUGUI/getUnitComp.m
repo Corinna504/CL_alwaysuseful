@@ -1,4 +1,4 @@
-function [ix, iy] = getUnitComp(spec, expInfo)
+function expInfo_out = getUnitComp(spec, expInfo)
 % when there are is a comparison inside a unit this functions looks
 % to assign the data correctly
 
@@ -14,8 +14,15 @@ else
     iy = findCorrespStimIdx(spec.stimy, spec.eyey, expInfo);
 end
 
-% expInfo_out = singleUnitsOnly(expInfo(ix | iy));
-% expInfo_out = expInfo(ix & iy);
+if all(ix == iy)
+    
+    expInfo_out = singleUnitsOnly(expInfo(ix | iy));
+
+else 
+    error('the indices are not matching. check the stimulus condition');
+end
+
+
 end
 
 
@@ -92,26 +99,37 @@ end
 
 
 
-function expInfo_out = singleUnitsOnly(expInfo)
-% if there are conflicting data from the same session, the one with best
-% regression fit is used
+function expInfo_out = singleUnitsOnly(exinfo)
+% if there are conflicting data from the same session, the one with highest
+% baseline response is used
 
-    idi = unique([expInfo.idi]);
-    idxsu = [];
-    for i = 1:length(idi) 
-       
-        if sum([expInfo.idi] == idi(i)) > 1
-        
-            idx_idi = find([expInfo.id] == idi(i));
-            [~,k] = max([expInfo(idx_idi).r2reg]);
-            idxsu = [idxsu; idx_idi(k)];
-        else
-            idxsu = [idxsu; find([expInfo.id] == idi(i))];
-        
-        end
-    end
 
-    expInfo_out = expInfo(idxsu);
+idx_5HT1 = singleUnitsOnlyHelper(exinfo, [exinfo.is5HT]& [exinfo.isc2]);
+idx_5HT2 = singleUnitsOnlyHelper(exinfo, [exinfo.is5HT]& ~[exinfo.isc2]);
+
+idx_NaCl1 = singleUnitsOnlyHelper(exinfo, ~[exinfo.is5HT]& [exinfo.isc2]);
+idx_NaCl2 = singleUnitsOnlyHelper(exinfo, ~[exinfo.is5HT]& ~[exinfo.isc2]);
+
+expInfo_out = exinfo([idx_5HT1; idx_5HT2; idx_NaCl1; idx_NaCl2]);
     
+
+end
+
+
+function idx_su = singleUnitsOnlyHelper(exinfo, id_5HT)
+
+idx_su = [];
+id_i = unique([exinfo(id_5HT).id]);
+for i = 1:length(id_i)
+    
+    idx_temp = find([exinfo.id] == id_i(i) & id_5HT); % indices of current unit
+    
+    if length(idx_temp) > 1
+        [~,k] = max(cellfun(@max, {exinfo(idx_temp).ratemn}));
+        idx_su = [idx_su; idx_temp(k)];
+    else
+        idx_su = [idx_su; idx_temp];
+    end
+end
 
 end

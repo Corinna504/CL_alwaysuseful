@@ -14,10 +14,20 @@ elseif nargin == 4
 end
 
 if strcmp(ax_spec, 'log')
-    [~, binrng] = histcounts(log(val), 7);
+    nbin = 10;   N = inf;
+    while max(N) > floor(length(val)/4) && nbin<20
+        nbin = nbin+1;
+        [N, binrng] = histcounts(log(val), nbin);
+    end
     binrng = exp(binrng);
 else
-    binrng = 8;
+    
+    nbin = 10;   N = inf;
+    while max(N) > floor(length(val)/4) && nbin<20
+        nbin = nbin+1;
+        [N, binrng] = histcounts(val, nbin);
+    end
+    
 end
 
 
