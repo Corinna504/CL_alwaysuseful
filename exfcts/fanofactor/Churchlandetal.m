@@ -4,8 +4,6 @@ function [ spikes ] = Churchlandetal( Trials )
 % date point.
 %
 
-long_flag = 0;
-
 addTime = 0.200;
 
 for i = 1:length(Trials)
@@ -46,18 +44,13 @@ for i = 1:length(Trials)
     else
         spk = [spk_before', spk_pres', spk_after'];
     end
-    
-    
+     
     
     spikes(i, 1:(460+1+2000*addTime)) = false;
     spikes(i, spk) = true;
     
-    
 end
 
-if long_flag
-    disp('presentation duration was longer than 0.46');
-end
 
 
 end
