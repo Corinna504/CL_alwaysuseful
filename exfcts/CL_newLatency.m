@@ -47,8 +47,13 @@ if max(sd)>mean(noise)*4
     idx = find( sd2 >= (max(sd2)/2), 1, 'last');  
     dur = times(idx)/10 - lat2hmax;
     
+    try
     [latfp, ~, pPoisson] = friedmanpriebe(round(sd(200:end).*100), ...
-        'minTheta', 250, 'responseSign', 0, 'graphics', true);
+        'minTheta', 250, 'responseSign', 0, 'graphics', false);
+    
+    catch
+       disp('') 
+    end
     latfp = latfp/10;
     
 end
