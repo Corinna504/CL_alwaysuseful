@@ -7,7 +7,7 @@ function [ex, argout] = evalSingleRC( exinfo, fname )
 ex_ = load( fname ); ex =ex_.ex;
 
 
-[ res, spkstats, fitparam ] = RCsubspace(ex);
+[ res, spkstats, fitparam ] = RCsubspace(ex, 'lat_flag', false);
 if isempty(strfind(fname, '5HT')) && isempty(strfind(fname, 'NaCl'))
     set(gcf, 'Name', [exinfo.figname '_base']);
     savefig(gcf, [exinfo.fig_sdfs(1:end-4) '_mlfit_drug.fig'])
@@ -17,7 +17,7 @@ else
 end
 
 close all
-res = getLat2D(res, exinfo);
+% res = getLat2D(res, exinfo);
 
 nrep = res.sdfs.n;
 if ~isempty(res.netSpikesPerFrameBlank)
@@ -31,8 +31,23 @@ tcdiff = (maxspk - minspk) ./ mean([maxspk, minspk]);
 
 
 %% Anova
-bootsample = reshape(spkstats.bootstrap,[1,size(spkstats.bootstrap, 1)*size(spkstats.bootstrap, 3)]);
-p_anova = anova1(bootsample, repmat(spkstats.or(1:8), 1000, 1), 'off');
+idx = find(spkstats.(exinfo.param1)<1000);
+p_anova = nan(length(idx),length(idx));
+for i = 1:length(idx)
+    for j = i+1:length(idx)
+        
+        try
+            lstat = sum(squeeze(spkstats.bootstrap(i,1,:)) - squeeze(spkstats.bootstrap(j,1,:)) < 0 )/ 1000;
+            rstat = sum(squeeze(spkstats.bootstrap(i,1,:)) -  squeeze(spkstats.bootstrap(j,1,:)) > 0 )/ 1000;
+            p_anova(i, j) = min([lstat rstat]);
+        catch
+           disp(''); 
+        end
+        
+    end
+end
+
+p_anova = min(min(p_anova));
 
 
 %% assign output arguments
@@ -41,6 +56,7 @@ argout =  {'lat', res.latFP, 'lat2Hmax', res.lat, 'fitparam', fitparam, ...
     'tcdiff', tcdiff, 'resvars', res.vars2, 'sdfs', res.sdfs,...
     'resdur', res.dur,  'times', res.times, ...
     'nrep', nrep, 'p_anova', p_anova};
+
 end
 
 
