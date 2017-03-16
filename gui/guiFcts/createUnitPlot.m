@@ -32,16 +32,15 @@ markerface(find(dat.is5HT), 1) =  1;
 
 temp = [];
 for lll = 1:length(dat.x)
-    
-%     dat_new.expinf{lll}(1).fname
+  
     temp(lll,1) = dat.expInfo(lll).id;
     temp(lll,2) = dat.x(lll);
     temp(lll,3) = dat.y(lll);
     temp(lll,4) = dat.expInfo(lll).isc2;
-
+    temp(lll,5) = dat.expInfo(lll).is5HT;
 end
 
-disp('id x y');
+disp('id x y isc2 is5HT');
 temp
 %%%----------------------------------------------------
 if hist_flag
