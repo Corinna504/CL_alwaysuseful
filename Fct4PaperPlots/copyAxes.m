@@ -1,4 +1,6 @@
-function stats = copyAxes(s, fname)
+function stats = copyAxes(s, fname, idx)
+
+if nargin == 2; idx = 1; end
 
 h = openfig(fname, 'invisible');
 
@@ -11,11 +13,7 @@ end
 % copy the axes
 ax = findobj(h, 'type', 'axes');
 
-if length(ax)>1
-    copyobj(ax(2).Children, s); delete(h);
-else
-    copyobj(ax(1).Children, s); delete(h);
-end
+copyobj(ax(idx).Children, s); delete(h);
 
 end
 
