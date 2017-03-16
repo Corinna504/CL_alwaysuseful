@@ -75,8 +75,8 @@ for k = 1:length(allstim)
 end
 
 t = 0.001:0.001:length(sdfs)/1000;
-f1 = a*2; % f1 is the amplitude
-% f1 = a;
+f1 = a; % f1 is the amplitude
+
 % use the highest mean response to compute
 [~, i] = max(f1);
 f1f0 = f1(i)/f0(i);
