@@ -1,8 +1,6 @@
 function h = znormplot( ex_base, ex_drug, exinfo )
 % znormplot
-% plots the 
-
-
+% plots the z-scored data in the drug and baseline condition 
 
 
 h = figure('Name', exinfo.figname);
@@ -71,7 +69,7 @@ function s = plotZScoreHelper(ex, fill_flag)
 
 % plot the trend line
 x = 1:length([ex.Trials]);
-y = [ex.Trials.zspkrate];
+y = [ex.Trials.zspkcount];
 s = plot(x, y, 'k-', 'LineWidth', 0.5); hold on;
 
 % plot trials with equal stimulus in the same color

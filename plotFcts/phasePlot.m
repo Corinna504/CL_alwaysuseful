@@ -1,4 +1,6 @@
 function exinfo = phasePlot( exinfo, ex0, ex2 )
+% stimulus phase as time vs psth
+% this plot reflects evidence for simple or complex behavior
 
 
 hnew = figure('Name', exinfo.figname, 'UserData', exinfo, ...

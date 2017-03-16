@@ -40,11 +40,12 @@ h2 = histogram(cax, val(~i_sub) ,binrng, 'EdgeColor', 'w', 'FaceColor', 'k');
 [~, p_tt] = ttest2(val(i_sub), val(~i_sub));
 if any(~i_sub) && any(i_sub)
     p_wil = ranksum(val(i_sub), val(~i_sub));
+    [~, p20b] = ttest(val(~i_sub), 0);  psignb = signrank(val(~i_sub));
 else
     p_wil = nan;
+    p20b = nan;  psignb = nan;
 end
 [~, p20r] = ttest(val(i_sub), 0);   psignr = signrank(val(i_sub));
-[~, p20b] = ttest(val(~i_sub), 0);  psignb = signrank(val(~i_sub));
 
 
 if any(val <= 0)
@@ -68,9 +69,13 @@ std_b = nanstd(val(~i_sub));
 
 
 if strcmp(ax_spec, 'log')
-    
     [~, p20r] = ttest(log(val(i_sub)), 0);   psignr = signrank(log(val(i_sub)));
-    [~, p20b] = ttest(log(val(~i_sub)), 0);  psignb = signrank(log(val(~i_sub)));
+    
+    if any(~i_sub)     
+        [~, p20b] = ttest(log(val(~i_sub)), 0);  psignb = signrank(log(val(~i_sub)));
+    else
+        p20b = nan;  psignb = nan;
+    end
     
     title(cax, sprintf(['p_{tt}=%1.3f, p_{wilc}=%1.3f \n n_{red}=%1.0f ,' ...
         'plog_{ttvs0}=%1.3f,  plog_{wilvs0}=%1.3f,  '...
@@ -92,11 +97,11 @@ end
 
 
 max_y = max(get(cax, 'Ylim'));
-plot(cax, mn_r, max_y, 'vk', 'MarkerFaceColor', 'k');
-text(mn_r, max_y-max_y/10, sprintf('%1.2f', mn_r), 'Parent', cax,'FontWeight', 'bold', 'FontSize', 8);
+plot(cax, med_r, max_y, 'vk', 'MarkerFaceColor', 'k');
+text(med_r, max_y-max_y/10, sprintf('%1.2f', med_r), 'Parent', cax,'FontWeight', 'bold', 'FontSize', 8);
 
-plot(cax ,mn_b, max_y, 'vk', 'MarkerFaceColor', 'k');
-text(mn_b, max_y-max_y/5, sprintf('%1.2f', mn_b), 'Parent', cax, 'FontWeight', 'bold', 'FontSize', 8 );
+plot(cax ,med_b, max_y, 'vk', 'MarkerFaceColor', 'k');
+text(med_b, max_y-max_y/5, sprintf('%1.2f', med_b), 'Parent', cax, 'FontWeight', 'bold', 'FontSize', 8 );
 
 
 box off

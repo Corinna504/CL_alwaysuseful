@@ -14,12 +14,22 @@ else
 end
 
 
-% disp(datinfo(1).fname_drug);
-% fprintf('Anova Baseline p=%1.3f, Drug: p=%1.3f \n', datinfo(1).p_anova, datinfo(1).p_anova_drug);
-% if strcmp(datinfo(1).param1, 'co')
-%     fprintf('Add Anova Baseline data<=c50 p=%1.3f, data>c50: p=%1.3f \n', datinfo(1).fitparam.undersmpl(1), datinfo(1).fitparam.undersmpl(2));
-%     fprintf('Add Anova Drug data<=c50 p=%1.3f, data>c50: p=%1.3f \n', datinfo(1).fitparam_drug.undersmpl(1), datinfo(1).fitparam.undersmpl(2));
-% end
+disp(datinfo(1).fname_drug);
+fprintf('Anova Baseline p=%1.3f, Drug: p=%1.3f \n', datinfo(1).p_anova, datinfo(1).p_anova_drug);
+if strcmp(datinfo(1).param1, 'co')
+    fprintf('Add Anova Baseline data<=c50 p=%1.3f, data>c50: p=%1.3f \n', datinfo(1).fitparam.undersmpl(1), datinfo(1).fitparam.undersmpl(2));
+    fprintf('Add Anova Drug data<=c50 p=%1.3f, data>c50: p=%1.3f \n', datinfo(1).fitparam_drug.undersmpl(1), datinfo(1).fitparam.undersmpl(2));
+end
+
+try
+    fprintf('Baseline stimrep-mn-var-ff \n');
+    [datinfo(1).ff.classic_2ndhalf.stimrep; datinfo(1).ff.classic_2ndhalf.spkcnt_mn;...
+        datinfo(1).ff.classic_2ndhalf.spkcnt_var; datinfo(1).ff.classic_2ndhalf.ff]
+    
+    fprintf([datinfo(1).drugname 'stimrep-mn-var-ff \n']);
+    [datinfo(1).ff_drug.classic_2ndhalf.stimrep; datinfo(1).ff_drug.classic_2ndhalf.spkcnt_mn;...
+        datinfo(1).ff_drug.classic_2ndhalf.spkcnt_var; datinfo(1).ff_drug.classic_2ndhalf.ff]
+end
 
 
 j = 1;
@@ -70,13 +80,15 @@ while j<=length(fig2plot)
             continue
             
         case 'Variability'
-            h_var = openfig(datinfo(1).fig_varxtime);
+            h_var = openfig(datinfo(1).fig_noisecorr, 'visible');
             set(h_var, 'UserData', datinfo(1));
+%             
+%             h_var2 = openfig(strrep(datinfo(1).fig_varxtime, 'Variability', 'Phase'), 'visible');
             j = j+1;
             pos = pos+1;
             continue
             
-            
+           
         case 'Tuning Curve'
             temp = openfig(datinfo(1).fig_tc, 'invisible');
             
@@ -99,6 +111,7 @@ while j<=length(fig2plot)
             continue
             
         case 'Raster'
+            
             h_raster = openfig(datinfo(1).fig_raster);
             set(h_raster, 'UserData', datinfo(1));
             j = j+1;
@@ -130,7 +143,7 @@ while j<=length(fig2plot)
 %             dir2 = 'C:\Users\Corinna\Documents\CODE\Sandbox\RC_orcomp_vs_blank\';
 %             openfig( [dir2 datinfo(1).figname '.fig']);
             try
-                openfig(datinfo(1).fig_latjackknife);
+%                 openfig(datinfo(1).fig_latjackknife);
             end
             temp = openfig(datinfo(1).fig_sdfs, 'invisible');
            
