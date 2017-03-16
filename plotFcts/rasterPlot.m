@@ -43,11 +43,10 @@ title('baseline'); ylim([1 ntrials]); ax_rast.View =[0 -90];
 
 % baseline rate development
 ax = subplot(9,7,(10:7:63));
-plotRateHelper(ex);
+plotRateHelper(ex, exinfo.ff, exinfo.ratepar);
 ax.View = [90 90];  ax.XTick = []; 
 ylabel('spk/s');    xlim([1 ntrials]);
 box off
-
 
 % 2. plot drug condition
 ntrials = length([ex_drug.Trials])+1;
@@ -58,7 +57,7 @@ title(exinfo.drugname); ylim([1 ntrials]);ax_rast.View =[0 -90];
 
 % drug  rate development
 ax = subplot(9,7,(14:7:63));
-plotRateHelper(ex_drug);
+plotRateHelper(ex_drug, exinfo.ff_drug, exinfo.ratepar_drug);
 ax.View = [90 90];  ax.XTick = [];      
 ylabel('spk/s');    xlim([1 ntrials]);
 box off
@@ -148,7 +147,7 @@ end
 
 
 
-function plotRateHelper(ex)
+function plotRateHelper(ex, ff, ratepar)
 
 x = 1.5;
 y = [ex.Trials.spkRate];
@@ -164,10 +163,27 @@ for i = 1:nvals
     col_i = col(i,:);
     plot(x:x+sum(ind)-1, y(ind), '-', 'Color', col_i); hold on;
     scatter(x:x+sum(ind)-1, y(ind), 15, col_i, 'filled'); hold on;
-   
+    idx = find(ratepar == vals(i));
+    
+    try
+        text(x+sum(ind)/2, max(y), ...
+            sprintf('ff(%1.0f)= %1.1f / %1.1f\n=%1.2f \n ff2(%1.0f)= %1.1f / %1.1f\n=%1.2f',...
+            ff.classic.stimrep(idx), ....
+            ff.classic.spkcnt_var(idx), ff.classic.spkcnt_mn(idx), ff.classic.ff(idx),...
+            ff.classic_2ndhalf.stimrep(idx), ....
+            ff.classic_2ndhalf.spkcnt_var(idx), ff.classic_2ndhalf.spkcnt_mn(idx), ...
+            ff.classic_2ndhalf.ff(idx)), 'FontSize', 7, 'Color', col_i);
+        
+    catch
+        text(x+sum(ind)/2, max(y), ...
+            sprintf('ff= %1.1f / %1.1f\n=%1.2f',...
+            ff.classic.spkcnt_var(idx), ff.classic.spkcnt_mn(idx), ff.classic.ff(idx)),...
+            'FontSize', 7, 'Color', col_i);
+    end
     x=x+sum(ind);
     plot([x x]-0.5, [0, 150], 'Color', [.5 .5 .5]);
 end
 
 ylim([0 max(y)]);
+
 end
