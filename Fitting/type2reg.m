@@ -1,4 +1,4 @@
-function [beta1, beta0, xvar]  = type2reg(exinfo, p_flag)
+function [beta1, beta0, xvar, bootstrp]  = type2reg(exinfo, p_flag)
 % type2reg returns the offset and slope for the best fit linear regression
 % that is subject to both errors (x and y).
 
@@ -12,7 +12,7 @@ drug = exinfo.ratemn_drug( ismember( s2, s1 ));
 
 
 % calculate perpendicular distance minimizing fit
-[beta0, beta1, xvar] = ...
+[beta0, beta1, xvar, bootstrp] = ...
     perpendicularfit(cont, drug, var(drug)/var(cont));
 
 

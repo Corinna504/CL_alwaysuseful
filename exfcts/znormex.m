@@ -42,7 +42,7 @@ for par = parvls
     % z normed spike counts
     z = zscore( [ ex.Trials(ind).spkCount ] );
     z = num2cell(z);
-    [ex.Trials(ind).zspkrate] = deal(z{:});
+    [ex.Trials(ind).zspkcount] = deal(z{:});
     
     % raster - contains 0 for times without spike and 1 for times of spikes
     % is reduced for times between -0.5s and 0.5s around stimulus onset
@@ -86,19 +86,17 @@ end
 
 
 
-
-
 function res = resample2(A)
 % resample from A
 
 n = length(A); 
 nsmpl = 1000; % number 
 
-res = nan(n, nsmpl); %initial variable to prevent overhead
-idx = randi(imax, 1000, n); % combination of indices corresponding to A's data
+res = ones(n, nsmpl); %initial variable to prevent overhead
+idx = randi(n, 1000, n); % combination of indices corresponding to A's data
 
 for i = 1:nsmpl
-    res(:, nsmpl) = A(idx(i, :)); %assigning the randomized resamples
+    res(:, i) = A(idx(i, :)); %assigning the randomized resamples
 end
 
 end
