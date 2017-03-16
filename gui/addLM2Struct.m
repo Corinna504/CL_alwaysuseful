@@ -1,4 +1,4 @@
-function [exinfo, exinfo_missing] = addLM2Struct( exinfo )
+function exinfo = addLM2Struct( exinfo )
 
 
 load('C:\Users\Corinna\Documents\CODE\CL_alwaysuseful\gui\linreg.mat');
