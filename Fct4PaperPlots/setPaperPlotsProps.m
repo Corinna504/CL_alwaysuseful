@@ -40,7 +40,7 @@ sz = 10;
 
 xarg_sc = {'fsz', fsz, 'alpha', alpha, 'sz', sz, 'unity'};
 xarg_reg = {'fsz', fsz, 'alpha', alpha, 'sz', sz, 'cross'};
-xarg_tc = {'fsz', fsz, 'sz', 2, 'square', 'alpha', alpha};
+xarg_tc = {'fsz', fsz, 'sz', 15, 'square', 'alpha', alpha};
 xarg_hist = {'fsz', fsz, 'sz', 2, 'txtsz', fsz, 'alpha', alpha+0.1};
 fsz_add = 1; % increase the font size with this value to emphasize labels and titles
 

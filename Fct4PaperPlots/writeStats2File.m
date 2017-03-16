@@ -41,7 +41,7 @@ end
 
 function [rho5HT, p5HT, rhoNaCl, pNaCl] = getCorrStats(s, fname)
 % extract correlation rho and p value
-l = 4;
+l = 6;
 l2 = 13;
 
 [~,idxp]  = regexp(s, fname);  idxp = idxp+1;
@@ -68,7 +68,7 @@ function [p5HTxy, pNaClxy, p5HTvsNaClx, p5HTvsNaCly] = getSampleTest(s)
 
 
 alpha = 0.05; % alpha level
-l_ks = 3; l_test = 5;
+l_ks = 5; l_test = 7;
 
 % test indeces
 % indeces for paired tests

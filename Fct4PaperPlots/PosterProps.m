@@ -47,6 +47,7 @@ function PosterProps(ax, xlim_, ylim_, varargin)
 % NOTE2: Put the unity function in the same folder to guarantee smooth
 % collaborations.
 
+h = setPaperPlotsProps();delete(h);
 global uni_k uni_r;
 
 
@@ -79,9 +80,6 @@ while j <= length(varargin)
             j=j+1;
         case 'square'
             square_flag= true;
-        case 'alpha'
-            transpy = varargin{j+1};
-            j=j+1;
         case 'save'
             fname = varargin{j+1};
             j=j+1;
@@ -107,7 +105,7 @@ set(ax, 'xlim', [xlim_(1) xlim_(end)], ...
 
 % format scatter plot
 set(findobj(ax, 'Type', 'Scatter'), 'SizeData', sz, 'MarkerFaceAlpha', transpy, ...
- 'MarkerEdgeAlpha', 0.2, 'MarkerEdgeColor', 'w', 'LineWidth', 0.3); 
+ 'MarkerEdgeAlpha', 0.6, 'MarkerEdgeColor', 'w', 'LineWidth', 0.3); 
 
 
 % format line plot with specified data
@@ -115,7 +113,7 @@ set(findobj(ax, 'Type', 'Line', 'LineStyle', 'o'), 'MarkerSize',sz, ...
     'MarkerFaceAlpha', transpy, 'MarkerEdgeAlpha', 0.3);
 
 % format error bar
-set(findobj(ax,'Type', 'Errorbar'), 'MarkerSize', sz, 'LineWidth', 0.5);
+set(findobj(ax,'Type', 'Errorbar'), 'MarkerSize', 2, 'LineWidth', 0.35);
 
 % format dashed lines
 set(findobj(ax,'Type', 'Line', 'LineStyle', '--'), 'LineStyle', ':');
@@ -129,8 +127,6 @@ set(findobj(ax, 'Type', 'Errorbar', 'Color', 'k'), 'Color',uni_k);
 set(findobj(ax, 'Type', 'Line', 'Color', 'r'),'Color',uni_r);
 set(findobj(ax, 'Type', 'Scatter', 'MarkerFaceColor', 'r'),'MarkerFaceColor',uni_r);
 set(findobj(ax, 'Type', 'Errorbar', 'Color', 'r'), 'Color',uni_r);
-
-
 
 
 % add unity or cross. note that both are not compatible with each other 
