@@ -24,13 +24,6 @@ if isempty(res)
 %     else
 %         res = HN_PlotRevCorAny_tue(ex,'times',[-200:1600],'sdfw',40, 'noplot', 'exp2', 'co_seq');
 %     end
-
-% if isfield(ex.stim.vals, 'RCperiod')
-%     res = filterS(res, 100/ex.stim.vals.RCperiod);
-% else
-%     res = filterS(res, 100);
-% end
-
 end
    
 if isfield(res, 'vars')
@@ -185,26 +178,3 @@ res.or = x(1:length(nspk)-length(res.sdfs.extras));
 end
 
 
-
-
-function res = filterS(res, filt_freq)
-% filtering 100Hz
-
-% lowpass filter variables
-Fs = 10000;              % sampling frequency
-highp_frequ = [filt_freq-10 filt_freq+10]/(Fs/2);     % filter frequency
-highp_order = 2;           % filter order
-[b, a] = butter(highp_order, highp_frequ, 'stop');
-
-for i = 1:length(res.sdfs.s)
-    res.sdfs.s{i} = filtfilt(b, a, res.sdfs.s{i});
-end
-
-if ~isempty(res.sdfs.extras)
-    res.sdfs.extras{1}.sdf = ....
-        filtfilt(b, a, res.sdfs.extras{1}.sdf);
-end
-
-
-end
-        
