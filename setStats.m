@@ -1,4 +1,4 @@
-function s = setStats( h, inclusioncrit)
+function stats = setStats( h, inclusioncrit)
 % adds a string to the figure handle h's UserData with all statistical tests and their
 % results for the attached data set. The % string can be called via h.UserData.Stats
 % 
@@ -28,7 +28,7 @@ dat.Stats = sprintf(['X = ' dat.xlab ' \nY = ' dat.ylab '\n\n' inclusioncrit '\n
     '\n----------\n\n' 'MANGO' s_ma ...
     '\n----------\n\n' 'KAKI' s_ka]);
 set(h, 'UserData', dat);
-
+stats = dat.Stats;
 
 end
 
@@ -56,7 +56,7 @@ function s = getCorr(x, y)
 [rho_sp, p_sp] = corr(x, y, 'type', 'Spearman');
 
 
-s = sprintf('correlation Pearson: rho=%1.2f  p=%1.4f, \t Spearman: rho=%1.2f  p=%1.4f \n', ...
+s = sprintf('correlation Pearson: rho=%1.2f  p=%1.7f, \t Spearman: rho=%1.2f  p=%1.7f \n', ...
     rho_p, p_p, rho_sp, p_sp);
 
 end
@@ -67,7 +67,7 @@ function s = getStatsTwoSample(sero, nat)
 [~, ptt] = ttest2(sero, nat);
 pwil = ranksum(sero, nat);
 
-s = sprintf('2-sample ttest p=%1.4f, \t wilcoxon p=%1.4f \n', ptt, pwil);
+s = sprintf('2-sample ttest p=%1.5f, \t wilcoxon p=%1.4f \n', ptt, pwil);
 end
 
 
@@ -78,11 +78,12 @@ s_drug = getDistParam(Y);
 
 % check for normal distribution
 h = kstest(X-Y);
-[~, ptt] = ttest(X, Y);   psr = signrank(X, Y);
+[~, ptt] = ttest(X, Y)
+psr = signrank(X, Y)
 
 
 s = sprintf(['X' s_base 'Y' s_drug ...
-    'normal dist X-Y h=%1.0f, paired t-test p=%1.4f, \t paired signrank p=%1.4f \n\n' ], ...
+    'normal dist X-Y h=%1.0f, paired t-test p=%1.5f, \t paired signrank p=%1.5f \n\n' ], ...
     h, ptt, psr);
 
 end
@@ -94,7 +95,7 @@ function s = getDistParam(A)
 n = length(A);
 
 % distribution values
-quar_ =  quantile(A, [.25 0.5 .75]);
+prct =  prctile(A, [2.5 50 97.5]);
 
 mn_ = nanmean(A);
 std_ = nanstd(A);
@@ -114,10 +115,8 @@ psignr = signrank(A);
 
 
 s = sprintf(['(N = %1.0f) \n' ...
-    'median: %1.2f quartile(25, 75): %1.2f %1.2f, \t mean: %1.2f +- %1.2f SD, \t GM: %1.2f \n' ...
-    'test for normal dist p=%1.2f, \t t-test vs. 0 p = %1.2f, \t signrank test vs 0: %1.2f \n\n'], ...
-    n, quar_(2), quar_([1 3]), mn_, std_, geomn_, psphericity, pttest, psignr);
+    'percentile (2.5, 50, 97.5): %1.2f/%1.2f/%1.2f, \t mean: %1.2f +- %1.2f SD, \t GM: %1.2f \n' ...
+    'test for normal dist p=%1.5f, \t t-test vs. 0 p = %1.5f, \t signrank test vs 0 p: %1.5f \n\n'], ...
+    n, prct, mn_, std_, geomn_, psphericity, pttest, psignr);
 
 end
-
-
