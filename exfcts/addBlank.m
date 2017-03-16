@@ -41,6 +41,12 @@ elseif isempty(ex.exp.e1.blank)
 end
 
 
+% add e1 blank in case there was none
+if isempty(ex.exp.e1.blank)
+    ex.exp.e1.blank = 100001;
+end
+
+
 % add e2 dummy
 if isfield(ex,'exp') && ~isfield(ex.exp,'e2')
     ex.exp.e2.type  = 'me';
