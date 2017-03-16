@@ -1,21 +1,20 @@
-function fitparam = fitSZ( mn, sem, sz )
+function fitparam = fitSZ( mn, sem, sz, bootstrp )
 % assigns the critical parameters and estimates to the fitparam structure
 %
 %
-%
-%
+
 
 idx = sz<1000;
 sz2=sz(idx); 
 mn2 = mn(idx); offset = min(mn2); mn2 = mn2-offset;
 sem2 = sem(idx);
 
-sz_4fit = sz2 ;%.*5;
+sz_4fit = sz2;
 
 
 % CL fit
 [ks, kc, ws, wc, fvalcl, r2] = fitGaussRatio(sz_4fit, mn2);
-% sz = sz/10; wc=wc/10; ws=ws/10;
+
 
 %  assign results
 fitparam.val.mn = mn(idx);
@@ -32,10 +31,24 @@ fitparam.kc = kc;
 mn4si = mn(idx)-mn(~idx);
 fitparam.SI = (max(mn4si)-mn4si(end)) /  max(mn4si);
 
+    
+
 fitparam.mu = getPSZ(fitparam.val.y , fitparam.val.x, mn(idx), sz2);
 fitparam.r2 = r2;
 
-fprintf('SI %1.2f \n', fitparam.SI)
+if nargin == 4
+    mn2 = mn(idx);
+    sem2 = sem(idx);
+    sz2 = sz(idx);
+    
+    parfor i = 1:1000
+        bootidx = randi(length(mn2), length(mn2), 1);
+        boot(i) = fitSZ( [mn2(bootidx) mn(~idx)], ...
+            [sem2(bootidx) sem(~idx)], ...
+            [sz2(bootidx) 10001] ) ;
+    end
+    fitparam.boot = boot;
+end
 
 end
 

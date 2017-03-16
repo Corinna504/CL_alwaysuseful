@@ -1,11 +1,11 @@
-function fitparam = fitSF( resp, sem, sf, log_flag)
+function fitparam = fitSF( mn, sem, sf, log_flag, bootstrp)
 %fitSF fits a gaussian function to the mean spike mn rates given the spatical
 %frequency sf.
 
 
 % ignore blanks
 i_noblank = sf<1000;
-resp   = resp( i_noblank );    
+mn   = mn( i_noblank );    
 sem   = sem( i_noblank );
 sf  = sf( i_noblank );
 
@@ -14,8 +14,8 @@ if log_flag; sf = log(sf); end
 
 
 %%% fit data to gauss
-[~, sf_peak] = max(resp);
-x0 = [sf_peak 4 max(resp) min(resp)]; % starting parameters (mu, sig, a, b)
+[~, sf_peak] = max(mn);
+x0 = [sf_peak 4 max(mn) min(mn)]; % starting parameters (mu, sig, a, b)
 
 if log_flag
     fo = fitoptions('Method','NonlinearLeastSquares', 'Lower', [-inf 0 0 0], ...
@@ -25,7 +25,7 @@ else
 end
 ft = fittype(@(mu, sig, a, b, x) gaussian(mu, sig, a, b, x), 'options', fo);
           
-[f,gof2, output] = fit(sf', resp', ft);
+[f,gof2, output] = fit(sf', mn', ft);
 
 % assign parameters
 fitparam.mu = f.mu;        fitparam.sig = f.sig;
@@ -33,7 +33,7 @@ fitparam.a = f.a;          fitparam.b = f.b;
 fitparam.r2 = gof2.rsquare;
 
 % recorded data
-fitparam.val.mn = resp;
+fitparam.val.mn = mn;
 fitparam.val.sem = sem;
 fitparam.val.sf = sf;
 
@@ -51,6 +51,18 @@ if log_flag
     fitparam.mu = exp(fitparam.mu);
     fitparam.sig = exp(fitparam.sig);
 end
+
+
+
+
+if nargin == 5
+    parfor i = 1:1000
+        bootidx = randi(length(mn), length(mn), 1);
+        boot(i) = fitSF( mn(bootidx), sem(bootidx), sf(bootidx), log_flag);
+    end
+    fitparam.boot = boot;
+end
+
 
 end
 
