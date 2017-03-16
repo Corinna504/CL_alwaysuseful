@@ -1,39 +1,88 @@
-function exinfo = bootstrap_exinfo( exinfo )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+function exinfo = bootstrap_exinfo( exinfo, conc_flag )
+% evaluates the resampled tuning curves and returns the relative rate
 
 
+if exinfo.isRC
+    return;
+end
+
+% get stimulus conditions to match indices
 s1 = exinfo.ratepar;
 s2 = exinfo.ratepar_drug;
-[rate_base, mntc_CI_base] = getMnVr(exinfo.ratemn, exinfo.ratesd, exinfo.rawspkrate, s1, s2);
-[rate_drug, mntc_CI_drug] = getMnVr(exinfo.ratemn_drug, exinfo.ratesd_drug, exinfo.rawspkrate, s2, s1);
+
+% compute mean and resampled data
+[rate_base, res_tc_base] = getMnAndResDist(exinfo.ratemn, exinfo.rate_resmpl, s1, s2);
+[rate_drug, res_tc_drug] = getMnAndResDist(exinfo.ratemn_drug, exinfo.rate_resmpl_drug, s2, s1);
 
 
 exinfo.nonparam_ratio = mean(rate_drug)/mean(rate_base);
-exinfo.mntc_CI_base = evaluateBooty(boot_base); 
-exinfo.mntc_CI_drug = evaluateBooty(boot_drug); 
 
+% return the confidence intervals of the averaged, resampled tuning curve
+exinfo.mntc_CI_base = getCI(res_tc_base); 
+exinfo.mntc_CI_drug = getCI(res_tc_drug); 
+
+if nargin == 2 && conc_flag
+    exinfo.rate_resmpl = res_tc_base;
+    exinfo.rate_resmpl_drug = res_tc_drug;
+end
 end
 
 
-function [mn, ci] = getMnVr(mn, resmpls, i1, i2)
+function [ratemn, res_mnmn] = getMnAndResDist(ratemn, resmpls, i1, i2)
 %returns data with similar rate 
+
 idx = ismember(i1, i2);
-mn = mn(idx); % mean spike rate (across raw tc)
+ratemn = ratemn(idx); % mean spike rate (across raw tc)
 resmpls = resmpls(idx); % resamples, cell array
 
-for i = 1:length(resmpls)
-    mn_res(i,:) = mean(resmpls{i}, 2);
-end
-mn_res = mean(mn_res,2);
 
-ci = getCI(mn_res);
+% compute the average tuning curve from the resampled stimulus conditions
+res_mn = nan(length(resmpls), 1000);
+for i = 1:length(resmpls)
+    res_mn(i,:) = mean(resmpls{i}, 1);
+end
+res_mnmn = mean(res_mn,1);
+
+% 
+% resmpls = resample2(ratemn);
+% res_mnmn = mean(resmpls, 1);
+
 end
 
 
 function ci = getCI(y)
-% 5 and 95% intervals
+% 25, 50 and 75% intervals
+% allows for Tukey's test of outliers
 ci(1) = prctile(y, 5);
-ci(2) = prctile(y, 95);
+ci(2) = prctile(y, 25);
+ci(3) = prctile(y, 50);
+ci(4) = prctile(y, 75);
+ci(5) = prctile(y, 95);
+
+% k times the quartiles as range for outliers
+k = 0;
+
+ci(1) = ci(1)-k*(ci(3)-ci(1));
+ci(2) = ci(2)-k*(ci(3)-ci(2));
+ci(4) = ci(4)+k*(ci(4)-ci(3));
+ci(5) = ci(5)+k*(ci(5)-ci(3));
 
 end
+
+
+function res = resample2(A)
+% resample from A
+
+n = length(A); 
+nsmpl = 1000; % number 
+
+res = ones(n, nsmpl); %initial variable to prevent overhead
+idx = randi(n, 1000, n); % combination of indices corresponding to A's data
+
+for i = 1:nsmpl
+    res(:, i) = A(idx(i, :)); %assigning the randomized resamples
+end
+
+end
+
+

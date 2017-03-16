@@ -31,27 +31,20 @@ exinfo.upfi_drug = find(exinfo.ratepar_drug == exinfo.ratepar( exinfo.upfi ));
 
 
 %% non-parametric change, i.e. relative change in the integrated area under the tc curve
-s1 = exinfo.ratepar;
-s2 = exinfo.ratepar_drug;
-if exinfo.isRC
-    exinfo.nonparam_ratio = mean(exinfo.ratemn_drug (ismember(s2, s1))) /  ...
-        mean(exinfo.ratemn (ismember(s1, s2)));
-    
-else
-    exinfo.nonparam_ratio = sum(exinfo.ratemn_drug (ismember(s2, s1))) /  ...
-        sum(exinfo.ratemn (ismember(s1, s2)));
-end
-
+exinfo = bootstrap_exinfo( exinfo );
 
 %% gain change
-[gslope, yoff, r2] = type2reg(exinfo, p_flag);
+[gslope, yoff, r2, bootstrp] = type2reg(exinfo, p_flag);
 
 exinfo.gslope = gslope(1);
 exinfo.yoff = yoff(1);
 exinfo.r2reg = r2(1);
 
 exinfo.yoff_rel = yoff(2);
-exinfo.r2reg_rel = r2(2);
+exinfo.reg_bootstrp = bootstrp;
+
+
+return;
 
 
 %% fitting parameters
