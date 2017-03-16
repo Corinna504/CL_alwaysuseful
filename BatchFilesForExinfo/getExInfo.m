@@ -9,6 +9,8 @@ i_strt = 1;
 fig_suffix = '';
 saveflag = false;
 j = 1;
+rng(2384569);
+
     
 while  j<= length(varargin)
     switch varargin{j}
@@ -29,6 +31,8 @@ while  j<= length(varargin)
         case 'figsuf'
             fig_suffix = varargin{j+1};
             j = j+2;
+        otherwise
+                j = j+1;
     end
 end
 
@@ -38,14 +42,12 @@ if isempty(exinfo)
     exinfo = loadGeneralInfo(varargin{:});
 end
 
-
 %% go through each file and add other information
 for kk = i_strt:length(exinfo)
 
-
-    if exinfo(kk).isRC
-        continue;
-    end
+%     if ~exinfo(kk).isRC
+%         continue;
+%     end
     
     fprintf('WORKING ON ROW %1i, file %1.1f \n', kk, exinfo(kk).id);
     exinfo(kk) = replaceFigName(exinfo(kk), fig_suffix);
@@ -84,6 +86,8 @@ for kk = i_strt:length(exinfo)
            tuningCurvePlot(exinfo(kk));        
            znormplot(ex0, ex2, exinfo(kk));
            exinfo(kk) = phasePlot(exinfo(kk), ex0, ex2);
+           
+           VariabilityPlot(exinfo(kk), ex0, ex2);
         end
 
         exinfo(kk) = getISI_All(exinfo(kk), ex0, ex2, p_flag);
@@ -94,8 +98,8 @@ for kk = i_strt:length(exinfo)
     end
     
     %-------------------------------------- temp save
-    if saveflag; 
-        save(['exinfo' fig_suffix '.mat'], 'exinfo'); 
+    if saveflag && mod(kk, 10)==0 
+        save(['exinfo' fig_suffix '.mat'], 'exinfo', '-v7.3'); 
     end
 end
 
@@ -105,10 +109,11 @@ exinfo = getValidField(exinfo);
 exinfo = getDominantEyeField(exinfo);
 exinfo = setReceptiveFieldSize( exinfo );
 exinfo = addSortingValue(exinfo);
+exinfo = addNumInExp(exinfo);
 
 exinfo = addStruct(exinfo);
 
-if saveflag; save(['exinfo' fig_suffix '.mat'], 'exinfo'); end
+if saveflag; save(['exinfo' fig_suffix '.mat'], 'exinfo', '-v7.3'); end
 
 end
 
@@ -118,7 +123,7 @@ j = 1;
 
 
 while j<length(varargin)
-    
+
     switch varargin{j}
         
         case 'lat'
@@ -153,9 +158,18 @@ while j<length(varargin)
             eval([ 'info.rsig' apx ' = varargin{j+1};']);
         case 'prsig'
             eval([ 'info.prsig' apx ' = varargin{j+1};']);
+        case 'rsc_2nd'
+            eval([ 'info.rsc_2nd' apx ' = varargin{j+1};']);
+        case 'prsc_2nd'
+            eval([ 'info.prsc_2nd' apx ' = varargin{j+1};']);
+        case 'rsig_2nd'
+            eval([ 'info.rsig_2nd' apx ' = varargin{j+1};']);
+        case 'prsig_2nd'
+            eval([ 'info.prsig_2nd' apx ' = varargin{j+1};']);
         case 'resvars'
             eval([ 'info.resvars' apx ' = varargin{j+1};']);
-            
+        case 'expduration'
+            eval([ 'info.expduration' apx ' = varargin{j+1};']);
         case 'sdfs'
             eval([ 'info.sdfs' apx ' = varargin{j+1};']);
         case 'times'
@@ -176,6 +190,16 @@ while j<length(varargin)
              eval([ 'info.p_anova' apx ' = varargin{j+1};']);
         case 'nrep'
             eval([ 'info.nrep' apx ' = varargin{j+1};']);
+        case 'c0rate'
+            eval([ 'info.c0rate' apx ' = varargin{j+1};']);
+        case 'c0geomn'
+            eval([ 'info.c0geomn' apx ' = varargin{j+1};']);
+        case 'c0geomn_2nd'
+            eval([ 'info.c0geomn_2nd' apx ' = varargin{j+1};']);
+        case 'trials_c0'
+            eval([ 'info.trials_c0' apx ' = varargin{j+1};']);
+        case 'trials_c1'
+            eval([ 'info.trials_c1' apx ' = varargin{j+1};']);
     end
     j = j+2;
 end
@@ -267,5 +291,6 @@ exinfo.fig_regl = [exinfo.fig_regl(1:end-4), fig_suffix, '.fig'];
 exinfo.fig_sdfs= [exinfo.fig_sdfs(1:end-4), fig_suffix, '.fig'];
 exinfo.fig_tc = [exinfo.fig_tc(1:end-4), fig_suffix, '.fig'];
 exinfo.fig_raster = [exinfo.fig_raster(1:end-4), fig_suffix, '.fig'];
-
+exinfo.fig_varxtime = [exinfo.fig_varxtime(1:end-4), fig_suffix, '.fig'];
+exinfo.fig_noisecorr = [exinfo.fig_noisecorr(1:end-4), fig_suffix, '.fig'];
 end
