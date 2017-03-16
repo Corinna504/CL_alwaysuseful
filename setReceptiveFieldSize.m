@@ -5,6 +5,12 @@ function exinfo = setReceptiveFieldSize( exinfo )
 
 session = unique([exinfo.id]);
 
+for i =1:length(exinfo)
+    exinfo(i).RFwx = nan;
+    exinfo(i).RFwy = nan;
+    exinfo(i).RFw = nan;
+end
+
 % loop through all sessions
 for i = 1:length(session)
 
@@ -14,18 +20,20 @@ for i = 1:length(session)
     %find all entries belonging to this session
     idx = find([exinfo.id]==session(i));
     
-    if exinfo(idx(1)).ismango
-        fdir = ['Z:\data\mango\' foldernr(session(i))];
-    else
-        fdir = ['Z:\data\kaki\' foldernr(session(i)-0.5)];
-    end
-    
-    %get all filenames belonging to this session
-    fnames = dir( fdir );    fnames = {fnames.name};
-    
+           
     % XPos
+    [fnames, fdir] = getExFileNames(session(i));
     fnamesX = fnames( cellfun(@(x) ~isempty(strfind(x, 'XPos')), fnames) );
     fnamesX = fnamesX( cellfun(@(x) ~isempty(strfind(x, 'c1') & strfind(x, 'sortLH')), fnamesX) );
+    
+    k = 1;
+    while isempty(fnamesX) 
+        [fnames, fdir] = getExFileNames(session(i)-k);
+        fnamesX = fnames( cellfun(@(x) ~isempty(strfind(x, 'XPos')), fnames) );
+        fnamesX = fnamesX( cellfun(@(x) ~isempty(strfind(x, 'c1') & strfind(x, 'sortLH')), fnamesX) );
+        k = k+1;        
+    end
+    
     if ~isempty(fnamesX)
         for j =1:length(fnamesX)
             ex = loadCluster(fullfile(fdir, fnamesX{j}));
@@ -34,11 +42,19 @@ for i = 1:length(session)
     end
  
     % YPos
+    [fnames, fdir] = getExFileNames(session(i));
     fnamesY = fnames( cellfun(@(x) ~isempty(strfind(x, 'YPos')), fnames) );
     fnamesY = fnamesY( cellfun(@(x) ~isempty(strfind(x, 'c1') & strfind(x, 'sortLH')), fnamesY) );
-    if isempty(fnamesY)
-        continue;
-    else
+
+    k = 1;
+    while isempty(fnamesX) 
+        [fnames, fdir] = getExFileNames(session(i)-k);
+        fnamesY = fnames( cellfun(@(x) ~isempty(strfind(x, 'YPos')), fnames) );
+        fnamesY = fnamesY( cellfun(@(x) ~isempty(strfind(x, 'c1') & strfind(x, 'sortLH')), fnamesY) );
+        k = k+1;        
+    end
+        
+    if ~isempty(fnamesY)
         for j =1:length(fnamesY)
             ex = loadCluster(fullfile(fdir, fnamesY{j}));
             wY(j) = getMarginalDist(ex.Trials, 'y0');
@@ -47,18 +63,38 @@ for i = 1:length(session)
     
     
     % assign receptive field size
+    if isempty(fnamesY) && isempty(fnamesX) 
+        
+        if idx(1)>1 && (exinfo(idx(1)-1).date - exinfo(idx(1)).date) <0.8 
+            wX = exinfo(idx(1)-1).RFwx;
+            wY = exinfo(idx(1)-1).RFwy;
+            
+            for j = 1:length(idx)
+                exinfo(idx(j)).RFwx = nanmean(wX);
+                exinfo(idx(j)).RFwy = nanmean(wY);
+                exinfo(idx(j)).RFw = nanmean([exinfo(idx(j)).RFwy exinfo(idx(j)).RFwx]);
+            end
+            
+        else
+            continue;
+        end
+    end
+    
     for j = 1:length(idx)
         exinfo(idx(j)).RFwx = nanmean(wX);
         exinfo(idx(j)).RFwy = nanmean(wY);
         exinfo(idx(j)).RFw = nanmean([exinfo(idx(j)).RFwy exinfo(idx(j)).RFwx]);
     end
-        
+
+    
+
         
     rf(i) = nanmean([exinfo(idx(j)).RFwy exinfo(idx(j)).RFwx]);
     ecc(i) = exinfo(idx(j)).ecc;
     clearvars wX wY
         
 end
+
 
 
 exinfo = setRFcorrected(exinfo, rf, ecc);
@@ -153,5 +189,18 @@ else
     uq = unique([ex.Trials.y0]);
 end
 d = diff(uq(1:2));
+end
+
+
+function [fnames, fdir] = getExFileNames(unitnr)
+
+if mod(unitnr,1) == 0
+    fdir = ['Z:\data\mango\' foldernr(unitnr)];
+else
+    fdir = ['Z:\data\kaki\' foldernr(unitnr-0.5)];
+end
+
+%get all filenames belonging to this session
+fnames = dir( fdir );    fnames = {fnames.name};
 end
 
