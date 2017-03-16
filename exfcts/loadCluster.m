@@ -4,7 +4,7 @@ function ex = loadCluster(fname, varargin)
 
 p_flag = 0;
 onlyrewarded_flag = 1;
-
+ocul = nan;
 j = 1;
 
 while j<=length(varargin)
@@ -13,6 +13,8 @@ while j<=length(varargin)
             onlyrewarded_flag = varargin{j+1};
         case 'p_flag'
             p_flag = varargin{j+1};
+        case 'ocul'
+            ocul = varargin{j+1};
     end
     j=j+1;
 end
@@ -53,5 +55,8 @@ if isempty(strfind(fname, 'lfp'))
     addspkRate;  
 end
 
+if ~isnan(ocul)
+    ex.Trials = ex.Trials([ex.Trials.me] == ocul);   
+end
 
 
