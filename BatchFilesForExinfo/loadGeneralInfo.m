@@ -5,7 +5,7 @@ function exinfo = loadGeneralInfo(varargin)
 
 %% initiate variables
 kk = 0;
-idi = 1;
+idi = 709;
 fname = 'Z:\Corinna\filenames\SU110716_CL_all.txt';
 exinfo = struct('id', [], 'idi', [], 'monkey', {}, 'dose', [], 'dosernd', [], 'volt', [],...
         'gslope', [], 'yoff', [], 'param1', {},...

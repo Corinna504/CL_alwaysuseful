@@ -680,14 +680,16 @@ switch fctname
         lab = 'signal correlation diff (base-drug)';
         
     case 'noise correlation 2nd half'
-        val = [exinfo.rsc_2nd];
+        val = [exinfo.rsc_2nd];% - 0.006*[exinfo.c0geomn_2nd];
+        lab = [fctname ' normed (estimate = 0.006)'];
         
     case 'noise correlation drug 2nd half'
-        val = [exinfo.rsc_2nd_drug];
+        val = [exinfo.rsc_2nd_drug] ;%- 0.006*[exinfo.c0geomn_2nd_drug];
+        lab = [fctname ' normed (estimate = 0.006)'];
         
     case 'noise correlation diff 2nd half'
         val = [exinfo.rsc_2nd] - [exinfo.rsc_2nd_drug];
-        lab = 'noise correlation diff 2nd half(base-drug)';
+        lab = 'noise correlation diff 2nd half(base-drug) normed';
         
     case 'signal correlation 2nd half'
         val = [exinfo.rsig_2nd];
@@ -1182,12 +1184,11 @@ switch fctname
         
     case 'geometric mean c1-c0' 
         for bin =1:length(exinfo)
-            if ~isempty ( exinfo(bin).fitparam_drug )
-                val(bin) = geomean( [mean(exinfo(bin).ratemn), ...
-                    mean(exinfo(bin).c0geomn_2nd) ]); 
-            end
+                val(bin) = exinfo(bin).c0geomn_2nd; 
+            
         end
 
+        lab = [fctname ' 2nd half'];
         
 end
 end

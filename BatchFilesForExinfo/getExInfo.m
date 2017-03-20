@@ -45,9 +45,9 @@ end
 %% go through each file and add other information
 for kk = i_strt:length(exinfo)
 
-%     if ~exinfo(kk).isRC
-%         continue;
-%     end
+    if exinfo(kk).isRC
+        continue;
+    end
     
     fprintf('WORKING ON ROW %1i, file %1.1f \n', kk, exinfo(kk).id);
     exinfo(kk) = replaceFigName(exinfo(kk), fig_suffix);
@@ -81,16 +81,16 @@ for kk = i_strt:length(exinfo)
 
         if p_flag && ~exinfo(kk).isadapt
 
-           exinfo(kk) = new_psthPlot_red(exinfo(kk), ex0, ex2);
-           rasterPlot( exinfo(kk), ex0, ex2);
+%            exinfo(kk) = new_psthPlot_red(exinfo(kk), ex0, ex2);
+%            rasterPlot( exinfo(kk), ex0, ex2);
            tuningCurvePlot(exinfo(kk));        
-           znormplot(ex0, ex2, exinfo(kk));
-           exinfo(kk) = phasePlot(exinfo(kk), ex0, ex2);
+%            znormplot(ex0, ex2, exinfo(kk));
+%            exinfo(kk) = phasePlot(exinfo(kk), ex0, ex2);
            
-           VariabilityPlot(exinfo(kk), ex0, ex2);
+%            VariabilityPlot(exinfo(kk), ex0, ex2);
         end
 
-        exinfo(kk) = getISI_All(exinfo(kk), ex0, ex2, p_flag);
+%         exinfo(kk) = getISI_All(exinfo(kk), ex0, ex2, p_flag);
 
     elseif exinfo(kk).isRC && p_flag
         rcPlot(exinfo(kk));
@@ -98,8 +98,9 @@ for kk = i_strt:length(exinfo)
     end
     
     %-------------------------------------- temp save
-    if saveflag && mod(kk, 10)==0 
-        save(['exinfo' fig_suffix '.mat'], 'exinfo', '-v7.3'); 
+    if saveflag && mod(kk, 30)==0 
+%         save(['exinfo' fig_suffix '.mat'], 'exinfo', '-v7.3'); 
+        save('exinfo2003.mat', 'exinfo', '-v7.3'); 
     end
 end
 
@@ -113,7 +114,8 @@ exinfo = addNumInExp(exinfo);
 
 exinfo = addStruct(exinfo);
 
-if saveflag; save(['exinfo' fig_suffix '.mat'], 'exinfo', '-v7.3'); end
+% if saveflag; save(['exinfo' fig_suffix '.mat'], 'exinfo', '-v7.3'); end
+if saveflag; save('exinfo2003.mat', 'exinfo', '-v7.3'); end
 
 end
 

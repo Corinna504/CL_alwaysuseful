@@ -56,7 +56,7 @@ function s = getCorr(x, y)
 [rho_sp, p_sp] = corr(x, y, 'type', 'Spearman');
 
 
-s = sprintf('correlation Pearson: rho=%1.2f  p=%1.7f, \t Spearman: rho=%1.2f  p=%1.7f \n', ...
+s = sprintf('correlation Pearson: rho=%1.2f  p=%1.4g, \t Spearman: rho=%1.2f  p=%1.4g \n', ...
     rho_p, p_p, rho_sp, p_sp);
 
 end
@@ -67,7 +67,7 @@ function s = getStatsTwoSample(sero, nat)
 [~, ptt] = ttest2(sero, nat);
 pwil = ranksum(sero, nat);
 
-s = sprintf('2-sample ttest p=%1.5f, \t wilcoxon p=%1.4f \n', ptt, pwil);
+s = sprintf('2-sample ttest p=%1.4g, \t wilcoxon p=%1.4g \n', ptt, pwil);
 end
 
 
@@ -83,7 +83,7 @@ psr = signrank(X, Y)
 
 
 s = sprintf(['X' s_base 'Y' s_drug ...
-    'normal dist X-Y h=%1.0f, paired t-test p=%1.5f, \t paired signrank p=%1.5f \n\n' ], ...
+    'normal dist X-Y h=%1.0f, paired t-test p=%1.4g, \t paired signrank p=%1.4g \n\n' ], ...
     h, ptt, psr);
 
 end
@@ -116,7 +116,7 @@ psignr = signrank(A);
 
 s = sprintf(['(N = %1.0f) \n' ...
     'percentile (2.5, 50, 97.5): %1.2f/%1.2f/%1.2f, \t mean: %1.2f +- %1.2f SD, \t GM: %1.2f \n' ...
-    'test for normal dist p=%1.5f, \t t-test vs. 0 p = %1.5f, \t signrank test vs 0 p: %1.5f \n\n'], ...
+    'test for normal dist p=%1.4g, \t t-test vs. 0 p = %1.4g, \t signrank test vs 0 p: %1.4g \n\n'], ...
     n, prct, mn_, std_, geomn_, psphericity, pttest, psignr);
 
 end

@@ -24,19 +24,19 @@ rsc_argout = getRsc(exinfo, fname);
 argout = [argout rsc_argout{:}];
 
 %% Tuning curve fit
-% tc_argout = fitTC(exinfo, spkrate, ex, fname);
-% argout = [argout tc_argout{:}];
+tc_argout = fitTC(exinfo, spkrate, ex, fname);
+argout = [argout tc_argout{:}];
 
 %% Tc height diff
-% minspk = min([spkrate.mn]);
-% maxspk = max([spkrate.mn]);
-% tcdiff = (maxspk - minspk) / mean([maxspk, minspk]);
-% argout = [argout {'tcdiff', tcdiff}];
+minspk = min([spkrate.mn]);
+maxspk = max([spkrate.mn]);
+tcdiff = (maxspk - minspk) / mean([maxspk, minspk]);
+argout = [argout {'tcdiff', tcdiff}];
 
 
 %% Phase selectivity
-% phasesel = getPhaseSelectivity(ex, 'stim', exinfo.param1);
-% argout = [argout {'phasesel', phasesel}];
+phasesel = getPhaseSelectivity(ex, 'stim', exinfo.param1);
+argout = [argout {'phasesel', phasesel}];
 
 %% assign output arguments
 argout =  [argout {'rateMN', [spkrate.mn]', 'rateVARS', [spkrate.var]', ...
@@ -62,7 +62,7 @@ exc0 = loadCluster( fnamec0, 'ocul', exinfo.ocul );
 
 
 %%% all trials
-[ex, spkrate, spkcount] = znormex(ex, exinfo);
+[ex, spkrate] = znormex(ex, exinfo);
 [exc0, spkrate_c0] = znormex(exc0, exinfo); % z norm
 
 % Noise Correlation
@@ -81,7 +81,7 @@ rsc_all = {'rsc', rsc, 'prsc', prsc, 'rsig', rsig,...
 
 %%% 2nd half
 ex.Trials = getPartialTrials(ex.Trials); 
-[ex, spkrate, spkcount] = znormex(ex, exinfo);
+[ex, spkrate] = znormex(ex, exinfo);
 
 exc0.Trials = getPartialTrials(exc0.Trials);
 [exc0, spkrate_c0] = znormex(exc0, exinfo); % z norm
@@ -148,7 +148,6 @@ if strcmp(exinfo.param1, 'or')
 elseif strcmp(exinfo.param1, 'co')
     
     idx_nonblank = getNoBlankIdx(exinfo, ex);
-    
     fitparam = fitCO([spkrate.mn], [spkrate.(exinfo.param1)]);
     
     % check for underspampling
@@ -158,6 +157,7 @@ elseif strcmp(exinfo.param1, 'co')
     i_cohic50 = [ex.Trials.(exinfo.param1)]>fitparam.c50 & idx_nonblank;% higher than c50
     fitparam.undersmpl(2) = anova1([ex.Trials(i_cohic50).spkRate], [ex.Trials(i_cohic50).(exinfo.param1)],'off');
     
+    % in case of the drug file, test the contrast gain and activity gain model 
     if strfind( fname , exinfo.drugname )
         fitparam.sub = fitCO_drug([spkrate.mn], [spkrate.(exinfo.param1)], exinfo.fitparam);
     end

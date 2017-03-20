@@ -45,9 +45,7 @@ if nargin == 4
     parfor i = 1:1000
         bootidx(i,:) = randi(length(mn), length(mn), 1);
         boot(i) = fitOR( mn(bootidx(i,:)), sem(bootidx(i,:)), or(bootidx(i,:)));
-        
     end
-    
     fitpar.boot = boot;
 end
 end
@@ -61,11 +59,11 @@ x0 = [pk 90 max(val.mn)-min(val.mn) 0]; % starting point
 if any(val.mn<0)
     tc_diff = max(val.mn)-min(val.mn);
     fo = fitoptions('Method','NonlinearLeastSquares',...
-               'Lower', [pk-100 0 tc_diff/2 -inf], 'Upper',[pk+100  180 2*tc_diff inf],...
+               'Lower', [-inf 0 0 0], 'Upper',[inf  inf 2*tc_diff inf],...
                'StartPoint', x0, 'MaxFunEvals', 10^5, 'MaxIter', 10^5); 
 else
     fo = fitoptions('Method','NonlinearLeastSquares',...
-               'Lower', [pk-100 0 min(val.mn)/2 0], 'Upper',[pk+100  180 2*max(val.mn) min(val.mn)*1.5],...
+               'Lower', [-inf 0 min(val.mn)/2 0], 'Upper',[inf  inf 2*max(val.mn) inf],...
                'StartPoint', x0, 'MaxFunEvals', 10^5, 'MaxIter', 10^5); 
 end
 ft = fittype(@(mu, sig, a, b, x) gaussian(mu, sig, a, b, x), 'options', fo);

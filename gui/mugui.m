@@ -129,15 +129,15 @@ editPanova_h = uicontrol(fig_h, 'Style','edit',...
     'Position',[pos(3)*(margins+0.06) pos(4)*0.135 pos(3)*0.04 pos(4)*0.03], ...
     'String', ' < 0.05 ');
 
-%------------------------- co undersampled TC
+%------------------------- recovery probability
 txt5 = uicontrol(fig_h, 'Style','text',...
     'Position',[pos(3)*margins pos(4)*0.01 pos(3)*0.15 pos(4)*0.1],...
-    'String','p undersampled (co) <', ...
+    'String','p recov ', ...
     'HorizontalAlignment', 'left');
 
-editUndersampledTuning_h = uicontrol(fig_h, 'Style','edit',...
-    'Position',[pos(3)*(margins+0.1) pos(4)*0.085 pos(3)*0.04 pos(4)*0.03], ...
-    'String', ' 1 ');
+editPrecov_h = uicontrol(fig_h, 'Style','edit',...
+    'Position',[pos(3)*(margins+0.06) pos(4)*0.085 pos(3)*0.04 pos(4)*0.03], ...
+    'String', '<= 1 ');
 
 %------------------------- only increasing tuning
 increasingTuning = uicontrol(fig_h, ....
@@ -271,7 +271,7 @@ fig2plot_check(2) = uicontrol(fig_h, ...
 
 fig2plot_check(3) = uicontrol(fig_h, ...
     'Style', 'checkbox', ...
-    'String', 'ISI', ...
+    'String', 'Recovery', ...
     'Position', [pos(3)*0.3 pos(4)*0.25 pos(3)*0.08 pos(4)*0.05], ...
     'Callback', @UpdateFigures);
 
@@ -372,7 +372,7 @@ fig2plot_check(12) = uicontrol(fig_h, ...
         pop_Yspec.Value = 5; pop_Xspec.Value = 5;
         createPlot(0, 0, 0); h = exportPlot(0, 0);
         savefig(h, 'raw_figs\Size\MeanFiringRate.fig'); delete(h)
-        return
+        
         
         % plots showing regression plots
         addCross.Value = 1;
@@ -469,75 +469,75 @@ fig2plot_check(12) = uicontrol(fig_h, ...
         editr2tc_h.String = '>0.7';
         
         % ORIENTATION
-        pop_Yspec.Value = 2; pop_Xspec.Value = 2;
+%         pop_Yspec.Value = 2; pop_Xspec.Value = 2;
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'gauss fit mu base'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'gauss fit mu drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\Orientation\PreferredOR.fig'); delete(h)
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'gauss fit sig base'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'gauss fit sig drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\Orientation\BandWidth.fig'); delete(h)
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'gauss fit a base'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'gauss fit a drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\Orientation\Amplitude.fig'); delete(h)
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'gauss fit b base'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'gauss fit b drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\Orientation\Offset.fig'); delete(h)
+%         
         
-        popX_h.Value= find(strcmp(axisopts, 'gauss fit mu base'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'gauss fit mu drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\Orientation\PreferredOR.fig'); delete(h)
+%         % SPATIAL FREQUENCY
+%         pop_Yspec.Value = 3; pop_Xspec.Value = 3;
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'gauss fit mu base'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'gauss fit mu drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\SpatialF\PreferredSF.fig'); delete(h)
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'gauss fit sig base'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'gauss fit sig drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\SpatialF\BandWidth.fig'); delete(h)
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'gauss fit a base'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'gauss fit a drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\SpatialF\Amplitude.fig'); delete(h)
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'gauss fit b base'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'gauss fit b drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\SpatialF\Offset.fig'); delete(h)
         
-        popX_h.Value= find(strcmp(axisopts, 'gauss fit sig base'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'gauss fit sig drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\Orientation\BandWidth.fig'); delete(h)
-        
-        popX_h.Value= find(strcmp(axisopts, 'gauss fit a base'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'gauss fit a drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\Orientation\Amplitude.fig'); delete(h)
-        
-        popX_h.Value= find(strcmp(axisopts, 'gauss fit b base'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'gauss fit b drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\Orientation\Offset.fig'); delete(h)
-        
-        
-        % SPATIAL FREQUENCY
-        pop_Yspec.Value = 3; pop_Xspec.Value = 3;
-        
-        popX_h.Value= find(strcmp(axisopts, 'gauss fit mu base'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'gauss fit mu drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\SpatialF\PreferredSF.fig'); delete(h)
-        
-        popX_h.Value= find(strcmp(axisopts, 'gauss fit sig base'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'gauss fit sig drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\SpatialF\BandWidth.fig'); delete(h)
-        
-        popX_h.Value= find(strcmp(axisopts, 'gauss fit a base'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'gauss fit a drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\SpatialF\Amplitude.fig'); delete(h)
-        
-        popX_h.Value= find(strcmp(axisopts, 'gauss fit b base'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'gauss fit b drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\SpatialF\Offset.fig'); delete(h)
-        
-        % CONTRAST
-        pop_Yspec.Value = 4; pop_Xspec.Value = 4;
-        
-        popX_h.Value= find(strcmp(axisopts, 'c50 base'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'c50 drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\Contrast\C50.fig'); delete(h)
-        
-        popX_h.Value= find(strcmp(axisopts, 'rmax base'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'rmax drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\Contrast\Rmax.fig'); delete(h)
-        
-        popX_h.Value= find(strcmp(axisopts, 'co fit n base'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'co fit n drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\Contrast\ExponentN.fig'); delete(h)
-        
-        
-        popX_h.Value= find(strcmp(axisopts, 'co fit m base'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'co fit m drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\Contrast\SpontActivity.fig'); delete(h)
+%         % CONTRAST
+%         pop_Yspec.Value = 4; pop_Xspec.Value = 4;
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'c50 base'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'c50 drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\Contrast\C50.fig'); delete(h)
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'rmax base'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'rmax drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\Contrast\Rmax.fig'); delete(h)
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'co fit n base'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'co fit n drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\Contrast\ExponentN.fig'); delete(h)
+%         
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'co fit m base'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'co fit m drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\Contrast\SpontActivity.fig'); delete(h)
         
         % SIZE
         pop_Yspec.Value = 5; pop_Xspec.Value = 5;
@@ -552,25 +552,25 @@ fig2plot_check(12) = uicontrol(fig_h, ...
         createPlot(0, 0, 0); h = exportPlot(0, 0);
         savefig(h, 'raw_figs\Size\PreferredSize.fig'); delete(h)
         
-        popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit width center'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit width center drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\Size\WdtCenter.fig'); delete(h)
-        
-        popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit width surround'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit width surround drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\Size\WdtSurround.fig'); delete(h)
-        
-        popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain surround'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain surround drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\Size\GainSurround.fig'); delete(h)
-        
-        popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain center'))+1;
-        popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain center drug'))+1;
-        createPlot(0, 0, 0); h = exportPlot(0, 0);
-        savefig(h, 'raw_figs\Size\GainCenter.fig'); delete(h)
+%         popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit width center'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit width center drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\Size\WdtCenter.fig'); delete(h)
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit width surround'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit width surround drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\Size\WdtSurround.fig'); delete(h)
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain surround'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain surround drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\Size\GainSurround.fig'); delete(h)
+%         
+%         popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain center'))+1;
+%         popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain center drug'))+1;
+%         createPlot(0, 0, 0); h = exportPlot(0, 0);
+%         savefig(h, 'raw_figs\Size\GainCenter.fig'); delete(h)
         
     end
 
@@ -1057,8 +1057,8 @@ fig2plot_check(12) = uicontrol(fig_h, ...
                 
         
         % the electrode resistance
-        %         UpdateInclusionHelper(1,...
-        %             'cellfun(@(x) x<150, {exinfo.resistance})');
+%         UpdateInclusionHelper(1,...
+%             'cellfun(@(x) x<150, {exinfo.resistance})');
         UpdateInclusionHelper(1,...
             'cellfun(@(x) isnan(x) || x<150, {exinfo.resistance})');
         
@@ -1124,9 +1124,7 @@ fig2plot_check(12) = uicontrol(fig_h, ...
 %             ['[exinfo.spkqual_base] ' get(editSpkSortQualtiy_h, 'String') ...
 %             ' & [exinfo.spkqual_drug] ' get(editSpkSortQualtiy_h, 'String')])
         
-%         % if co data, what is the undersampled data
-%         UpdateInclusionHelper(strcmp(stimy, 'co'),...
-%             ['wellsampledCO(exinfo, ' get(editUndersampledTuning_h, 'String') ')']);
+     
         
         % which one of the experiments in one session should be shown
         idx1 = getCritIdx(exinfo(incl_i), popC_h.String{popC_h.Value});
@@ -1135,10 +1133,6 @@ fig2plot_check(12) = uicontrol(fig_h, ...
         % which electrode criteria is considered
         idx2 = getElectrodeCrit(exinfo(incl_i), popEcrit_h.String{popEcrit_h.Value});
         incl_i = incl_i(idx2);
-        
-        
-%         smallestResp = evalMU('smallest response drug', 'gain change', exinfo);
-%         incl_i = intersect(incl_i, find( smallestResp.x > 2));
         
         
         %in case you want to exclude a single data point
@@ -1156,6 +1150,13 @@ fig2plot_check(12) = uicontrol(fig_h, ...
             
             
         end
+        
+        
+        % what is probability criteria for recovery
+        
+        UpdateInclusionHelper(1,...
+            ['[exinfo.ret2base] ' get(editPrecov_h, 'String')]);
+        
     end
 
     function UpdateInclusionHelper(val, cond)
@@ -1208,7 +1209,7 @@ fig2plot_check(12) = uicontrol(fig_h, ...
             'min # trial repetitions ' num2str(nrep) '\n'...
             'min # spikes in preferred condition ' num2str(minspk) '\n' ...
             'anova p ' get(editPanova_h, 'String') '\n' ...
-            'anova for split contrast data p <=' get(editUndersampledTuning_h, 'String') '\n' ...
+            'overlap between baseline and control bootstrap p ' get(editPrecov_h, 'String') '\n' ...
             'regression fit r2 ' get(editr2_h, 'String') '\n' ...
             'tuning curve fit r2 ' get(editr2tc_h, 'String') '\n' ...
             'tuning curve had to increase (CO) / well-sampled around peak (SF)' num2str(get(increasingTuning, 'Value')) '\n' ...

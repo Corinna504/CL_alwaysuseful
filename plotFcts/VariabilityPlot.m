@@ -9,24 +9,14 @@ kernel = [1 1 1]; kernel = kernel/sum(kernel);
 
 % baseline cluster 0
 fnamec0 = strrep(exinfo.fname, exinfo.cluster, 'c0'); % load cluster 0
-ex_base_c0 = loadCluster( fnamec0 );
-ex_base_c0.Trials = ex_base_c0.Trials([ex_base_c0.Trials.me] == exinfo.ocul);
-
-% remove this part for normal batch
-trial_incl = ceil(length([ex_base_c0.Trials])/3):length([ex_base_c0.Trials]);
-ex_base_c0.Trials = ex_base_c0.Trials(trial_incl);
+ex_base_c0 = loadCluster( fnamec0, 'ocul', exinfo.ocul);
 
 [ex_base_c0, spkrate_base_c0] = znormex(ex_base_c0, exinfo); % z norm
 
 
 % drug cluster 0
 fnamec0 = strrep(exinfo.fname_drug, exinfo.cluster, 'c0'); % load cluster 0
-ex_drug_c0 = loadCluster( fnamec0 );
-ex_drug_c0.Trials = ex_drug_c0.Trials([ex_drug_c0.Trials.me] == exinfo.ocul);
-
-% remove this part for normal batch
-trial_incl = ceil(length([ex_drug_c0.Trials])/3):length([ex_drug_c0.Trials]);
-ex_drug_c0.Trials = ex_drug_c0.Trials(trial_incl);
+ex_drug_c0 = loadCluster( fnamec0, 'ocul', exinfo.ocul);
 
 [ex_drug_c0, spkrate_drug_c0] = znormex(ex_drug_c0, exinfo); % z norm
 

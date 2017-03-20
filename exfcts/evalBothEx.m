@@ -4,7 +4,6 @@ function exinfo = evalBothEx(ex0, ex2, exinfo, p_flag)
 
 
 %% preferred/unpreferred stimuli occuring in both files
-
 idx = ismember(exinfo.ratepar, exinfo.ratepar_drug) &  exinfo.ratepar<1000;
 parb = exinfo.ratemn;       
 
@@ -15,19 +14,6 @@ exinfo.pfi_drug = find(exinfo.ratepar_drug == exinfo.ratepar( exinfo.pfi ));
 parb(~idx) = 10^4;
 [~, exinfo.upfi] = min( parb );
 exinfo.upfi_drug = find(exinfo.ratepar_drug == exinfo.ratepar( exinfo.upfi ));
-
-
-% pupil size
-% [exinfo.ppsz_mu, exinfo.ppsz_mu_drug, ppsz_h] = ...
-%     ppsz_mu(ex0.Trials, ex2.Trials, exinfo.drugname, p_flag);
-% 
-% if p_flag
-%     figure(ppsz_h(1)); title(strrep(exinfo.figname, '_', ' '));
-%     if strcmp(exinfo.drugname, 'NaCl');
-%         set(findobj(ppsz_h(1), 'Color', 'r'), 'Color', 'k');
-%     end
-%     set(ppsz_h, 'tag', 'ppsz');
-% end
 
 
 %% non-parametric change, i.e. relative change in the integrated area under the tc curve
@@ -41,10 +27,8 @@ exinfo.yoff = yoff(1);
 exinfo.r2reg = r2(1);
 
 exinfo.yoff_rel = yoff(2);
-exinfo.reg_bootstrp = bootstrp;
+%exinfo.reg_bootstrp = bootstrp;
 
-
-return;
 
 
 %% fitting parameters
@@ -79,7 +63,7 @@ if isfield(exinfo.fitparam, 'others') && isfield(exinfo.fitparam.others, 'OR')
     plotCOTC(exinfo);
    
     
-elseif strcmp(exinfo.param1, 'sf')      %%% spatial freuqency
+elseif strcmp(exinfo.param1, 'sf')      %%% spatial frequency
 
     % first entry linear fit, second entry log scaled fit
     others_base = exinfo.fitparam.others;

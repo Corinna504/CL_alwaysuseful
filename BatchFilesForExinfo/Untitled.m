@@ -47,7 +47,7 @@ end
 
 %% concatenate ex files
 % exinfo_new = rcdatka04;
-fnames = fieldnames(exinfo);
+fnames = fieldnames(exinfo2);
 curlen = length(exinfo); %current length
 for i = 1:length(exinfo_new)
     
@@ -64,6 +64,20 @@ for i = 1:length(exinfo_new)
     
 end
 
+
+%%
+for i = 1:length(exinfo2)
+    
+   for j = 1:length(fnames)
+      
+       if ~isfield(exinfo2, fnames{j})
+           exinfo2(1).(fnames{j}) = 0;
+       
+       end
+       
+   end
+    
+end
 
 
 

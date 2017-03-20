@@ -16,20 +16,13 @@ end
 
 disp(datinfo(1).fname_drug);
 fprintf('Anova Baseline p=%1.3f, Drug: p=%1.3f \n', datinfo(1).p_anova, datinfo(1).p_anova_drug);
+fprintf('recovery overlap p=%1.3f \n', datinfo(1).ret2base);
 if strcmp(datinfo(1).param1, 'co')
     fprintf('Add Anova Baseline data<=c50 p=%1.3f, data>c50: p=%1.3f \n', datinfo(1).fitparam.undersmpl(1), datinfo(1).fitparam.undersmpl(2));
     fprintf('Add Anova Drug data<=c50 p=%1.3f, data>c50: p=%1.3f \n', datinfo(1).fitparam_drug.undersmpl(1), datinfo(1).fitparam.undersmpl(2));
 end
 
-try
-    fprintf('Baseline stimrep-mn-var-ff \n');
-    [datinfo(1).ff.classic_2ndhalf.stimrep; datinfo(1).ff.classic_2ndhalf.spkcnt_mn;...
-        datinfo(1).ff.classic_2ndhalf.spkcnt_var; datinfo(1).ff.classic_2ndhalf.ff]
-    
-    fprintf([datinfo(1).drugname 'stimrep-mn-var-ff \n']);
-    [datinfo(1).ff_drug.classic_2ndhalf.stimrep; datinfo(1).ff_drug.classic_2ndhalf.spkcnt_mn;...
-        datinfo(1).ff_drug.classic_2ndhalf.spkcnt_var; datinfo(1).ff_drug.classic_2ndhalf.ff]
-end
+
 
 
 j = 1;
@@ -101,6 +94,7 @@ while j<=length(fig2plot)
         case 'ISI'
             temp = openfig(datinfo(1).fig_bri, 'invisible');
             
+            
         case 'LFP spk avg'
             temp = openfig(datinfo(1).fig_lfpAvgSpk, 'invisible');
             
@@ -146,6 +140,12 @@ while j<=length(fig2plot)
 %                 openfig(datinfo(1).fig_latjackknife);
             end
             temp = openfig(datinfo(1).fig_sdfs, 'invisible');
+            
+        case 'Recovery'
+            
+            temp = openfig(datinfo(1).fig_recovery);
+            j = j+1;
+            continue
            
     end
     
