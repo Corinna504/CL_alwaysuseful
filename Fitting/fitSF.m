@@ -38,8 +38,7 @@ fitparam.val.sem = sem;
 fitparam.val.sf = sf;
 
 % fit predicted tuning
-
-fitparam.x = min(sf):0.001:sf(end);    
+fitparam.x = min(sf):0.01:sf(end);    
 fitparam.y = gaussian(fitparam.mu, fitparam.sig, fitparam.a, fitparam.b, fitparam.x);
 
 % % debugging

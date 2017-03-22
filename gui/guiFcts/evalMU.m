@@ -681,15 +681,15 @@ switch fctname
         
     case 'noise correlation 2nd half'
         val = [exinfo.rsc_2nd];% - 0.006*[exinfo.c0geomn_2nd];
-        lab = [fctname ' normed (estimate = 0.006)'];
+%         lab = [fctname ' normed (estimate = 0.006)'];
         
     case 'noise correlation drug 2nd half'
         val = [exinfo.rsc_2nd_drug] ;%- 0.006*[exinfo.c0geomn_2nd_drug];
-        lab = [fctname ' normed (estimate = 0.006)'];
+%         lab = [fctname ' normed (estimate = 0.006)'];
         
     case 'noise correlation diff 2nd half'
         val = [exinfo.rsc_2nd] - [exinfo.rsc_2nd_drug];
-        lab = 'noise correlation diff 2nd half(base-drug) normed';
+        lab = 'noise correlation diff 2nd half(base-drug)';
         
     case 'signal correlation 2nd half'
         val = [exinfo.rsig_2nd];
@@ -811,7 +811,14 @@ switch fctname
         lab = 'regression r2';
         
     case 'gain change'
-        val = [exinfo.gslope];
+        for i = 1:length(exinfo)
+           if min(exinfo(i).ratemn)>0
+                val(i) = exinfo(i).gslope;
+           else
+               val(i) = nan;
+           end
+        end
+%         val = [exinfo.gslope];
         lab = 'gain change';
         
     case 'additive change'

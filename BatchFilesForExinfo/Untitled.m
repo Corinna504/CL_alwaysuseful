@@ -1,6 +1,17 @@
+
+for i = 1:length(exinfo_red)
+    if strcmp(exinfo_red(i).param1, 'sf')
+
+        exinfo_red(i) = tuningCurvePlot(exinfo_red(i));
+    end
+end
+
+
+
+
+%%
 for kk = 1:length(exinfo)
-   
-    
+      
    if ~exinfo(kk).isRC 
     exinfo(kk).ff.classic.ff = ( exinfo(kk).ff.classic.spkcnt_var ./ exinfo(kk).ff.classic.spkcnt_mn );
     exinfo(kk).ff_drug.classic.ff = ( exinfo(kk).ff_drug.classic.spkcnt_var ./ exinfo(kk).ff_drug.classic.spkcnt_mn ); 

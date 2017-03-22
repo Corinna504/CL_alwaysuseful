@@ -102,6 +102,7 @@ or = val.or(val.or<180)';
 
 % fit gaussian function to the mean values
 fitparam = fitOR( mn, sem, or);
+
 end
 
 

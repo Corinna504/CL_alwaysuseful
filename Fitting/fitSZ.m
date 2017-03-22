@@ -21,7 +21,7 @@ fitparam.val.mn = mn(idx);
 fitparam.val.sem = sem2;
 fitparam.val.sz = sz2;
 
-fitparam.val.x = 0:0.01:sz2(end);
+fitparam.val.x = 0:0.03:sz2(end);
 fitparam.val.y = GaussRatio(ks, kc, ws, wc, fitparam.val.x)+offset;
 fitparam.wc = wc; 
 fitparam.ws = ws; 

@@ -45,7 +45,8 @@ end
 %% go through each file and add other information
 for kk = i_strt:length(exinfo)
 
-    if exinfo(kk).isRC
+    if exinfo(kk).isRC || ~isempty(strfind(exinfo(kk).fname, 'all.')) || ~isempty(strfind(exinfo(kk).fname_drug, 'all.'))
+        %%strcmp(exinfo(kk).param1, 'sz') || strcmp(exinfo(kk).param1, 'sf')
         continue;
     end
     
@@ -63,7 +64,7 @@ for kk = i_strt:length(exinfo)
 
     %-------------------------------------- operations on both ex files
     exinfo(kk).tf = ex0.stim.vals.tf;
-    exinfo(kk) = evalBothEx(ex0, ex2,  exinfo(kk), p_flag);
+%     exinfo(kk) = evalBothEx(ex0, ex2,  exinfo(kk), p_flag);
   
     %-------------------------------------- additional fitting for 2D
     if exinfo(kk).isRC && ~isempty(strfind(exinfo(kk).fname, 'CO'))
@@ -99,11 +100,12 @@ for kk = i_strt:length(exinfo)
     
     %-------------------------------------- temp save
     if saveflag && mod(kk, 30)==0 
-%         save(['exinfo' fig_suffix '.mat'], 'exinfo', '-v7.3'); 
-        save('exinfo2003.mat', 'exinfo', '-v7.3'); 
+        save(['exinfo' fig_suffix '.mat'], 'exinfo', '-v7.3'); 
     end
 end
 
+if saveflag; save(['exinfo' fig_suffix '.mat'], 'exinfo', '-v7.3'); end
+return;
 
 %------------------------------------------------------------- add fields
 exinfo = getValidField(exinfo);
@@ -114,8 +116,7 @@ exinfo = addNumInExp(exinfo);
 
 exinfo = addStruct(exinfo);
 
-% if saveflag; save(['exinfo' fig_suffix '.mat'], 'exinfo', '-v7.3'); end
-if saveflag; save('exinfo2003.mat', 'exinfo', '-v7.3'); end
+if saveflag; save(['exinfo' fig_suffix '.mat'], 'exinfo', '-v7.3'); end
 
 end
 

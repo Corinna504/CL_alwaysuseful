@@ -12,31 +12,31 @@ ex = loadCluster( fname, 'ocul', exinfo.ocul ); % load raw data
 expduration = ex.Trials(end).TrialEnd - ex.Trials(1).TrialStart;
 
 %% Selectivity measured by Anova
-p_argout = SelectivityCheck(exinfo, ex);
-argout = [argout p_argout{:}];
+% p_argout = SelectivityCheck(exinfo, ex);
+% argout = [argout p_argout{:}];
 
 %% Fano Factor
-% ff_argout = FF(exinfo, ex);
-% argout = [argout ff_argout{:}];
+ff_argout = FF(exinfo, ex);
+argout = [argout ff_argout{:}];
 
 %% Noise correlation and signal correlation
-rsc_argout = getRsc(exinfo, fname);
-argout = [argout rsc_argout{:}];
+% rsc_argout = getRsc(exinfo, fname);
+% argout = [argout rsc_argout{:}];
 
 %% Tuning curve fit
-tc_argout = fitTC(exinfo, spkrate, ex, fname);
-argout = [argout tc_argout{:}];
+% tc_argout = fitTC(exinfo, spkrate, ex, fname);
+% argout = [argout tc_argout{:}];
 
 %% Tc height diff
-minspk = min([spkrate.mn]);
-maxspk = max([spkrate.mn]);
-tcdiff = (maxspk - minspk) / mean([maxspk, minspk]);
-argout = [argout {'tcdiff', tcdiff}];
+% minspk = min([spkrate.mn]);
+% maxspk = max([spkrate.mn]);
+% tcdiff = (maxspk - minspk) / mean([maxspk, minspk]);
+% argout = [argout {'tcdiff', tcdiff}];
 
 
 %% Phase selectivity
-phasesel = getPhaseSelectivity(ex, 'stim', exinfo.param1);
-argout = [argout {'phasesel', phasesel}];
+% phasesel = getPhaseSelectivity(ex, 'stim', exinfo.param1);
+% argout = [argout {'phasesel', phasesel}];
 
 %% assign output arguments
 argout =  [argout {'rateMN', [spkrate.mn]', 'rateVARS', [spkrate.var]', ...
@@ -163,11 +163,11 @@ elseif strcmp(exinfo.param1, 'co')
     end
     
 elseif strcmp(exinfo.param1, 'sz')
-    fitparam = fitSZ([spkrate.mn], [spkrate.sd], [spkrate.(exinfo.param1)]);
+    fitparam = fitSZ([spkrate.mn], [spkrate.sem], [spkrate.(exinfo.param1)]);
     
 elseif strcmp(exinfo.param1, 'sf')
-    fitparam_lin = fitSF([spkrate.mn], [spkrate.sd], [spkrate.(exinfo.param1)], false );
-    fitparam_log = fitSF([spkrate.mn], [spkrate.sd], [spkrate.(exinfo.param1)], true );
+    fitparam_lin = fitSF([spkrate.mn], [spkrate.sem], [spkrate.(exinfo.param1)], false );
+    fitparam_log = fitSF([spkrate.mn], [spkrate.sem], [spkrate.(exinfo.param1)], true );
     
     % first entry linear fit, second entry log scaled fit
     fitparam.others = {fitparam_lin; fitparam_log};

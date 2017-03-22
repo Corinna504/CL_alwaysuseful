@@ -42,11 +42,12 @@ s_NaCl_corr = getCorr(X(~idx)', Y(~idx)');
 
 s_x = getStatsTwoSample(X(idx), X(~idx));
 s_y = getStatsTwoSample(Y(idx), Y(~idx));
+s_diff = getStatsTwoSample(X(idx)-Y(idx), X(~idx)-Y(~idx));
 
 
 s = ['\n----5HT\n' s_5HT s_5HT_corr...
     '\n----NaCl\n' s_NaCl s_NaCl_corr...
-    '\n----5HT vs. NaCl\n x: ' s_x  ' y: ' s_y];
+    '\n----5HT vs. NaCl\n x: ' s_x  ' y: ' s_y  ' x-y: ' s_diff];
 end
 
 
@@ -56,7 +57,7 @@ function s = getCorr(x, y)
 [rho_sp, p_sp] = corr(x, y, 'type', 'Spearman');
 
 
-s = sprintf('correlation Pearson: rho=%1.2f  p=%1.4g, \t Spearman: rho=%1.2f  p=%1.4g \n', ...
+s = sprintf('correlation Pearson: rho=%1.2f  p=%1.2e, \t Spearman: rho=%1.2f  p=%1.2e \n', ...
     rho_p, p_p, rho_sp, p_sp);
 
 end
@@ -67,7 +68,7 @@ function s = getStatsTwoSample(sero, nat)
 [~, ptt] = ttest2(sero, nat);
 pwil = ranksum(sero, nat);
 
-s = sprintf('2-sample ttest p=%1.4g, \t wilcoxon p=%1.4g \n', ptt, pwil);
+s = sprintf('2-sample ttest p=%1.2e, \t wilcoxon p=%1.2e \n', ptt, pwil);
 end
 
 
@@ -75,15 +76,16 @@ function s = getStatsPairedSample(X, Y)
 % paired comparison
 s_base  = getDistParam(X);
 s_drug = getDistParam(Y);
+s_diff = getDistParam(X-Y);
 
 % check for normal distribution
 h = kstest(X-Y);
-[~, ptt] = ttest(X, Y)
-psr = signrank(X, Y)
+[~, ptt] = ttest(X, Y);
+psr = signrank(X, Y);
 
 
-s = sprintf(['X' s_base 'Y' s_drug ...
-    'normal dist X-Y h=%1.0f, paired t-test p=%1.4g, \t paired signrank p=%1.4g \n\n' ], ...
+s = sprintf(['X' s_base 'Y' s_drug 'Diff X-Y' s_diff ...
+    'normal dist X-Y h=%1.0f, paired t-test p=%1.2e, \t paired signrank p=%1.2e \n\n' ], ...
     h, ptt, psr);
 
 end
@@ -95,7 +97,7 @@ function s = getDistParam(A)
 n = length(A);
 
 % distribution values
-prct =  prctile(A, [2.5 50 97.5]);
+prct =  prctile(A, [5 50 95]);
 
 mn_ = nanmean(A);
 std_ = nanstd(A);
@@ -115,8 +117,8 @@ psignr = signrank(A);
 
 
 s = sprintf(['(N = %1.0f) \n' ...
-    'percentile (2.5, 50, 97.5): %1.2f/%1.2f/%1.2f, \t mean: %1.2f +- %1.2f SD, \t GM: %1.2f \n' ...
-    'test for normal dist p=%1.4g, \t t-test vs. 0 p = %1.4g, \t signrank test vs 0 p: %1.4g \n\n'], ...
+    'percentile (5, 50, 95): %1.2f/%1.2f/%1.2f, \t mean: %1.2f +- %1.2f SD, \t GM: %1.2f \n' ...
+    'test for normal dist p=%1.2e, \t t-test vs. 0 p = %1.2e, \t signrank test vs 0 p: %1.2e \n\n'], ...
     n, prct, mn_, std_, geomn_, psphericity, pttest, psignr);
 
 end

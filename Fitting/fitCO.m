@@ -85,7 +85,7 @@ ss = sum((y_pred-y).^2);        % summed squared error, i.e. the general cost fu
 
 
 % restrictions / boundaries
-if c50 < 0 || n < 0 || m<0 || rmax <0 || rmax+m > max(y) 
+if c50 < 0 || n < 0 || m<0 || rmax <0 %|| rmax+m > max(y) 
     ss = Inf;
 end
     

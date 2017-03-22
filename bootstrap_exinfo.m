@@ -1,7 +1,6 @@
 function exinfo = bootstrap_exinfo( exinfo, conc_flag )
 % evaluates the resampled tuning curves and returns the relative rate
 
-
 if exinfo.isRC
     return;
 end
@@ -11,8 +10,10 @@ s1 = exinfo.ratepar;
 s2 = exinfo.ratepar_drug;
 
 % compute mean and resampled data
-[rate_base, res_tc_base] = getMnAndResDist(exinfo.ratemn, exinfo.rate_resmpl, s1, s2);
-[rate_drug, res_tc_drug] = getMnAndResDist(exinfo.ratemn_drug, exinfo.rate_resmpl_drug, s2, s1);
+[rate_base, res_tc_base] = ...
+    getMnAndResDist(exinfo.ratemn, exinfo.rate_resmpl, exinfo.nrep, s1, s2);
+[rate_drug, res_tc_drug] = ...
+    getMnAndResDist(exinfo.ratemn_drug, exinfo.rate_resmpl_drug, exinfo.nrep_drug, s2, s1);
 
 
 exinfo.nonparam_ratio = mean(rate_drug)/mean(rate_base);
@@ -28,24 +29,32 @@ end
 end
 
 
-function [ratemn, res_mnmn] = getMnAndResDist(ratemn, resmpls, i1, i2)
+function [ratemn, res_mnmn] = getMnAndResDist(ratemn, resmpls, nrep, i1, i2)
 %returns data with similar rate 
 
 idx = ismember(i1, i2);
 ratemn = ratemn(idx); % mean spike rate (across raw tc)
 resmpls = resmpls(idx); % resamples, cell array
-
+nrep = nrep(idx);
 
 % compute the average tuning curve from the resampled stimulus conditions
 res_mn = nan(length(resmpls), 1000);
 for i = 1:length(resmpls)
-    res_mn(i,:) = mean(resmpls{i}, 1);
+    res_mn(i,:) = mean(resmpls{i},1);
 end
-res_mnmn = mean(res_mn,1);
 
+try
+    if size(nrep, 1)>1
+        nrep = nrep';
+    end
+    res_mnmn = nrep*res_mn / sum(nrep); % weighted average
+
+catch
+    disp('');
+end
 % 
 % resmpls = resample2(ratemn);
-% res_mnmn = mean(resmpls, 1);
+% res_mnmn = mean(res_mn, 1);
 
 end
 

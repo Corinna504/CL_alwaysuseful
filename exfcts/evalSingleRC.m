@@ -34,20 +34,20 @@ tcdiff = (maxspk - minspk) ./ mean([maxspk, minspk]);
 idx = find(spkstats.(exinfo.param1)<1000);
 p_anova = nan(length(idx),length(idx));
 for i = 1:length(idx)
-    for j = i+1:length(idx)
+    for j = i:length(idx)
         
-        try
-            lstat = sum(squeeze(spkstats.bootstrap(i,1,:)) - squeeze(spkstats.bootstrap(j,1,:)) < 0 )/ 1000;
-            rstat = sum(squeeze(spkstats.bootstrap(i,1,:)) -  squeeze(spkstats.bootstrap(j,1,:)) > 0 )/ 1000;
-            p_anova(i, j) = min([lstat rstat]);
-        catch
-           disp(''); 
-        end
+%         mu = spkstats.mn(j);
+%         ct = prctile(squeeze(spkstats.bootstrap(i,1,:)), [5 95]);
+%         p_anova(i, j) = mu>ct(1) && mu<ct(2);
+            
+        A = squeeze(spkstats.bootstrap(i,1,:));
+        B = squeeze(spkstats.bootstrap(j,1,:));
         
+        p_anova(i, j) = min([sum(A<B)/1000, sum(B>A)/1000]);
     end
 end
 
-p_anova = min(min(p_anova));
+% p_anova = max(max(p_anova))
 
 
 %% assign output arguments
@@ -58,7 +58,7 @@ p_anova = min(min(p_anova));
 %     'nrep', nrep, 'p_anova', p_anova, ...
 %     'lat', res.latFP, 'lat2Hmax', res.lat};
 
-argout = {'p_anova', p_anova, 'nrep', nrep, 'fitparam', fitparam};
+argout = {'p_anova', p_anova, 'nrep', nrep}; %, 'fitparam', fitparam};
 
 end
 
