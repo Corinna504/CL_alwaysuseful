@@ -39,6 +39,15 @@ for n = 1:length(ex.Trials)
             ex.Trials(n).spkRate    =  ex.Trials(n).nSpks / (t_end - t_strt(1) + frame_dur);
             ex.Trials(n).spkCount   =  ex.Trials(n).nSpks ;
         end
+        
+        
+        % I should correct for the temporal frequency because 
+        % simple cells would have a disadvantage in cases of odd numbers of
+        % circles presented. Yet, this is not simple. A frequency analysis
+        % or something alike would have to be performed to retract the
+        % spikes per cycle per second. Because we only consider pair-wise
+        % comparisons, this is issue is neglected for now.
+        
     else
         ex.Trials(n).spkRate = [];
     end
