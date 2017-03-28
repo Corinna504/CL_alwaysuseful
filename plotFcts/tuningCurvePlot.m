@@ -4,6 +4,7 @@ function h = tuningCurvePlot(exinfo)
 
 h = figure('Name', exinfo.figname);
 
+
 if strcmp(exinfo.param1, 'or') 
     fittedTC_or(exinfo)
 elseif  strcmp(exinfo.param1, 'sf')
@@ -27,7 +28,6 @@ end
 
 
 
-
 %% size data
 function fittedTC_sz(exinfo)
 
@@ -35,11 +35,13 @@ c = getCol(exinfo);
 
 val = exinfo.fitparam.val;
 errorbar( val.sz,val.mn, val.sem, 'o', 'Color', c, 'MarkerFaceColor', c); ho
+text( val.sz,val.mn, exinfo.nrep(exinfo.ratepar<1000))
 plot( val.x, val.y, 'Color', c);
 
 val = exinfo.fitparam_drug.val;
 errorbar( val.sz,val.mn, val.sem, 'o', 'Color', c, 'MarkerFaceColor', 'w');
 plot( val.x, val.y, 'Color', c, 'LineStyle', '--');
+text( val.sz,val.mn, exinfo.nrep_drug(exinfo.ratepar_drug<1000))
 
 plotSpontResp(exinfo, c);
 % plot( ones(2,1)*exinfo.fitparam.mu, get(gca, 'YLim'), 'k');
@@ -167,8 +169,8 @@ c = getCol(exinfo);
 args_base = {'o', 'Color', c, 'MarkerSize', 5, 'MarkerFaceColor', c};
 args_drug = args_base; args_drug{end} = 'w';
 
-fittedTC_sf_Helper(ft,  args_base, {c}); ho;
-fittedTC_sf_Helper(ft_drug,  args_drug, {c, 'LineStyle', '--'});
+fittedTC_sf_Helper(ft,  args_base, {c}, exinfo.nrep(exinfo.ratepar<1000)); ho;
+fittedTC_sf_Helper(ft_drug,  args_drug, {c, 'LineStyle', '--'}, exinfo.nrep_drug(exinfo.ratepar_drug<1000));
 
 plotSpontResp(exinfo, c)
 xlabel('spatial frequency');    ylabel('spks/s (\pm sme)');
@@ -190,10 +192,11 @@ title( sprintf( ['B: pf=%1.2f, bw=%1.2f, amp=%1.1f, off=%1.1f r2=%1.3f\n' ...
 end
 
 
-function fittedTC_sf_Helper(ft, errArgs, lineArgs)
+function fittedTC_sf_Helper(ft, errArgs, lineArgs, nrep)
 
 errorbar(ft.val.sf, ft.val.mn, ft.val.sem, errArgs{:}); ho
 plot(ft.x, ft.y, lineArgs{:}); ho
+text(ft.val.sf, ft.val.mn, num2str(nrep), 'FontSize', 8);
 
 set(gca, 'XLim', [min(ft.val.sf) max(ft.val.sf)]);
 end
@@ -207,6 +210,7 @@ c = getCol(exinfo);
 mn0 = exinfo.ratemn;            mn1 = exinfo.ratemn_drug;
 sme0 = exinfo.ratesme;          sme1 = exinfo.ratesme_drug;   
 par0 = exinfo.ratepar;          par1 = exinfo.ratepar_drug;
+nrep0 = exinfo.nrep;           nrep1 = exinfo.nrep_drug;
 errArgs = {'o', 'Color', c, 'MarkerSize', 5};
 
 
@@ -220,7 +224,10 @@ fittedTC_co_Helper(exinfo.fitparam, {c})
 fittedTC_co_Helper(exinfo.fitparam_drug, {c, 'LineStyle', '--'})
 
 errorbar(par0.*100, mn0, sme0, errArgs{:}, 'MarkerFaceColor', c); hold on;
+text(par0.*100, mn0, num2str(nrep0));
 errorbar(par1.*100, mn1, sme1, errArgs{:}, 'MarkerFaceColor', 'w');
+text(par1.*100, mn1, num2str(nrep1));
+
 legend('base', exinfo.drugname, 'Location', 'northwest');
 set(gca, 'XScale','log', 'XLim', [1 100]);
 box off;
