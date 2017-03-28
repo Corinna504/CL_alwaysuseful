@@ -45,26 +45,25 @@ end
 %% go through each file and add other information
 for kk = i_strt:length(exinfo)
 
-    if exinfo(kk).isRC || ~isempty(strfind(exinfo(kk).fname, 'all.')) || ~isempty(strfind(exinfo(kk).fname_drug, 'all.'))
-        %%strcmp(exinfo(kk).param1, 'sz') || strcmp(exinfo(kk).param1, 'sf')
-        continue;
-    end
+%     if exinfo(kk).isRC 
+%         continue;
+%     end
     
     fprintf('WORKING ON ROW %1i, file %1.1f \n', kk, exinfo(kk).id);
     exinfo(kk) = replaceFigName(exinfo(kk), fig_suffix);
 
     %--------------------------------------- operations on single ex files
     %base
-    [ex0, args0] = evalSingleEx(exinfo(kk), exinfo(kk).fname);
+    [ex0, args0] = evalSingleEx(exinfo(kk), exinfo(kk).fname, varargin{:});
     exinfo(kk) = assignInfo(exinfo(kk), '', args0{:});
     
     %drug
-    [ex2, args2] = evalSingleEx(exinfo(kk), exinfo(kk).fname_drug);
+    [ex2, args2] = evalSingleEx(exinfo(kk), exinfo(kk).fname_drug, varargin{:});
     exinfo(kk) = assignInfo(exinfo(kk), '_drug', args2{:});
 
     %-------------------------------------- operations on both ex files
     exinfo(kk).tf = ex0.stim.vals.tf;
-%     exinfo(kk) = evalBothEx(ex0, ex2,  exinfo(kk), p_flag);
+    exinfo(kk) = evalBothEx(ex0, ex2,  exinfo(kk), p_flag, varargin{:});
   
     %-------------------------------------- additional fitting for 2D
     if exinfo(kk).isRC && ~isempty(strfind(exinfo(kk).fname, 'CO'))
@@ -82,16 +81,16 @@ for kk = i_strt:length(exinfo)
 
         if p_flag && ~exinfo(kk).isadapt
 
-%            exinfo(kk) = new_psthPlot_red(exinfo(kk), ex0, ex2);
-%            rasterPlot( exinfo(kk), ex0, ex2);
+           exinfo(kk) = new_psthPlot_red(exinfo(kk), ex0, ex2);
+           rasterPlot( exinfo(kk), ex0, ex2);
            tuningCurvePlot(exinfo(kk));        
-%            znormplot(ex0, ex2, exinfo(kk));
-%            exinfo(kk) = phasePlot(exinfo(kk), ex0, ex2);
+           znormplot(ex0, ex2, exinfo(kk));
+           exinfo(kk) = phasePlot(exinfo(kk), ex0, ex2);
            
-%            VariabilityPlot(exinfo(kk), ex0, ex2);
+           VariabilityPlot(exinfo(kk), ex0, ex2);
         end
 
-%         exinfo(kk) = getISI_All(exinfo(kk), ex0, ex2, p_flag);
+        exinfo(kk) = getISI_All(exinfo(kk), ex0, ex2, p_flag);
 
     elseif exinfo(kk).isRC && p_flag
         rcPlot(exinfo(kk));
@@ -104,17 +103,14 @@ for kk = i_strt:length(exinfo)
     end
 end
 
-if saveflag; save(['exinfo' fig_suffix '.mat'], 'exinfo', '-v7.3'); end
-return;
-
 %------------------------------------------------------------- add fields
 exinfo = getValidField(exinfo);
 exinfo = getDominantEyeField(exinfo);
 exinfo = setReceptiveFieldSize( exinfo );
 exinfo = addSortingValue(exinfo);
 exinfo = addNumInExp(exinfo);
-
 exinfo = addStruct(exinfo);
+
 
 if saveflag; save(['exinfo' fig_suffix '.mat'], 'exinfo', '-v7.3'); end
 
