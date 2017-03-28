@@ -127,7 +127,7 @@ txt4 = uicontrol(fig_h, 'Style','text',...
     'HorizontalAlignment', 'left');
 editPanova_h = uicontrol(fig_h, 'Style','edit',...
     'Position',[pos(3)*(margins+0.06) pos(4)*0.135 pos(3)*0.04 pos(4)*0.03], ...
-    'String', ' < 0.05 ');
+    'String', ' < 0.01 ');
 
 %------------------------- recovery probability
 txt5 = uicontrol(fig_h, 'Style','text',...
@@ -142,7 +142,7 @@ editPrecov_h = uicontrol(fig_h, 'Style','edit',...
 %------------------------- only increasing tuning
 increasingTuning = uicontrol(fig_h, ....
     'Style',  'checkbox',...
-    'String', 'increasing TC(co)/mu within stim range(sf)' ,...
+    'String', 'increasing TC(co)' ,...
     'Position', [pos(3)*0.2 pos(4)*0.4 pos(3)*0.2 pos(4)*0.15]);
 
 %--------------------------- popup for Data Criteria
@@ -339,7 +339,7 @@ fig2plot_check(12) = uicontrol(fig_h, ...
         % figure 1
         
         % prepare folders
-        if exist('raw_figs', 'dir') ~= 7
+        if exist(fullfile(cd, 'raw_figs'), 'dir') ~= 7
             mkdir('raw_figs');
             mkdir(fullfile('raw_figs\Orientation'));
             mkdir(fullfile('raw_figs\SpatialF'));
@@ -357,21 +357,21 @@ fig2plot_check(12) = uicontrol(fig_h, ...
         popX_h.Value= find(strcmp(axisopts, 'mean spike rate base'))+1;
         popY_h.Value= find(strcmp(axisopts, 'mean spike rate drug'))+1;
         
-%         pop_Yspec.Value = 2; pop_Xspec.Value = 2;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\Orientation\MeanFiringRate.fig'); delete(h)
-%         
-%         pop_Yspec.Value = 3; pop_Xspec.Value = 3;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\SpatialF\MeanFiringRate.fig'); delete(h)
-%         
-%         pop_Yspec.Value = 4; pop_Xspec.Value = 4;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\Contrast\MeanFiringRate.fig'); delete(h)
-%         
-%         pop_Yspec.Value = 5; pop_Xspec.Value = 5;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\Size\MeanFiringRate.fig'); delete(h)
+        pop_Yspec.Value = 2; pop_Xspec.Value = 2;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\Orientation\MeanFiringRate.fig'); delete(h)
+        
+        pop_Yspec.Value = 3; pop_Xspec.Value = 3;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\SpatialF\MeanFiringRate.fig'); delete(h)
+        
+        pop_Yspec.Value = 4; pop_Xspec.Value = 4;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\Contrast\MeanFiringRate.fig'); delete(h)
+        
+        pop_Yspec.Value = 5; pop_Xspec.Value = 5;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\Size\MeanFiringRate.fig'); delete(h)
         
         
         % plots showing regression plots
@@ -401,7 +401,6 @@ fig2plot_check(12) = uicontrol(fig_h, ...
         createPlot(0, 0, 0); h = exportPlot(0, 0);
         savefig(h, 'raw_figs\Size\Regression.fig'); delete(h)
         
-        return
         %% tuning curves
         h = openfig(exinfo([exinfo.idi] == 91 & [exinfo.ocul]==-1).fig_tc);
         savefig(h, 'raw_figs\Orientation\Tc5HT.fig'); delete(h);
@@ -552,25 +551,25 @@ fig2plot_check(12) = uicontrol(fig_h, ...
         createPlot(0, 0, 0); h = exportPlot(0, 0);
         savefig(h, 'raw_figs\Size\PreferredSize.fig'); delete(h)
         
-%         popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit width center'))+1;
-%         popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit width center drug'))+1;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\Size\WdtCenter.fig'); delete(h)
-%         
-%         popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit width surround'))+1;
-%         popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit width surround drug'))+1;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\Size\WdtSurround.fig'); delete(h)
-%         
-%         popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain surround'))+1;
-%         popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain surround drug'))+1;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\Size\GainSurround.fig'); delete(h)
-%         
-%         popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain center'))+1;
-%         popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain center drug'))+1;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\Size\GainCenter.fig'); delete(h)
+        popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit width center'))+1;
+        popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit width center drug'))+1;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\Size\WdtCenter.fig'); delete(h)
+        
+        popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit width surround'))+1;
+        popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit width surround drug'))+1;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\Size\WdtSurround.fig'); delete(h)
+        
+        popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain surround'))+1;
+        popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain surround drug'))+1;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\Size\GainSurround.fig'); delete(h)
+        
+        popX_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain center'))+1;
+        popY_h.Value= find(strcmp(axisopts, 'gauss ratio fit gain center drug'))+1;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\Size\GainCenter.fig'); delete(h)
         
     end
 
@@ -659,53 +658,55 @@ fig2plot_check(12) = uicontrol(fig_h, ...
         editSpkSortQualtiy_h.String = '>=1';
         
         
-%         % fano factor
-%         popX_h.Value= find(strcmp(axisopts, ['fano factor' suffix ' base']))+1;
-%         popY_h.Value= find(strcmp(axisopts, ['fano factor' suffix ' drug']))+1;
-% 
-% 
-%         pop_Yspec.Value = 2; pop_Xspec.Value = 2;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\Orientation\FanoFactor.fig'); delete(h)
-%         
-%         pop_Yspec.Value = 3; pop_Xspec.Value = 3;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\SpatialF\FanoFactor.fig'); delete(h)
-%         
-%         pop_Yspec.Value = 4; pop_Xspec.Value = 4;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\Contrast\FanoFactor.fig'); delete(h)
-%         
-%         pop_Yspec.Value = 5; pop_Xspec.Value = 5;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\Size\FanoFactor.fig'); delete(h)
-%         
-%         
-%         % fano factor vs relative rate
-%         popX_h.Value= find(strcmp(axisopts, ['nonparam area ratio' suffix]))+1;
-%         popY_h.Value= find(strcmp(axisopts, ['fano factor' suffix ' diff']))+1;
-%         addUnity.Value = 0;  eqAxes.Value = 0;
-% 
-%         pop_Yspec.Value = 2; pop_Xspec.Value = 2;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\Orientation\FanoFactor_vs_RelRate.fig'); delete(h)
-%         
-%         pop_Yspec.Value = 3; pop_Xspec.Value = 3;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\SpatialF\FanoFactor_vs_RelRate.fig'); delete(h)
-%         
-%         pop_Yspec.Value = 4; pop_Xspec.Value = 4;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\Contrast\FanoFactor_vs_RelRate.fig'); delete(h)
-%         
-%         pop_Yspec.Value = 5; pop_Xspec.Value = 5;
-%         createPlot(0, 0, 0); h = exportPlot(0, 0);
-%         savefig(h, 'raw_figs\Size\FanoFactor_vs_RelRate.fig'); delete(h)
-%         
+        % fano factor
+        popX_h.Value= find(strcmp(axisopts, ['fano factor' suffix ' base']))+1;
+        popY_h.Value= find(strcmp(axisopts, ['fano factor' suffix ' drug']))+1;
+
+
+        pop_Yspec.Value = 2; pop_Xspec.Value = 2;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\Orientation\FanoFactor.fig'); delete(h)
         
+        pop_Yspec.Value = 3; pop_Xspec.Value = 3;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\SpatialF\FanoFactor.fig'); delete(h)
+        
+        pop_Yspec.Value = 4; pop_Xspec.Value = 4;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\Contrast\FanoFactor.fig'); delete(h)
+        
+        pop_Yspec.Value = 5; pop_Xspec.Value = 5;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\Size\FanoFactor.fig'); delete(h)
+        
+        
+        % fano factor vs relative rate
+        popX_h.Value= find(strcmp(axisopts, ['nonparam area ratio' suffix]))+1;
+        popY_h.Value= find(strcmp(axisopts, ['fano factor' suffix ' diff']))+1;
+        addUnity.Value = 0;  eqAxes.Value = 0;
+
+        pop_Yspec.Value = 2; pop_Xspec.Value = 2;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\Orientation\FanoFactor_vs_RelRate.fig'); delete(h)
+        
+        pop_Yspec.Value = 3; pop_Xspec.Value = 3;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\SpatialF\FanoFactor_vs_RelRate.fig'); delete(h)
+        
+        pop_Yspec.Value = 4; pop_Xspec.Value = 4;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\Contrast\FanoFactor_vs_RelRate.fig'); delete(h)
+        
+        pop_Yspec.Value = 5; pop_Xspec.Value = 5;
+        createPlot(0, 0, 0); h = exportPlot(0, 0);
+        savefig(h, 'raw_figs\Size\FanoFactor_vs_RelRate.fig'); delete(h)
+        
+        
+        
+        suffix2 = ' corrected';
         % noise correlation
-        popX_h.Value= find(strcmp(axisopts, ['noise correlation' suffix]))+1;
-        popY_h.Value= find(strcmp(axisopts, ['noise correlation drug' suffix]))+1;
+        popX_h.Value= find(strcmp(axisopts, ['noise correlation' suffix suffix2]))+1;
+        popY_h.Value= find(strcmp(axisopts, ['noise correlation drug' suffix suffix2]))+1;
         addUnity.Value = 1;  eqAxes.Value = 1;
 
         pop_Yspec.Value = 2; pop_Xspec.Value = 2;
@@ -725,9 +726,9 @@ fig2plot_check(12) = uicontrol(fig_h, ...
         savefig(h, 'raw_figs\Size\NoiseCorr.fig'); delete(h)
        
         
-         % noise correlation vs relative rate
-        popX_h.Value= find(strcmp(axisopts, ['nonparam area ratio' suffix]))+1;
-        popY_h.Value= find(strcmp(axisopts, ['noise correlation diff' suffix]))+1;
+        % noise correlation vs relative rate
+        popX_h.Value= find(strcmp(axisopts, ['nonparam area ratio' suffix ]))+1;
+        popY_h.Value= find(strcmp(axisopts, ['noise correlation diff' suffix suffix2]))+1;
         addUnity.Value = 0;  eqAxes.Value = 0;
 
         pop_Yspec.Value = 2; pop_Xspec.Value = 2;
@@ -873,7 +874,7 @@ fig2plot_check(12) = uicontrol(fig_h, ...
                 
                 createPlotHelper(get(addHistograms, 'Value'), spec);
                 
-                dat.exinfo = exinfo(incl_i);
+%                 dat.exinfo = exinfo(incl_i);
                 set(gcf, 'UserData', dat);
                 
             else
@@ -881,7 +882,7 @@ fig2plot_check(12) = uicontrol(fig_h, ...
                 dat = createUnitPlot(exinfo(incl_i), fctX, fctY, spec, ...
                     fig2plot, get(addHistograms, 'Value'));
                 
-                dat.exinfo = exinfo(incl_i);
+%                 dat.exinfo = exinfo(incl_i);
                 set(gcf, 'UserData', dat);
                 
             end
@@ -927,13 +928,6 @@ fig2plot_check(12) = uicontrol(fig_h, ...
 %             'cellfun(@(x) x<150, {exinfo.resistance})');
         UpdateInclusionHelper(1,...
             'cellfun(@(x) isnan(x) || x<150, {exinfo.resistance})');
-        
-        
-        %%% if contrast data are plotted, use only those with increasing
-        %%% activity
-        UpdateInclusionHelper(get(increasingTuning, 'Value') && strcmp(stimy, 'co') ,...
-            'getIncreasingData(exinfo)');
-
         
         
         %%% global inclusion criteria
@@ -986,9 +980,9 @@ fig2plot_check(12) = uicontrol(fig_h, ...
             ' & [exinfo.p_anova_drug] ' get(editPanova_h, 'String')])
         
         % what is the isolation quality criteria
-%         UpdateInclusionHelper(1,...
-%             ['[exinfo.spkqual_base] ' get(editSpkSortQualtiy_h, 'String') ...
-%             ' & [exinfo.spkqual_drug] ' get(editSpkSortQualtiy_h, 'String')])
+        UpdateInclusionHelper(1,...
+            ['[exinfo.spkqual_base] ' get(editSpkSortQualtiy_h, 'String') ...
+            ' & [exinfo.spkqual_drug] ' get(editSpkSortQualtiy_h, 'String')])
         
      
         
@@ -1008,18 +1002,21 @@ fig2plot_check(12) = uicontrol(fig_h, ...
 
         fctX = axisopts{get(popX_h, 'Value')-1};
         fctY = axisopts{get(popY_h, 'Value')-1};
-        if ~isempty(strfind(fctX, 'fano factor')) || ~isempty(strfind(fctY, 'fano factor')) || ...
-            ~isempty(strfind(fctX, 'noise correlation')) || ~isempty(strfind(fctY, 'noise correlation')) 
+        if (~isempty(strfind(fctX, 'fano factor')) || ~isempty(strfind(fctY, 'fano factor')) || ...
+            ~isempty(strfind(fctX, 'noise correlation')) || ~isempty(strfind(fctY, 'noise correlation'))) ...
+            && (~isempty(strfind(fctX, '2nd half')) || ~isempty(strfind(fctY, '2nd half')))
             incl_i = intersect(incl_i, ...
             find( cellfun(@isempty, strfind({exinfo.fname}, 'all.grating')) & ...
                 cellfun(@isempty, strfind({exinfo.fname_drug}, 'all.grating')) ));
-            
-            
         end
         
         
+        %%% if contrast data are plotted, use only those with increasing
+        %%% activity
+        UpdateInclusionHelper(get(increasingTuning, 'Value') && strcmp(stimy, 'co') ,...
+            'getIncreasingData(exinfo)');
+
         % what is probability criteria for recovery
-        
         UpdateInclusionHelper(1,...
             ['[exinfo.ret2base] ' get(editPrecov_h, 'String')]);
         
@@ -1127,4 +1124,26 @@ switch crit
 end
 
 end
+
+
+
+function idx = getIncreasingData(exinfo)
+% tests whether the tuning curve has a well defined slope
+% by testing the data smaller and larger than c50 for significant
+% differences
+
+idx = zeros(length(exinfo),1);
+
+for i = 1:length(exinfo)
+    if strcmp(exinfo(i).param1, 'co')
+        if all(exinfo(i).fitparam_drug.undersmpl < 0.05) &&...
+                all(exinfo(i).fitparam.undersmpl < 0.05)
+            idx(i) = 1;
+            
+        end
+    end
+end
+end
+
+
 
