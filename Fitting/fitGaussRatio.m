@@ -26,6 +26,7 @@ function [ks, kc, ws, wc, fval, r2] = fitGaussRatio(sz, r)
 % given, 'good' starting values are tested for the best fit.
 %
 
+rng(9123234); % to always end up with the same fit in repetitive batches
 
 opt = optimset('MaxFunEvals',2000,'maxiter',2000, 'Display', 'off');
 

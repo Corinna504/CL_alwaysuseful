@@ -3,6 +3,9 @@ function fitparam = fitSF( mn, sem, sf, log_flag, bootstrp)
 %frequency sf.
 
 
+rng(9123234); % to always end up with the same fit in repetitive batches
+
+
 % ignore blanks
 i_noblank = sf<1000;
 mn   = mn( i_noblank );    

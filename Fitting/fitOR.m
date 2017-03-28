@@ -1,6 +1,9 @@
 function fitpar = fitOR( mn, sem, or, bootstrp)
 %fitgauss fits incoming spike rates to the orientation data
 
+
+rng(9123234); % to always end up with the same fit in repetitive batches
+
 i_noblank = or < 180;
 or = or(i_noblank);
 mn = mn(i_noblank);
@@ -62,7 +65,6 @@ if any(val.mn<0)
 %                'Lower', [-inf 0 0 0], 'Upper',[inf  inf 2*tc_diff inf],...
 %                'StartPoint', x0, 'MaxFunEvals', 10^5, 'MaxIter', 10^5); 
     fo = fitoptions('Method','NonlinearLeastSquares',...
-        'Lower', [-inf 0 0 0], 'Upper',[inf  inf inf inf],...
         'StartPoint', x0, 'MaxFunEvals', 10^5, 'MaxIter', 10^5);
 
 else
@@ -70,7 +72,6 @@ else
 %                'Lower', [-inf 0 min(val.mn)/2 0], 'Upper',[inf  inf 2*max(val.mn) inf],...
 %                'StartPoint', x0, 'MaxFunEvals', 10^5, 'MaxIter', 10^5); 
         fo = fitoptions('Method','NonlinearLeastSquares',...
-               'Lower', [-inf 0 0 0], 'Upper',[inf  inf inf inf],...
                'StartPoint', x0, 'MaxFunEvals', 10^5, 'MaxIter', 10^5); 
 end
 ft = fittype(@(mu, sig, a, b, x) gaussian(mu, sig, a, b, x), 'options', fo);

@@ -12,9 +12,13 @@ function fitparam = fitCO(mn, co_in, bootstrp)
 %
 % @CL 21.06.2016
 
+rng(9123234); % to always end up with the same fit in repetitive batches
+
+
 % index for non-blank values
 co = co_in(co_in<=1);
 mn = mn(co_in<=1);
+
 
 % fit settings
 opt = optimset('MaxIter', 10^4, 'MaxFunEvals', 10^4, 'TolFun', 0.001, 'Display', 'off');
@@ -45,7 +49,12 @@ fitparam.rmax = param(1);
 fitparam.c50 = param(2);
 fitparam.n = param(3);
 fitparam.m = param(4);
-fitparam.r2 = 1 - ss / sum( (mn - mean(mn)).^2 );
+
+r2 = 1 - ss / sum( (mn - mean(mn)).^2 );
+if r2 <0; r2 = 0;end
+if r2 >1; r2 = 1;end
+fitparam.r2 = r2;
+
 fitparam.val = mn;
 fitparam.co = co;
 
@@ -85,7 +94,7 @@ ss = sum((y_pred-y).^2);        % summed squared error, i.e. the general cost fu
 
 
 % restrictions / boundaries
-if c50 < 0 || n < 0 || m<0 || rmax <0 %|| rmax+m > max(y) 
+if c50 < 0 || n < 0 || m<0 || rmax <0 % || rmax+m > max(y) 
     ss = Inf;
 end
     
