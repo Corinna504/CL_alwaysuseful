@@ -55,6 +55,9 @@ end
 estb0 = ybar - estb1 * xbar;
 
 if nargout==4
+    
+    rng(9123234);
+    
   % Resample
   if nargin>3
       nresampleruns = varargin{2};

@@ -111,6 +111,9 @@ function [res, mn_rate, bootsmpl] = resampleRC(ex, nsmpl, varargin)
 % randomly choose n trials and compute netspikes
 % do this nsmpl times
 
+
+rng(9123234);
+
 res = HN_computeLatencyAndNetSpk([], ex, varargin{:});
 
 res_boot = cell(nsmpl,1); % results from bootstrapping samples
