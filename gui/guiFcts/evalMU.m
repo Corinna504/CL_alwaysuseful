@@ -655,6 +655,18 @@ switch fctname
         val = assignFct('predicted latency drug', exinfo) - [exinfo.lat2Hmax_drug];
         lab = fctname;
         
+    case 'noise correlation corrected'
+        val = [exinfo.rsc]-0.0062698*[exinfo.c0geomn];
+        
+    case 'noise correlation drug corrected'
+        val = [exinfo.rsc_drug]-0.0062698*[exinfo.c0geomn_drug];
+        
+    case 'noise correlation diff corrected'
+        val = assignFct('noise correlation corrected', exinfo) - ...
+            assignFct('noise correlation drug corrected', exinfo);
+        lab = 'noise correlation corrected diff (base-drug)';
+        
+        
     case 'noise correlation'
         val = [exinfo.rsc];
         lab = 'noise correlation';
@@ -664,8 +676,10 @@ switch fctname
         lab = 'noise correlation drug';
         
     case 'noise correlation diff'
-        val = [exinfo.rsc_drug]-[exinfo.rsc];
+        val = assignFct('noise correlation', exinfo) - ...
+            assignFct('noise correlation drug', exinfo);
         lab = 'noise correlation diff (base-drug)';
+        
         
     case  'signal correlation'
         val = [exinfo.rsig];
@@ -680,16 +694,27 @@ switch fctname
         lab = 'signal correlation diff (base-drug)';
         
     case 'noise correlation 2nd half'
-        val = [exinfo.rsc_2nd];% - 0.006*[exinfo.c0geomn_2nd];
-%         lab = [fctname ' normed (estimate = 0.006)'];
+        val = [exinfo.rsc_2nd];
         
     case 'noise correlation drug 2nd half'
-        val = [exinfo.rsc_2nd_drug] ;%- 0.006*[exinfo.c0geomn_2nd_drug];
-%         lab = [fctname ' normed (estimate = 0.006)'];
+        val = [exinfo.rsc_2nd_drug];
         
     case 'noise correlation diff 2nd half'
-        val = [exinfo.rsc_2nd] - [exinfo.rsc_2nd_drug];
-        lab = 'noise correlation diff 2nd half(base-drug)';
+        val = assignFct('noise correlation 2nd half', exinfo) - ...
+            assignFct('noise correlation drug 2nd half', exinfo);
+        
+        
+    case 'noise correlation 2nd half corrected'
+        val = [exinfo.rsc_2nd] - 0.0053495*[exinfo.c0geomn_2nd];
+        lab = [fctname ' (estimate = 0.0053495)'];
+        
+    case 'noise correlation drug 2nd half corrected'
+        val = [exinfo.rsc_2nd_drug] - 0.0053495*[exinfo.c0geomn_2nd_drug];
+        lab = [fctname ' (estimate = 0.0053495)'];
+        
+    case 'noise correlation diff 2nd half corrected'
+        val = assignFct('noise correlation 2nd half corrected', exinfo) - ...
+            assignFct('noise correlation drug 2nd half corrected', exinfo);
         
     case 'signal correlation 2nd half'
         val = [exinfo.rsig_2nd];
@@ -716,94 +741,77 @@ switch fctname
         end
         lab = 'weighted mean spike rate drug';
         
-    case 'norm mean spike rate base'
-        
-        val = cellfun(@mean, {exinfo.ratemn},...
-            'UniformOutput', 0);
-        val = cell2mat(val);
-        lab = 'mean spike rate';
-        
-    case 'norm mean spike rate drug'
-        val = cellfun(@mean, {exinfo.ratemn_drug},...
-            'UniformOutput', 0);
-        val = cell2mat(val);
-        lab = 'mean spike rate drug';
-        
     case 'mean spike rate diff'
-        val =  cellfun(@mean, {exinfo.ratemn},...
-            'UniformOutput', 0);
-        val2 = cellfun(@mean, {exinfo.ratemn_drug},...
-            'UniformOutput', 0);
-        val = cell2mat(val);
-        val2 = cell2mat(val2);
-        val = val2 - val;
-        lab = 'mean spike rate diff (drug-base)';
+       
+        val = assignFct('mean spike rate base', exinfo) -...
+            assignFct('mean spike rate drug', exinfo);
+        lab = 'mean spike rate diff (base-drug)';
         
     case 'mean spike rate variance base'
-        val = cellfun(@mean, {exinfo.ratevars},...
-            'UniformOutput', 0);
-        val = cell2mat(val);
+%         val = cellfun(@mean, {exinfo.ratevars},...
+%             'UniformOutput', 0);
+%         val = cell2mat(val);
         lab = 'mean spike rate variance';
         
     case 'mean spike rate variance drug'
-        val = cellfun(@mean, {exinfo.ratevars_drug},...
-            'UniformOutput', 0);
-        val = cell2mat(val);
+%         val = cellfun(@mean, {exinfo.ratevars_drug},...
+%             'UniformOutput', 0);
+%         val = cell2mat(val);
         lab = 'mean spike rate variance drug';
         
     case 'mean spike rate variance diff'
-        val =  cellfun(@mean, {exinfo.ratevars},...
-            'UniformOutput', 0);
-        val2 = cellfun(@mean, {exinfo.ratevars_drug},...
-            'UniformOutput', 0);
-        val = cell2mat(val);
-        val2 = cell2mat(val2);
-        val = val - val2;
+%         val =  cellfun(@mean, {exinfo.ratevars},...
+%             'UniformOutput', 0);
+%         val2 = cellfun(@mean, {exinfo.ratevars_drug},...
+%             'UniformOutput', 0);
+%         val = cell2mat(val);
+%         val2 = cell2mat(val2);
+%         val = val - val2;
         lab = 'mean spike rate diff';
         
     case 'mean spike count base'
-        val = cellfun(@mean, {exinfo.spkCount_mn},...
-            'UniformOutput', 0);
-        val = cell2mat(val);
+%         val = cellfun(@mean, {exinfo.spkCount_mn},...
+%             'UniformOutput', 0);
+%         val = cell2mat(val);
         lab = 'mean spike count';
         
     case 'mean spike count drug'
-        val = cellfun(@mean, {exinfo.spkCount_mn_drug},...
-            'UniformOutput', 0);
-        val = cell2mat(val);
+%         val = cellfun(@mean, {exinfo.spkCount_mn_drug},...
+%             'UniformOutput', 0);
+%         val = cell2mat(val);
         lab = 'mean spike count drug';
         
     case 'mean spike count diff'
-        
-        val =  cellfun(@mean, {exinfo.spkCount_mn},...
-            'UniformOutput', 0);
-        val2 = cellfun(@mean, {exinfo.spkCount_mn_drug},...
-            'UniformOutput', 0);
-        val = cell2mat(val);
-        val2 = cell2mat(val2);
-        val = val - val2;
+%         
+%         val =  cellfun(@mean, {exinfo.spkCount_mn},...
+%             'UniformOutput', 0);
+%         val2 = cellfun(@mean, {exinfo.spkCount_mn_drug},...
+%             'UniformOutput', 0);
+%         val = cell2mat(val);
+%         val2 = cell2mat(val2);
+%         val = val - val2;
         lab = 'mean spike count diff';
         
     case 'mean spike count variance base'
-        val = cellfun(@mean, {exinfo.spkCount_var},...
-            'UniformOutput', 0);
-        val = cell2mat(val);
+%         val = cellfun(@mean, {exinfo.spkCount_var},...
+%             'UniformOutput', 0);
+%         val = cell2mat(val);
         lab = 'mean spike count variance';
         
     case 'mean spike count variance drug'
-        val = cellfun(@mean, {exinfo.spkCount_var_drug},...
-            'UniformOutput', 0);
-        val = cell2mat(val);
+%         val = cellfun(@mean, {exinfo.spkCount_var_drug},...
+%             'UniformOutput', 0);
+%         val = cell2mat(val);
         lab = 'mean spike count variance drug';
         
     case 'mean spike count variance diff'
-        val =  cellfun(@mean, {exinfo.spkCount_var},...
-            'UniformOutput', 0);
-        val2 = cellfun(@mean, {exinfo.spkCount_var_drug},...
-            'UniformOutput', 0);
-        val = cell2mat(val);
-        val2 = cell2mat(val2);
-        val = val - val2;
+%         val =  cellfun(@mean, {exinfo.spkCount_var},...
+%             'UniformOutput', 0);
+%         val2 = cellfun(@mean, {exinfo.spkCount_var_drug},...
+%             'UniformOutput', 0);
+%         val = cell2mat(val);
+%         val2 = cell2mat(val2);
+%         val = val - val2;
         lab = 'mean spike count variance diff';
         
     case 'r2'
@@ -811,14 +819,14 @@ switch fctname
         lab = 'regression r2';
         
     case 'gain change'
-        for i = 1:length(exinfo)
-           if min(exinfo(i).ratemn)>0
-                val(i) = exinfo(i).gslope;
-           else
-               val(i) = nan;
-           end
-        end
-%         val = [exinfo.gslope];
+%         for i = 1:length(exinfo)
+%            if min(exinfo(i).ratemn)>0
+%                 val(i) = exinfo(i).gslope;
+%            else
+%                val(i) = nan;
+%            end
+%         end
+        val = [exinfo.gslope];
         lab = 'gain change';
         
     case 'additive change'
@@ -896,6 +904,7 @@ switch fctname
         
     case 'fano factor base'
         for bin = 1:length(exinfo)
+            exinfo(bin).id
             val(bin) = nansum(exinfo(bin).ff.classic.ff .*...
                 exinfo(bin).ff.classic.stimrep)...
                 / nansum(exinfo(bin).ff.classic.stimrep);
@@ -1192,7 +1201,7 @@ switch fctname
     case 'geometric mean c1-c0' 
         for bin =1:length(exinfo)
                 val(bin) = exinfo(bin).c0geomn_2nd; 
-            
+%              val(bin) = exinfo(bin).c0geomn; 
         end
 
         lab = [fctname ' 2nd half'];

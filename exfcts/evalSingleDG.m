@@ -1,4 +1,4 @@
-function [ex, argout] = evalSingleDG( exinfo, fname )
+function [ex, argout] = evalSingleDG( exinfo, fname, varargin )
 % batch file that calls all functions to evaluated drifiting grating trials
 
 argout = {};
@@ -12,31 +12,39 @@ ex = loadCluster( fname, 'ocul', exinfo.ocul ); % load raw data
 expduration = ex.Trials(end).TrialEnd - ex.Trials(1).TrialStart;
 
 %% Selectivity measured by Anova
-% p_argout = SelectivityCheck(exinfo, ex);
-% argout = [argout p_argout{:}];
-
+if any(strcmp(varargin, 'anova')) || any(strcmp(varargin, 'all'))
+    p_argout = SelectivityCheck(exinfo, ex);
+    argout = [argout p_argout{:}];
+end
 %% Fano Factor
-ff_argout = FF(exinfo, ex);
-argout = [argout ff_argout{:}];
-
+if any(strcmp(varargin, 'ff')) || any(strcmp(varargin, 'all'))
+    ff_argout = FF(exinfo, ex);
+    argout = [argout ff_argout{:}];
+end
 %% Noise correlation and signal correlation
-% rsc_argout = getRsc(exinfo, fname);
-% argout = [argout rsc_argout{:}];
+if any(strcmp(varargin, 'rsc')) || any(strcmp(varargin, 'all'))
+    rsc_argout = getRsc(exinfo, fname);
+    argout = [argout rsc_argout{:}];
+end
 
 %% Tuning curve fit
-% tc_argout = fitTC(exinfo, spkrate, ex, fname);
-% argout = [argout tc_argout{:}];
-
+if any(strcmp(varargin, 'tcfit')) || any(strcmp(varargin, 'all'))
+    tc_argout = fitTC(exinfo, spkrate, ex, fname);
+    argout = [argout tc_argout{:}];
+end
 %% Tc height diff
-% minspk = min([spkrate.mn]);
-% maxspk = max([spkrate.mn]);
-% tcdiff = (maxspk - minspk) / mean([maxspk, minspk]);
-% argout = [argout {'tcdiff', tcdiff}];
-
+if any(strcmp(varargin, 'tcheight')) || any(strcmp(varargin, 'all'))
+   minspk = min([spkrate.mn]);
+   maxspk = max([spkrate.mn]);
+   tcdiff = (maxspk - minspk) / mean([maxspk, minspk]);
+   argout = [argout {'tcdiff', tcdiff}];
+end
 
 %% Phase selectivity
-% phasesel = getPhaseSelectivity(ex, 'stim', exinfo.param1);
-% argout = [argout {'phasesel', phasesel}];
+if any(strcmp(varargin, 'phasesel')) || any(strcmp(varargin, 'all'))
+    phasesel = getPhaseSelectivity(ex, 'stim', exinfo.param1);
+    argout = [argout {'phasesel', phasesel}];
+end
 
 %% assign output arguments
 argout =  [argout {'rateMN', [spkrate.mn]', 'rateVARS', [spkrate.var]', ...
@@ -62,29 +70,29 @@ exc0 = loadCluster( fnamec0, 'ocul', exinfo.ocul );
 
 
 %%% all trials
-[ex, spkrate] = znormex(ex, exinfo);
-[exc0, spkrate_c0] = znormex(exc0, exinfo); % z norm
+[ex, spkrate_c1 ,spkcount_c1] = znormex(ex, exinfo);
+[exc0, spkrate_c0, spkcount_c0] = znormex(exc0, exinfo); % z norm
 
 % Noise Correlation
 [rsc, prsc] = corr([ex.Trials.zspkcount]', [exc0.Trials.zspkcount]', 'rows', 'complete');
 % Signale Correlation
-[rsig, prsig] = corr([spkrate.mn]', [spkrate_c0.mn]', 'rows', 'complete');
+[rsig, prsig] = corr([spkcount_c1.mn]', [spkcount_c0.mn]', 'rows', 'complete');
 
 trials = struct('spkRate', [ex.Trials.spkRate], 'zspkCount', [ex.Trials.zspkcount], 'param',[ex.Trials.(exinfo.param1)]);
 trials0 = struct('spkRate', [exc0.Trials.spkRate], 'zspkCount', [exc0.Trials.zspkcount], 'param',[exc0.Trials.(exinfo.param1)]);
 
 
 rsc_all = {'rsc', rsc, 'prsc', prsc, 'rsig', rsig,...
-    'prsig', prsig, 'c0geomn', geomean([mean([spkrate_c0.mn]), mean([spkrate.mn])]),...
+    'prsig', prsig, 'c0geomn', geomean([ mean([spkrate_c0.mn]), mean([spkrate_c1.mn]) ]),...
     'trials_c0', trials0, 'trials_c1', trials};
 
 
 %%% 2nd half
 ex.Trials = getPartialTrials(ex.Trials); 
-[ex, spkrate] = znormex(ex, exinfo);
+[ex, spkrate, spkcount_c1] = znormex(ex, exinfo);
 
 exc0.Trials = getPartialTrials(exc0.Trials);
-[exc0, spkrate_c0] = znormex(exc0, exinfo); % z norm
+[exc0, spkrate_c0, spkcount_c0] = znormex(exc0, exinfo); % z norm
 
 % Noise Correlation
 [rsc, prsc] = corr([ex.Trials.zspkcount]', [exc0.Trials.zspkcount]', 'rows', 'complete');
@@ -92,7 +100,7 @@ exc0.Trials = getPartialTrials(exc0.Trials);
 [rsig, prsig] = corr([spkrate.mn]', [spkrate_c0.mn]', 'rows', 'complete');
 
 rsc_2nd = {'rsc_2nd', rsc, 'prsc_2nd', prsc, 'rsig_2nd', rsig, ...
-    'prsig_2nd', prsig, 'c0geomn_2nd', geomean([mean([spkrate_c0.mn]), mean([spkrate.mn])])};
+    'prsig_2nd', prsig, 'c0geomn_2nd', geomean([ mean([spkrate_c0.mn]), mean([spkrate_c1.mn]) ])};
 
 
 % concatenate
